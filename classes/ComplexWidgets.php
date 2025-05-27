@@ -1,0 +1,2026 @@
+<?php
+
+class ComplexWidgets
+{
+	private Template $template;
+	private Array $options;
+	
+	public function __construct(Template $template, Array $options)
+	{
+		$this->template = $template;
+		$this->options = $options;
+	}
+	
+	public function latestpostcard200thumbs(int $count, bool $link=false) : void
+	{
+		$db = Database::getInstance();
+		$stmt = $db->prepare('
+			SELECT `postcard`.`code`, `hash`, `extension`, `mime`, `postcard`.`received_at`
+			FROM `postcard_image`
+			INNER JOIN `postcard` ON `postcard`.`id`=`postcard_image`.`postcard_id`
+			WHERE
+				`received_at` NOT NULL
+				AND
+				`postcard_image`.`id` IN
+					(SELECT MIN(`id`) FROM `postcard_image` GROUP BY `postcard_id`)
+			ORDER BY `received_at` DESC
+			LIMIT :count
+		');
+		$stmt->bindValue(':count', $count, PDO::PARAM_INT);
+		$stmt->execute();
+		$this->postcard200thumbs($stmt->fetchAll(), $link);
+	}
+	public function postcard200thumbs(array $ar, bool $link) : void
+	{
+		foreach($ar as $row)
+		{
+			$received = $row['received_at'] !== null;
+			HtmlSnippets::printPostcardThumb200($row['hash'], $row['extension'], $row['code'], $link, false, $received);
+		}
+	}
+	public function learnlanguages() : void
+	{
+		$db = Database::getInstance();
+		$stmt = $db->prepare('
+			SELECT `language`, `language_code`, `phrase` FROM `learnlanguages_thanks` ORDER BY Random() LIMIT 1
+		');
+		$stmt->execute();
+		$result = $stmt->fetch(PDO::FETCH_ASSOC);
+		?>
+		<section>
+			<h1>Learn the languages</h1>
+			In <?= $result['language']; ?> thank a postal worker with:<br/>
+			<span lang='<?= $result['language_code'] ?>'><?= $result['phrase'] ?></span>.
+		</section>
+		<?php
+	}
+	
+	public function siteNotices(array $siteNotices) : void
+	{
+		foreach($siteNotices as $notice)
+		{
+			?>
+			<section class='sitenotice'>
+				<h1><?= $notice['header'] ?></h1>
+				<strong><?= $notice['text'] ?></strong>
+			</section>
+			<?php
+		}
+	}
+	public function userNotices(array $userNotices) : void
+	{
+		foreach($userNotices as $notice)
+		{
+			?>
+			<section class='usernotice'>
+				<h1>Notice</h1>
+				<?= $notice ?>
+			</section>
+			<?php
+		}
+	}
+	public function errors(array $errors) : void
+	{
+		foreach($errors as $error)
+		{
+			?>
+			<section class='error'>
+				<h1>Error</h1>
+				<?= $error ?>
+			</section>
+			<?php
+		}
+	}
+	
+	public function locationselectoptionlist_user(User $user) : void
+	{
+		$homeLocation = $user->getActiveLocation();
+		$this->locationselectoptionlist($homeLocation['code']);
+	}
+	public function locationselectoptionlist(string $defaultLocation = 'SOL3') : void
+	{
+		$db = Database::getInstance();
+		
+		$stmt = $db->prepare('SELECT `code`, `name` FROM `location_code`');
+		$stmt->execute();
+		while($row = $stmt->fetch(PDO::FETCH_ASSOC))
+		{
+			$selected = $row['code']==$defaultLocation ? ' selected=\'selected\'' : '';
+			echo "<option value='{$row['code']}'{$selected}>{$row['name']} [{$row['code']}]</option>";
+		}
+	}
+	public function locationselection_about(string $selectId, string $aboutDivClass = '') : void
+	{
+		$aboutId = "{$selectId}_about";
+		?>
+		<div id='<?= $aboutId ?>'>
+			<noscript>
+				<p>Your postcards will have a code selected. You will be able to change the location in case you are traveling.</p>
+			</noscript>
+		</div>
+		<script type='text/javascript' defer='defer'>
+			document.getElementById('<?= $selectId ?>').addEventListener('change', (event) => {
+				console.log(event.target.value);
+				
+				document.getElementById('<?= $aboutId ?>').innerHTML = 
+					'<p>Your postcards will have a code: '+event.target.value+'. You will be able to change the location in case you are traveling.</p>'+
+					'<p>Read more about this location <a href=\'/location/'+event.target.value+'\'>here</a>.</p>';
+			});
+		</script>
+		<?php
+	}
+	public function locationselection_codeentry(string $selectId, string $entryDivClass = '') : void
+	{
+		$codeentryId = "{$selectId}_codeentry";
+		?>
+		<div id='<?= $codeentryId ?>'>
+			<noscript>
+			</noscript>
+		</div>
+		<script type='text/javascript' defer='defer'>
+			const select = document.getElementById('<?= $selectId ?>');
+			const codeentryDiv = document.getElementById('<?= $codeentryId ?>');
+			const codeentryInput = document.createElement('input');
+			codeentryInput.setAttribute('type', 'text');
+			codeentryInput.setAttribute('autocapitalize', 'autocapitalize');
+			codeentryInput.setAttribute('placeholder', 'Code of location (if known)');
+			codeentryDiv.appendChild(codeentryInput);
+			codeentryInput.addEventListener('keydown', (event) => {
+				let value= codeentryInput.value;
+				value = value.trim();
+				value = value.toUpperCase();
+				console.log(event.key);
+				if (event.key == "Enter" || event.key == ' ')
+				{
+					select.value=value;
+					
+					event.preventDefault();
+				}
+				else if(value.length === 4)
+				{
+					select.value=value;
+				}
+			});
+		</script>
+		<?php
+	}
+	
+	private function getUserNews(User $user) : Array
+	{
+		$db = Database::getInstance();
+		
+		$stmt = $db->prepare('
+			SELECT * FROM(
+				SELECT "postcard_yousent" AS `type`,
+					`sent_at` AS `ts`,
+					`receiver`.`login`,
+					`receiver`.`polite_name`,
+					`code` AS `card_code`
+					FROM `postcard`
+					INNER JOIN `user` AS `receiver` ON `postcard`.`receiver_id`=`receiver`.`id`
+					WHERE `sender_id`=:user_id
+				UNION ALL
+				SELECT "postcard_yousent_received" AS `type`,
+					`received_at` AS `ts`,
+					`receiver`.`login`, 
+					`receiver`.`polite_name`,
+					`code` AS `card_code`
+					FROM `postcard`
+					INNER JOIN `user` AS `receiver` ON `postcard`.`receiver_id`=`receiver`.`id`
+					WHERE `sender_id`=:user_id AND `postcard`.`received_at` IS NOT NULL
+				UNION ALL
+				SELECT "postcard_othersent" AS `type`,
+					`sent_at` AS `ts`,
+					`sender`.`login`,
+					"" AS `polite_name`, 
+					`code`
+					FROM `postcard`
+					INNER JOIN `user` AS `sender` ON `postcard`.`sender_id`=`sender`.`id`
+					WHERE `receiver_id`=:user_id AND `postcard`.`received_at` IS NULL
+				UNION ALL
+				SELECT "postcard_othersent_received" AS `type`,
+					`received_at` AS `ts`,
+					`sender`.`login`,
+					`sender`.`polite_name`,
+					`code`
+					FROM `postcard`
+					INNER JOIN `user` AS `sender` ON `postcard`.`sender_id`=`sender`.`id`
+					WHERE `receiver_id`=:user_id AND `postcard`.`received_at` IS NOT NULL
+				UNION ALL
+				SELECT "registration" AS `type`,
+					`registered_at` AS `ts`,
+					`login`,
+					`polite_name`,
+					""
+					FROM `user`
+					WHERE `id`=:user_id
+			) AS t ORDER BY `ts` DESC
+		');
+		$stmt->bindValue(':user_id', $user->getId());
+		$stmt->execute();
+		return $stmt->fetchAll(PDO::FETCH_ASSOC);
+	}
+	private function timestampHtml(string $ts) : string
+	{
+		$date = substr($ts, 0, 10);
+		$time = substr($ts, 11);
+		ob_start();
+		
+		?><span><?= $date ?>&nbsp;<?php HtmlSnippets::printTimeClock($time); ?></span><?php
+		
+		return ob_get_clean();
+	}
+	public function user_news(User $user) : void
+	{
+		if(!($user instanceof UserExisting))
+		{
+			?>
+				This user is not registered!
+			<?php
+			return;
+		}
+		
+		$news = $this->getUserNews($user);
+		?><table>
+			<thead>
+				<th>Date</th>
+				<th>Event</th>
+			</thead>
+			<tbody>
+				<?php
+				$count = 15;
+				foreach($news as $row)
+				{
+					$willDisplay = false;
+					ob_start();
+					
+					$timestamp = $this->timestampHtml($row['ts']);
+					?><tr>
+						<td><?= $timestamp ?></td>
+						<?php
+						switch($row['type'])
+						{
+							case 'registration':
+								$willDisplay=true;
+								?>
+									<td><a href='/user/<?= $row['login'] ?>'><?= $row['polite_name'] ?></a>
+										has registered on this site.
+									</td>
+								<?php
+								break;
+							case 'postcard_yousent':
+								$willDisplay=true;
+								?>
+									<td>You sent a
+										<a href='/card/<?= $row['card_code'] ?>'
+											title='<?= $row['card_code'] ?>'>happy postcard</a>
+										to <a href='/user/<?= $row['login'] ?>'><?= $row['polite_name'] ?></a>.
+									</td>
+								<?php
+								break;
+							case 'postcard_yousent_received':
+								$willDisplay=true;
+								?>
+									<td>Your sent
+										<a href='/card/<?= $row['card_code'] ?>'
+											title='<?= $row['card_code'] ?>'>happy postcard</a>
+										was received by <a href='/user/<?= $row['login'] ?>'><?= $row['polite_name'] ?></a>
+									</td>
+								<?php
+								break;
+							case 'postcard_othersent':
+								$willDisplay=true;
+								?>
+									<td>Somebody has sent you a <span title='Number hidden'>happy postcard</a>
+										you can wait for it in your letterbox.
+									</td>
+								<?php
+								break;
+							case 'postcard_othersent_received':
+								$willDisplay=true;
+								?>
+									<td>You received a
+										<a href='/card/<?= $row['card_code'] ?>'
+											title='<?= $row['card_code'] ?>'>happy postcard</a>
+										from <a href='/user/<?= $row['login'] ?>'><?= $row['polite_name'] ?></a>.
+									</td>
+								<?php
+								break;
+						}
+					?></tr><?php
+					if($willDisplay)
+					{
+						ob_end_flush();
+						if(--$count == 0) break;
+					}
+					else
+					{
+						ob_end_clean();
+					}
+				}
+			?></tbody>
+		</table><?php
+	}
+	public function user_news_for_user(User $user, User $viewer) : void
+	{
+		if(!($user instanceof UserExisting))
+		{
+			?>
+				This user is not registered!
+			<?php
+			return;
+		}
+		
+		$viewOfSelf = ($viewer instanceof UserExisting and $user->getId() == $viewer->getId());
+		
+		$userName = $user->getPoliteName();
+		$userNameUC = $userName;
+		$userNamePossesive = "$userName&apos;s";
+		$userNameUCPossesive = $userNamePossesive;
+		if($viewOfSelf)
+		{
+			$userName = 'you';
+			$userNameUC = 'You';
+			$userNamePossesive = 'your';
+			$userNameUCPossesive = 'Your';
+		}
+		
+		$news = $this->getUserNews($user);
+		?><table>
+			<thead>
+				<th>Date</th>
+				<th>Event</th>
+			</thead>
+			<tbody>
+				<?php
+				$count = 15;
+				foreach($news as $row)
+				{
+					$willDisplay = false;
+					ob_start();
+					
+					$date = substr($row['ts'], 0, 10);
+					$time = substr($row['ts'], 11);
+					?><tr>
+						<td><span title='<?= $time ?>'><?= $date ?></span></td>
+						<?php
+						switch($row['type'])
+						{
+							case 'registration':
+								$willDisplay=true;
+								?>
+									<td><?= $userNameUC ?> registered on this site.</td>
+								<?php
+								break;
+							case 'postcard_yousent':
+								if($viewOfSelf)
+								{
+									$willDisplay=true;
+									$receiverName = $this->userPoliteName($row['login'], $row['polite_name'], true);
+									?>
+										<td>You sent a <a href='/card/<?= $row['card_code'] ?>'>happy postcard</a>
+											to <?= $receiverName ?>.
+										</td>
+									<?php
+								}
+								break;
+							case 'postcard_yousent_received':
+								$willDisplay=true;
+								$receiverName = $this->userPoliteName($row['login'], $row['polite_name'], true);
+								?>
+									<td><?= $receiverName ?> received a <a href='/card/<?= $row['card_code'] ?>'>happy postcard</a>
+										from <?= $userName ?>.
+									</td>
+								<?php
+								break;
+							case 'postcard_othersent':
+								if($viewer->getLogin() == $row['login'])
+								{
+									$willDisplay=true;
+									$senderName = $this->userPoliteName($row['login'], 'You', true);
+									?>
+										<td><?= $senderName ?> sent <?= $userName ?> a
+											<a href='/card/<?= $row['card_code'] ?>'>happy postcard</a>
+										</td>
+									<?php
+								}
+								break;
+							case 'postcard_othersent_received':
+								$willDisplay=true;
+								if($viewer->getLogin() == $row['login'])
+								{
+									$senderName = $this->userPoliteName($row['login'], 'Your', true);
+								}
+								else
+								{
+									$senderName = $this->userPoliteName($row['login'], $row['polite_name'], true).'&apos;s';
+								}
+									
+								?>
+									<td><?= $senderName ?> <a href='/card/<?= $row['card_code'] ?>'>happy postcard</a>
+										was received by <?= $userName ?>.
+									</td>
+								<?php
+								break;
+						}
+					?></tr><?php
+					if($willDisplay)
+					{
+						ob_end_flush();
+						if(--$count == 0) break;
+					}
+					else
+					{
+						ob_end_clean();
+					}
+				}
+			?></tbody>
+		</table><?php
+	}
+	public function site_news() : void
+	{
+		$db = Database::getInstance();
+		
+		$stmt = $db->prepare('
+			SELECT * FROM(
+				SELECT "new_user" as `type`, `registered_at` AS `ts`, `login`,
+					CASE WHEN LENGTH(`polite_name`)<>0 THEN `polite_name` ELSE `login` END AS `polite_name`,
+					NULL as `card_code`
+					FROM `user`
+				UNION ALL
+				SELECT "postcard_sent_received", `sent_at`, `login`, 
+					CASE WHEN LENGTH(`polite_name`)<>0 THEN `polite_name` ELSE `login` END AS `polite_name`,
+					`code`
+					FROM `postcard` INNER JOIN `user` ON `postcard`.`sender_id`=`user`.`id`
+					WHERE `received_at` IS NOT NULL
+				UNION ALL
+				SELECT "postcard_sent", `sent_at`, `login`, 
+					CASE WHEN LENGTH(`polite_name`)<>0 THEN `polite_name` ELSE `login` END AS `polite_name`,
+					`code`
+					FROM `postcard` INNER JOIN `user` ON `postcard`.`sender_id`=`user`.`id`
+					WHERE `received_at` IS NULL
+				UNION ALL
+				SELECT "postcard_received", `received_at`, `login`, 
+					CASE WHEN LENGTH(`polite_name`)<>0 THEN `polite_name` ELSE `login` END AS `polite_name`,
+					`code` FROM `postcard` INNER JOIN `user` ON `postcard`.`receiver_id`=`user`.`id`
+					WHERE `received_at` IS NOT NULL
+			) AS t ORDER BY `ts` DESC LIMIT 150
+		');
+		$stmt->execute();
+		
+		$rows = [];
+		while($row = $stmt->fetch(PDO::FETCH_ASSOC))
+		{
+			$collapsed = false;
+			foreach($rows as $rowKey => $rowVal)
+			{
+				if($rowVal['type'] == $row['type'] and $rowVal['login'] == $row['login'] and (new DateTime($row['ts']))->diff(new DateTime($rowVal['ts']))->h < 6)
+				{
+					$rows[$rowKey]['card_code'][] = $row['card_code'];
+					$collapsed = true;
+					break;
+				}
+			}
+			if(!$collapsed)
+			{
+				$row['card_code'] = [ $row['card_code'] ];
+				$rows[] = $row;
+			}
+		}
+		$rows = array_slice($rows, 0, 15);
+		
+		foreach($rows as $row)
+		{
+			$len = count($row['card_code']);
+			
+			echo '<div class="newsitem">';
+			$userLink = $this->userPoliteName($row['login'], $row['polite_name'], true);
+			switch($row['type'])
+			{
+				case 'new_user':
+					echo "{$userLink} has joined  «Happy Postcard».";
+					break;
+				case 'postcard_sent_received':
+					if($len > 2)
+					{
+						?><?= $userLink ?> has sent happy postcards:
+						<?php
+						$first = true;
+						foreach($row['card_code'] as $cardCode)
+						{
+							if(!$first)
+							{
+								echo ', ';
+								if($len == 1)
+								{
+									echo 'and ';
+								}
+							}
+							$first = false;
+							?><a href='/card/<?= $cardCode ?>'>📨</a><?php
+							--$len;
+						}
+					}
+					else if($len == 2)
+					{
+						?><?= $userLink ?> has sent happy postcards:
+						<?php
+						$first = true;
+						foreach($row['card_code'] as $cardCode)
+						{
+							if(!$first)
+							{
+								echo ' and ';
+							}
+							$first = false;
+							?><a href='/card/<?= $cardCode ?>'>📨</a><?php
+						}
+					}
+					else
+					{
+						?><?= $userLink ?> has sent a <a href='/card/<?= $row['card_code'][0] ?>'>happy postcard</a><?php
+					}
+					echo '.';
+					break;
+				case 'postcard_sent':
+					if($len > 1)
+					{
+						?><?= $userLink ?> has sent <?php HtmlSnippets::printCircledDigits($len) ?> happy postcards.<?php
+					}
+					else
+					{
+						?><?= $userLink ?> has sent a <span title='Number hidden'>happy postcard</span>.<?php
+					}
+					break;
+				case 'postcard_received':
+					if($len > 2)
+					{
+						?><?= $userLink ?> has received <?php HtmlSnippets::printCircledDigits($len) ?> happy postcards:
+						<?php
+						$first = true;
+						foreach($row['card_code'] as $cardCode)
+						{
+							if(!$first)
+							{
+								echo ', ';
+								if($len == 1)
+								{
+									echo 'and ';
+								}
+							}
+							$first=false;
+							?><a href='/card/<?= $cardCode ?>'>📩</a><?php
+							--$len;
+						}
+					}
+					else if($len == 2)
+					{
+						?><?= $userLink ?> has received <?php HtmlSnippets::printCircledDigits($len) ?> happy postcards:
+						<?php
+						$first = true;
+						foreach($row['card_code'] as $cardCode)
+						{
+							if(!$first)
+							{
+								echo ' and ';
+							}
+							$first=false;
+							?><a href='/card/<?= $cardCode ?>'>📩</a><?php
+						}
+					}
+					else
+					{
+						?><?= $userLink ?> has received a <a href='/card/<?= $row['card_code'][0] ?>'>happy postcard</a><?php
+					}
+					echo '.';
+					break;
+			}
+			echo '</div>';
+		}
+	}
+	public function user_statistics(User $user) : void
+	{
+		if(!($user instanceof UserExisting))
+		{
+			?>
+				This user is not registered!
+			<?php
+			return;
+		}
+		$db = Database::getInstance();
+		
+		$stmt = $db->prepare('
+			SELECT
+				COUNT(DISTINCT `out`.`id`) `sent`,
+				COUNT(DISTINCT `out`.`received_at`) `sent_arrived`,
+				COUNT(DISTINCT `in`.`id`) `incoming`,
+				COUNT(DISTINCT `in`.`received_at`) `incoming_arrived`
+				FROM `user`
+					LEFT JOIN `postcard` `out` ON `user`.`id`=`out`.`sender_id`
+					LEFT JOIN `postcard` `in` ON `user`.`id`=`in`.`receiver_id`
+				WHERE `user`.`login`=:login
+		');
+		$stmt->bindValue(':login', $user->getLogin());
+		$stmt->execute();
+		if($row = $stmt->fetch(PDO::FETCH_ASSOC))
+		{
+			$travelling = intval($row['sent'])-intval($row['sent_arrived']);
+			$waiting = intval($row['incoming'])-intval($row['incoming_arrived']);
+			?>
+				<div><a href='/sent/<?= $user->getLogin() ?>'>Sent</a>: <?= $row['sent_arrived'] ?></div>
+				<div>Travelling: <?= $travelling ?></div>
+				<div><a href='/received/<?= $user->getLogin() ?>'>Received</a>: <?= $row['incoming_arrived'] ?></div>
+				<div>Waiting: <?= $waiting ?></div>
+			<?php
+		}
+	}
+	public function card_information(string $cardCode, User $user)
+	{
+		$db = Database::getInstance();
+		
+		$stmt = $db->prepare('
+			SELECT
+				`postcard`.`id`,
+				`sender`.`id` AS `sender_id`,
+				`sender`.`login` AS `sender_login`,
+				CASE WHEN LENGTH(`sender`.`polite_name`)<>0 THEN `sender`.`polite_name` ELSE `sender`.`login` END AS `sender_name`,
+				`receiver`.`login` AS `receiver_login`,
+				CASE WHEN LENGTH(`receiver`.`polite_name`)<>0 THEN `receiver`.`polite_name` ELSE `receiver`.`login` END AS `receiver_name`,
+				`receiver`.`id` as `receiver_id`,
+				`sent_loc`.`code` AS `sent_location_code`, `sent_loc`.`name` AS `sent_location_name`,
+				`received_loc`.`code` AS `received_location_code`, `received_loc`.`name` AS `received_location_name`,
+				`postcard`.`sent_at`, `postcard`.`received_at`,
+				CAST(JulianDay(`received_at`) - JulianDay(`sent_at`) AS INTEGER) AS `days_travelled`,
+				CAST(JulianDay("now") - JulianDay(`sent_at`) AS INTEGER) AS `days_travelling`,
+				`type`,
+				COALESCE(`count_images`, 0) AS `count_images`
+			FROM `postcard`
+				INNER JOIN `user` `sender` ON `postcard`.`sender_id` = `sender`.`id`
+				INNER JOIN `user` `receiver` ON `postcard`.`receiver_id` = `receiver`.`id`
+				INNER JOIN `location_code` AS `sent_loc` ON `postcard`.`send_location_id`=`sent_loc`.`id`
+				INNER JOIN `location_code` AS `received_loc` ON `postcard`.`receive_location_id`=`received_loc`.`id`
+				LEFT JOIN (
+					SELECT COUNT(*) AS `count_images`, `postcard_id` FROM `postcard_image` GROUP BY `postcard_id`
+				) AS `cnt_images` ON `cnt_images`.`postcard_id` = `postcard`.`id`
+			WHERE `postcard`.`code` = :postcard_code
+		');
+		$stmt->bindParam(':postcard_code', $cardCode);
+		$stmt->execute();
+		$row = $stmt->fetch(PDO::FETCH_ASSOC);
+		if(!$row)
+		{
+			?>
+				<h1><?= $cardCode ?></h1>
+				<div>This postcard does not exist</div>
+			<?php
+			return;
+		}
+		
+		$cardOfSender = ($user instanceof UserExisting and $row['sender_id'] == $user->getId());
+		$cardOfReceiver = ($user instanceof UserExisting and $row['receiver_id'] == $user->getId());
+		$cardWasReceived = isset($row['received_at']);
+		$allowToChangeReceiver = 
+		(
+			!$cardWasReceived and
+			($row['count_images'] == '0') and
+			(intval($row['days_travelling']) <= 3)
+		);
+		
+		$birthdayMark = '';
+		if($row['type'] == 2)
+		{
+			$birthdayMark = ' &#127874';
+		}
+		
+		if(!$cardWasReceived and !$cardOfSender)
+		{
+			?>
+				<h1><?= $cardCode ?><?= $birthdayMark ?></h1>
+				<div>This is not your postcard!</div>
+			<?php
+			return;
+		}
+		?>
+		<h1><?= $cardCode ?><?= $birthdayMark ?></h1>
+		<div class='card_information card_information_sender'><?php
+			$wpd='';
+			if(substr($row['sent_at'], 5, 5)=='10-01') $wpd = " <a href='/wpd_cards'>Word Postcard Day</a>";
+			?>
+			<div>Sent: <?= $this->timestampHtml($row['sent_at']) ?><?= $wpd ?></div>
+			<div>Sender: <a href='/user/<?= $row['sender_login'] ?>'><?= $row['sender_name'] ?></a></div>
+			<div>Sent from: <a href='/location/<?= $row['sent_location_code'] ?>'><?= $row['sent_location_name'] ?></a></div>
+		</div>
+		<div class='card_information card_information_receiver'>
+		<?php
+		if($cardWasReceived)
+		{
+			$wpd='';
+			if(substr($row['received_at'], 5, 5)=='10-01') $wpd = " <a href='/wpd_cards'>Word Postcard Day</a>";
+			?>
+			<div>Received: <?= $this->timestampHtml($row['received_at']) ?><?= $wpd ?></div>
+			<div>Days travelled: <?=$row['days_travelled'] ?></div>
+			<?php
+		}
+		else
+		{
+			?>
+			<div>Received: (not yet)</div>
+			<div>Days travelling: <?= $row['days_travelling'] ?></div>
+			<?php
+		}
+		if($cardWasReceived or $cardOfSender)
+		{
+			?>
+			<div>Receiver: <a href='/user/<?= $row['receiver_login'] ?>'><?= $row['receiver_name'] ?></a></div>
+			<div>Destination: <a href='/location/<?= $row['received_location_code'] ?>'><?= $row['received_location_name'] ?></a></div>
+			<?php
+			if($allowToChangeReceiver)
+			{
+				?>
+				<div>If you are unable to send this card, you can
+					<a href='/changereceiver/<?= $cardCode ?>'>request to change a receiver</a>.
+				</div>
+				<?php
+			}
+		}
+		else
+		{
+			?>
+			<div>Receiver: <a href='/home'>Happy Postcard user</a></div>
+			<?php
+		}
+		?>
+			</div>
+		<?php
+		if(!$cardWasReceived and $cardOfSender)
+		{
+			$receiver = UserExisting::constructById($row['receiver_id']);
+			
+			?>
+			<div class='card_information card_information_travelling'>
+				<div>Number: <strong><?= $cardCode ?></strong> (write it on your card)</div>
+				<div class="addresses">
+				<?php $this->displayAddresses($receiver); ?>
+				</div>
+			</div>
+			
+			<section>
+				<h1>Personal description of the receiver</h1>
+				<?php $this->user_info($receiver); ?>
+			</section>
+			<?php
+		}
+		
+		$this->card_gallery(intval($row['id']), $cardCode, $cardOfSender or $cardOfReceiver);
+		
+		if($cardOfSender or $cardOfReceiver)
+		{
+			HtmlSnippets::printImageUploadForm('card', $cardCode);
+		}
+	}
+	public function card_gallery(int $cardId, string $cardCode, bool $canEdit=false) : void
+	{
+		if(!$this->template->isLoggedIn())
+		{
+			$canEdit=false;
+		}
+		
+		$db = Database::getInstance();
+		
+		$stmt = $db->prepare('
+			SELECT
+				`hash`, `extension`, `uploader_profile_id`, JULIANDAY(\'now\') - JULIANDAY(`uploaded_at`) AS `days_since_upload`
+			FROM
+				`postcard_image`
+			WHERE
+				`postcard_id` = :postcard_id
+		');
+		$stmt->bindParam(':postcard_id', $cardId);
+		$stmt->execute();
+		echo '<div class=\'gallery\'>';
+		while($row = $stmt->fetch(PDO::FETCH_ASSOC))
+		{
+			$canEditThis = (
+				$canEdit and
+				intval($row['uploader_profile_id']) == $this->template->getUserId() and
+				intval($row['days_since_upload']) <= 3
+			);
+			HtmlSnippets::printPostcardThumb200($row['hash'], $row['extension'], $cardCode, false, $canEditThis, true);
+		}
+		echo '</div>';
+	}
+	public function displayAddresses(User $user) : void
+	{
+		foreach($this->getUserAddresses($user) as $row)
+		{
+			echo "<div lang='{$row['language_code']}' class='address'>{$row['addr']}</div>";
+		}
+	}
+	private function getUserInfo(User $user) : Array
+	{
+		$db = Database::getInstance();
+		
+		$stmt = $db->prepare('
+			SELECT
+				CASE WHEN LENGTH(`polite_name`)>0 THEN `polite_name` ELSE `login` END as `polite_name`,
+				Cast(JulianDay("now") - JulianDay(`registered_at`) AS INTEGER) `days_registered`,
+				Cast(JulianDay("now") - JulianDay(`loggedin_at`) AS INTEGER) `days_since_last_login`,
+				`birthday`,
+				`location_code`.`code` AS `home_location_code`, `location_code`.`name` AS `home_location`,
+				`about`, `desires`, `hobbies`, `phobias`, `languages`
+			FROM `user`
+				LEFT JOIN (SELECT * FROM `user_preference` WHERE `key`="home_location") AS `home` ON `home`.`user_id`=`user`.`id`
+				LEFT JOIN `location_code` ON `location_code`.`code`=`home`.`val`
+			WHERE `login`=:login
+		');
+		$stmt->bindValue(':login', $user->getLogin());
+		$stmt->execute();
+		if(!($row = $stmt->fetch(PDO::FETCH_ASSOC)))
+		{
+			return [];
+		}
+		return $row;
+	}
+	private function getUserAddresses(User $user) : Array
+	{
+		$db = Database::getInstance();
+		
+		$stmt = $db->prepare('
+			SELECT `id`, `language_code`, `addr`
+			FROM `address`
+			WHERE `user_id`=:user_id
+		');
+		$stmt->bindValue(':user_id', $user->getId());
+		$stmt->execute();
+		$res = $stmt->fetchAll(PDO::FETCH_ASSOC);
+		return $res;
+	}
+	public function user_info_edit(UserExisting $user, UserExisting $editor) : void
+	{
+		if($user->getId() == $editor->getId())
+		{
+			// all is well
+		}
+		elseif($editor->isAdmin())
+		{
+			?>
+				You are an admin and are editing another user's profile.
+			<?php
+		}
+		else
+		{
+			?>
+				You are not allowed to edit another user&apos;s profile.
+			<?php
+			return;
+		}
+		$userInfo = $this->getUserInfo($user);
+		$addresses = $this->getUserAddresses($user);
+		?>
+		<form method='POST' action='/performprofileedit' enctype='multipart/form-data'>
+			<div>Login: <tt><?= $user->getLogin() ?></tt></div>
+			<div>Name: <input name='polite_name' value='<?= $userInfo['polite_name'] ?>' /></div>
+			<div>Days on this site: <?= $userInfo['days_registered'] ?></div>
+			<div>Birthday: <input type='date' name='birthday' value='<?= $userInfo['birthday'] ?>' /></div>
+			<div>Home location: <select name='home_location' id='home_location'>
+				<?php $this->locationselectoptionlist($userInfo['home_location_code']) ?>
+			</select></div>
+			<?php $this->locationselection_about('home_location', 'home_location_about'); ?>
+			<?php $this->locationselection_codeentry('home_location', 'home_location_codeentry'); ?>
+			
+			<div>Address (with name):
+				<div class='addresses_input'>
+					<?php foreach($addresses as $addr) { ?>
+						<div class='address_input'>
+							<input type='hidden' name='addr_id[]' value='<?php echo $addr['id'] ?>' />
+							<textarea name='addr_addr[]' rows='6' cols='27'><?php echo $addr['addr'] ?></textarea>
+							<input type='text' name='addr_lang_code[]' value='<?php echo $addr['language_code'] ?>' />
+						</div>
+					<?php } ?>
+					<div class='address_input'>
+						<input type='hidden' name='addr_id[]' value='0' />
+						<textarea name='addr_addr[]' rows='6' cols='27' placeholder='Your address in a different script/language'></textarea>
+						<input type='text' name='addr_lang_code[]' value='en' />
+					</div>
+				</div>
+			</div>
+			<div>About yourself: <div class='userinfo_input'>
+					<textarea name='about' rows='15' cols='27'
+						placeholder='Introduce yourself'><?php echo $userInfo['about'] ?></textarea>
+				</div>
+			</div>
+			<div>Your postcard preferences: <div class='userinfo_input'>
+					<textarea name='desires' rows='15' cols='27'
+						placeholder='What type of cards you enjoy most of all'><?php echo $userInfo['desires'] ?></textarea>
+				</div>
+			</div>
+			<div>Hobbies:
+				<input name='hobbies'
+					placeholder='What are your hobbies?' value='<?php echo $userInfo['hobbies'] ?>' />
+			</div>
+			<div>Languages:
+				<input name='languages'
+					placeholder='Languages you undersand' value='<?php echo $userInfo['languages'] ?>' /></div>
+			<div>Phobias:
+				<input name='phobias'
+					placeholder='Topics to avoid with you' value='<?php echo $userInfo['phobias'] ?>' /></div>
+			<input type='submit' value='Save' />
+		</form>
+		<?php
+	}
+	public function user_info(User $user) : void
+	{
+		if(!($user instanceof UserExisting))
+		{
+			?>
+				This user is not registered!
+			<?php
+			return;
+		}
+		$viewOfSelf = ($this->template->isLoggedIn() and $user->getId() == $this->template->getUserId());
+		if($viewOfSelf)
+		{
+			?>
+			<div>You can <a href='/useredit/<?= $user->getLogin() ?>'>edit</a> this information.</div>
+			<?php
+		}
+		$userInfo = $this->getUserInfo($user);
+		// https://stackoverflow.com/questions/19372458/convert-multiple-new-lines-to-paragraphs
+		$userAbout = preg_replace('~(*BSR_ANYCRLF)\R\R\K(?>[^<\r\n]++|<(?!h[1-6]\b)|\R(?!\R))+(?=\R\R|$)~u',
+			'<p>$0</p>', $userInfo['about']);
+		$userDesires = preg_replace('~(*BSR_ANYCRLF)\R\R\K(?>[^<\r\n]++|<(?!h[1-6]\b)|\R(?!\R))+(?=\R\R|$)~u',
+			'<p>$0</p>', $userInfo['desires']);
+		if(!empty($userInfo))
+		{
+			?>
+				<div>Name: <?= $userInfo['polite_name'] ?></div>
+				<div>Days on this site: <?= $userInfo['days_registered'] ?></div>
+				<div>Birthday: <?= $userInfo['birthday'] ?></div>
+			<?php
+			if(empty($userInfo['home_location_code']))
+			{
+				?><div>Home location has not been set</div><?php
+			}
+			else
+			{
+				?>
+					<div>Home location:
+						<a href='/location/<?= $userInfo['home_location_code'] ?>'><?= $userInfo['home_location'] ?></a>
+					</div>
+				<?php
+			}
+			?>
+				<div>What is shared about oneself: <blockquote><?= $userAbout ?></blockquote></div>
+				<div>Postcard desires: <blockquote><?= $userDesires ?></blockquote></div>
+				<div>Hobbies: <?= $userInfo['hobbies'] ?></div>
+				<div>Languages: <?= $userInfo['languages'] ?></div>
+			<?php
+			if(!empty($userInfo['phobias']))
+			{
+				?><div>Phobias: <?= $userInfo['phobias'] ?></div><?php
+			}
+			else
+			{
+				?><div>Phobias: None</div><?php
+			}
+		}
+		if($viewOfSelf)
+		{
+			$this->displayAddresses($user);
+		}
+	}
+	public function user_status() : bool
+	{
+		$user = $this->options['user'];
+		if(!$user->isEnabled())
+		{
+			echo 'This user has disabled their profile';
+			return true;
+		}
+		if($user->isTravelling())
+		{
+			echo 'This user is currently travelling';
+			return true;
+		}
+		if(!$user->hasAddress())
+		{
+			echo 'This user has not yet set their address';
+			return true;
+		}
+		return false;
+	}
+	public function inter_user_news(User $userSelf, User $userOther) : void
+	{
+		if(!($userOther instanceof UserExisting))
+		{
+			?>
+				This user is not registered!
+			<?php
+			return;
+		}
+		if($userSelf->getLogin() == $userOther->getLogin())
+		{
+			?>
+				You are this user
+			<?php
+			return;
+		}
+		
+		?><h1>Your interaction</h1><?php
+		$db = Database::getInstance();
+		
+		$stmt = $db->prepare('
+			SELECT Date(`sent_at`) `sent_at`, `code`,
+				`sender`.`login` `sender_login`, `sender`.`polite_name` `sender_name`,
+				`receiver`.`login` `receiver_login`, `receiver`.`polite_name` `receiver_name`
+			FROM `postcard`
+				INNER JOIN `user` `sender` ON `postcard`.`sender_id`=`sender`.`id`
+				INNER JOIN `user` `receiver` ON `postcard`.`receiver_id`=`receiver`.`id`
+			WHERE
+				`receiver`.`login` = :login_self AND `sender`.`login` = :login_other AND `postcard`.`received_at` IS NOT NULL
+				OR
+				`receiver`.`login` = :login_other AND `sender`.`login` = :login_self
+			ORDER BY `sent_at`
+		');
+		$stmt->bindValue(':login_self', $userSelf->getLogin());
+		$stmt->bindValue(':login_other', $userOther->getLogin());
+		$stmt->execute();
+		while($row = $stmt->fetch(PDO::FETCH_ASSOC))
+		{
+			?>
+				<div>
+					<?= $row['sent_at'] ?>:
+					<a href='/user/<?= $row['sender_login'] ?>'><?= $row['sender_name'] ?></a>
+					has sent <a href='/card/<?= $row['code'] ?>'><?= $row['code'] ?></a> to
+					<a href='/user/<?= $row['receiver_login'] ?>'><?= $row['receiver_name'] ?></a>
+				</div>
+			<?php
+		}
+	}
+	public function statistics() : void
+	{
+		$db = Database::getInstance();
+		
+		$stmt = $db->prepare('SELECT COUNT(`id`) `cnt`, COUNT(`received_at`) AS `cnt_received` FROM `postcard`');
+		$stmt->execute();
+		if($row = $stmt->fetch(PDO::FETCH_ASSOC))
+		{
+			?><div>Total postcards sent: <?= $row['cnt'] ?></div><?php
+			?><div>Total postcards sent and arrived at destination: <?= $row['cnt_received'] ?></div><?php
+		}
+		
+		$stmt = $db->prepare('
+			SELECT COUNT(`id`) `cnt`, COUNT(`received_at`) AS `cnt_received`
+			FROM `postcard` WHERE `year` = strftime(\'%Y\')
+		');
+		$stmt->execute();
+		if($row = $stmt->fetch(PDO::FETCH_ASSOC))
+		{
+			?><div>This year sent: <?= $row['cnt'] ?></div><?php
+			?><div>This year postcards sent and arrived at destination: <?= $row['cnt_received'] ?></div><?php
+		}
+		
+		$stmt = $db->prepare('
+			SELECT COUNT(`postcard`.`id`) `cnt`, `location`.`code` `loc_code`, `location`.`name` `loc_name`
+			FROM `postcard`
+				INNER JOIN `location_code` `location` ON `location`.`id` = `postcard`.`send_location_id`
+			GROUP BY `location`.`id`
+			ORDER BY COUNT(`postcard`.`id`) DESC
+			LIMIT 3
+		');
+		$stmt->execute();
+		?><ol>The top sending locations:<?php
+		while($row = $stmt->fetch(PDO::FETCH_ASSOC))
+		{
+			?><li><a href='/location/<?= $row['loc_code'] ?>'><?= $row['loc_name'] ?></a> — <?= $row['cnt'] ?></li><?php
+		}
+		?></ol><?php
+		
+		$stmt = $db->prepare('
+			SELECT COUNT(`postcard`.`id`) `cnt`, `location`.`code` `loc_code`, `location`.`name` `loc_name`
+			FROM `postcard`
+				INNER JOIN `location_code` `location` ON `location`.`id` = `postcard`.`send_location_id`
+			WHERE  `year` = strftime(\'%Y\')
+			GROUP BY `location`.`id`
+			ORDER BY COUNT(`postcard`.`id`) DESC
+			LIMIT 3
+		');
+		$stmt->execute();
+		?><ol>The top sending locations this year:<?php
+		while($row = $stmt->fetch(PDO::FETCH_ASSOC))
+		{
+			?><li><a href='/location/<?= $row['loc_code'] ?>'><?= $row['loc_name'] ?></a> — <?= $row['cnt'] ?></li><?php
+		}
+		?></ol><?php
+		
+		
+		$stmt = $db->prepare('
+			WITH RECURSIVE dates(dt) AS (
+				VALUES(DATE(\'now\', \'-1 month\'))
+				UNION ALL SELECT DATE(`dt`, \'+1 day\') FROM dates WHERE dt<DATE(\'now\')
+			)
+			SELECT COUNT(`postcard`.`id`) `cnt`, `dates`.`dt` `sent_at`
+			FROM `postcard`
+			RIGHT JOIN `dates` ON `dates`.`dt` = DATE(`postcard`.`sent_at`)
+			GROUP BY `dates`.`dt`
+			ORDER BY `dates`.`dt` ASC
+		');
+		$stmt->execute();
+		$svgGraph = new SvgGraph();
+		while($row = $stmt->fetch(PDO::FETCH_ASSOC))
+		{
+			$svgGraph->addPoint(floatval($row['cnt']));
+		}
+		$svgGraph->print();
+		/*
+		?>
+		<svg width='340' height='310' viewBox='-5 -5 325 305'
+			xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+			
+			<rect fill='#fff' stroke='#000' x='-5' y='-5' width='410' height='310'/>
+			
+			<line x1="0" y1="-3" x2="0" y2="303" stroke="black" stroke-width="1" />
+			<line x1="-3" y1="300" x2="403" y2="300" stroke="black" stroke-width="1" />
+			<?php
+			$count = 0;
+			while($row = $stmt->fetch(PDO::FETCH_ASSOC))
+			{
+				++$count;
+				if($count == 1)
+				{
+					$prev = $row;
+					continue;
+				}
+				?><line
+					x1="<?= ($count-1) * 10 ?>" y1="<?= 300 - intval($prev['cnt']) * 10 ?>"
+					x2="<?= ($count-0) * 10 ?>" y2="<?= 300 - intval( $row['cnt']) * 10 ?>" stroke="blue" stroke-width="1" /><?php
+				$direction = ( (intval($prev['cnt']) - intval($row['cnt'])) <=> 0 );
+				if($direction * $prevDir == -1 or $count == 2) // if direction changes
+				{
+					?><text x="<?= ($count-1) * 10 - 5 ?>" y="<?= 300 - intval( $prev['cnt']) * 10 + (-10 * $direction) ?>"
+						font-size="8"><?= $prev['cnt'] ?></text><?php
+				}
+				$prev = $row;
+				$prevDir = $direction;
+			}
+			?>
+		</svg>
+		<?php
+		*/
+	}
+	public function location_info($locationCode) : void
+	{
+		$db = Database::getInstance();
+		
+		$stmt = $db->prepare('
+			SELECT
+				`l`.`id`,
+				`l`.`code`, `l`.`name`, 
+				`l`.`iso3166_1_a2`, `l`.`iso3166_1_a3`, `l`.`iso3166_1_num`, `l`.`iso3166_2_ext`, `l`.`un_m49`, `l`.`un_sub`,
+				`l`.`itu`, `l`.`ioc`, `l`.`fifa`, `l`.`icao`, `l`.`iata`,
+				`l`.`map_link`, `l`.`description_link`,
+				`p`.`code` AS `parent`, `p`.`name` AS `parent_name`
+			FROM `location_code` AS `l`
+				LEFT JOIN `location_code` AS `p` ON `l`.`parent` = `p`.`id`
+			WHERE `l`.`code`=:location_code
+		');
+		$stmt->bindParam(':location_code', $locationCode);
+		$stmt->execute();
+		if($row = $stmt->fetch(PDO::FETCH_ASSOC))
+		{
+			$year = date("Y");
+			
+			?>
+				<h1><?= $row['name'] ?></h1>
+				<p>This location can be selected by anybody who lives there as their home,
+				in this case, when they send a postcard it will receive a code in the form
+				<u><?= $row['code'] ?>-LOC-<?= $year ?>-number</u> (where LOC is the location code of the receiver).</p>
+			<?php
+			if(!empty($row['iso3166_1_a2']))
+			{
+				?><div>ISO-3166-1 (2 letter): <?= $row['iso3166_1_a2'] ?></div><?php
+			}
+			if(!empty($row['iso3166_1_a3']))
+			{
+				?><div>ISO-3166-1 (3 letter): <?= $row['iso3166_1_a3'] ?></div><?php
+			}
+			if(!empty($row['iso3166_1_num']))
+			{
+				?><div>ISO-3166-1 (numeric): <?= $row['iso3166_1_num'] ?></div><?php
+			}
+			if(!empty($row['iso3166_2']))
+			{
+				?><div>ISO-3166-2: <?= $row['iso3166_1_a2'] ?></div><?php
+			}
+			if(!empty($row['un_m49']))
+			{
+				?><div>UN-M49: <?= $row['un_m49'] ?></div><?php
+			}
+			if(!empty($row['un_sub']))
+			{
+				?><div>UN subdivision code: <?= $row['un_sub'] ?></div><?php
+			}
+			if(!empty($row['itu']))
+			{
+				?><div>ITU: <?= $row['itu'] ?></div><?php
+			}
+			if(!empty($row['ioc']))
+			{
+				?><div>IOC: <?= $row['ioc'] ?></div><?php
+			}
+			if(!empty($row['fifa']))
+			{
+				?><div>FIFA: <?= $row['fifa'] ?></div><?php
+			}
+			if(!empty($row['icao']))
+			{
+				?><div>ICAO: <?= $row['icao'] ?></div><?php
+			}
+			if(!empty($row['iata']))
+			{
+				?><div>IATA: <?= $row['iata'] ?></div><?php
+			}
+			if(!empty($row['parent']))
+			{
+				?><div>This location is a part of:
+					<a href='/location/<?= $row['parent'] ?>'><?= $row['parent_name'] ?></a>
+				</div><?php
+			}
+			if(!empty($row['description_link']))
+			{
+				?><div>More information:
+					<a href='<?= $row['description_link'] ?>'><?= $row['description_link'] ?></a>
+				</div><?php
+			}
+			if(!empty($row['map_link']))
+			{
+				?><div>Map link:
+					<a href='https://commons.wikimedia.org/wiki/File:<?= $row['map_link'] ?>'>commons:<?= $row['map_link'] ?></a>
+				</div><?php
+			}
+			$subLocations = Location::getSublocations($row['id']);
+			if(!empty($subLocations))
+			{
+				?><div>Locations within this one: <?php
+				$first = true;
+				foreach($subLocations as $subLoc)
+				{
+					if(!$first) echo ', ';
+					$first = false;
+					?><a href='/location/<?= $subLoc['code'] ?>'><?= $subLoc['name'] ?></a><?php
+				}
+				?></div><?php
+			}
+		}
+		else
+		{
+			?><h1>Unknown location</h1>
+			There seems to be no location like this. Are you sure you know what you are doing?<?php
+		}
+	}
+	private function userPoliteName(string $login, string $polite_name, bool $link=false) : string
+	{
+		if(!isset($polite_name) || empty($polite_name))
+		{
+			$polite_name = $login;
+		}
+		
+		if($link)
+		{
+			return "<a href='/user/{$login}'>{$polite_name}</a>";
+		}
+		else
+		{
+			return $polite_name;
+		}
+	}
+	public function travelling_postcards(User $user) : void
+	{
+		$travelling = $user->getTravellingPostcards();
+		
+		?><table>
+			<thead>
+				<th>Date</th>
+				<th>Days travelling</th>
+				<th>Code</th>
+				<th>Destination</th>
+				<th>Receiver</th>
+				<th title='picture'>&#9215;</th>
+			</thead>
+			<tbody>
+			<?php
+			foreach($travelling as $row)
+			{
+				$date = substr($row['sent_at'], 0, 10);
+				$time = substr($row['sent_at'], 11);
+				?><tr>
+					<td><?= $this->timestampHtml($row['sent_at']) ?></td>
+					<td><?= $row['days_travelling'] ?></span></td>
+					<td><a href='/card/<?= $row['postcard_code'] ?>'><?= $row['postcard_code'] ?></a></td>
+					<td><a href='/location/<?= $row['loc_code'] ?>'><?= $row['loc_name'] ?></a></td>
+					<td><?= $this->userPoliteName($row['receiver_login'], $row['receiver_polite_name'], true) ?></td>
+					<?php
+					if(!empty($row['first_image_hash']))
+					{
+						?><td>&#9745;</td><?php
+					}
+					else
+					{
+						?><td>&#9744;</td><?php
+					}
+					?>
+				</tr><?php
+			}
+			?>
+			</tbody>
+		</table><?php
+	}
+	public function sent_postcards() : void
+	{
+		$user = $this->options['user'];
+		if(!isset($user) or !($user instanceof UserExisting))
+		{
+			echo 'No user';
+			return;
+		}
+		
+		?><p>User: <?= $this->userPoliteName($user->getLogin(), $user->getPoliteName(), true) ?></p><?php
+		
+		$sent = $user->getSentPostcards();
+		
+		?><table>
+			<thead>
+				<th>Date sent</th>
+				<th>Date received</th>
+				<th>Days travelled</th>
+				<th>Code</th>
+				<th>Destination</th>
+				<th>Receiver</th>
+			</thead>
+			<tbody>
+			<?php
+			foreach($sent as $row)
+			{
+				?><tr>
+					<td><?= $this->timestampHtml($row['sent_at']) ?></td>
+					<td><?= $this->timestampHtml($row['received_at']) ?></td>
+					<td><?= $row['days_travelled'] ?></span></td>
+					<td><a href='/card/<?= $row['postcard_code'] ?>'><?= $row['postcard_code'] ?></a></td>
+					<td><a href='/location/<?= $row['loc_code'] ?>'><?= $row['loc_name'] ?></a></td>
+					<td><?= $this->userPoliteName($row['receiver_login'], $row['receiver_polite_name'], true) ?></td>
+				</tr><?php
+			}
+			?>
+			</tbody>
+		</table><?php
+	}
+	public function received_postcards() : void
+	{
+		$user = $this->options['user'];
+		if(!isset($user) or !($user instanceof UserExisting))
+		{
+			echo 'No user';
+			return;
+		}
+		
+		?><p>User: <?= $this->userPoliteName($user->getLogin(), $user->getPoliteName(), true) ?></p><?php
+		
+		$sent = $user->getReceivedPostcards();
+		
+		?><table>
+			<thead>
+				<th>Date sent</th>
+				<th>Date received</th>
+				<th>Days travelled</th>
+				<th>Code</th>
+				<th>Sent from</th>
+				<th>Sender</th>
+			</thead>
+			<tbody>
+			<?php
+			foreach($sent as $row)
+			{
+				?><tr>
+					<td><?= $this->timestampHtml($row['sent_at']) ?></td>
+					<td><?= $this->timestampHtml($row['received_at']) ?></td>
+					<td><?= $row['days_travelled'] ?></span></td>
+					<td><a href='/card/<?= $row['postcard_code'] ?>'><?= $row['postcard_code'] ?></a></td>
+					<td><a href='/location/<?= $row['loc_code'] ?>'><?= $row['loc_name'] ?></a></td>
+					<td><?= $this->userPoliteName($row['sender_login'], $row['sender_polite_name'], true) ?></td>
+				</tr><?php
+			}
+			?>
+			</tbody>
+		</table><?php
+	}
+	public function location_stats(string $locationCode) : void
+	{
+		$userCounts = Location::getUserCounts($locationCode);
+		$postcardCounts = Location::getPostcardCounts($locationCode);
+		
+		?>
+		<div>
+			Total users with this location set: <?= $userCounts['now'] ?>
+		</div>
+		<div>
+			Total users who ever sent from this location: <?= $userCounts['ever_from'] ?>
+		</div>
+		<div>
+			Total users who ever had cards sent to them at this location: <?= $userCounts['ever_to'] ?>
+		</div>
+		<div>
+			Total postcards sent from this location: <?= $postcardCounts['sent_from'] ?>
+		</div>
+		<div>
+			Total postcards sent to this location: <?= $postcardCounts['sent_to'] ?>
+		</div>
+		<?php
+	}
+	
+	public function list_of_users() : void
+	{
+		$db = Database::getInstance();
+		
+		$stmt = $db->prepare(
+			'
+			SELECT
+				/*ROWID*/ `user`.`id` as `num`,
+				`user`.`login`,
+				`user`.`polite_name`,
+				`user`.`registered_at`,
+				`user`.`loggedin_at`,
+				`user`.`birthday`,
+				`home_loc`.`home_location`,
+				COUNT(DISTINCT `sent_postcard`.`id`) AS `sent_postcards_1`,
+				COUNT(DISTINCT `sent_postcard`.`received_at`) AS `sent_postcards_2`,
+				COUNT(DISTINCT `received_postcard`.`id`) AS `received_postcard_1`,
+				COUNT(DISTINCT `received_postcard`.`received_at`) AS `received_postcard_2`
+			FROM
+				`user`
+				LEFT JOIN
+					(SELECT
+						`id`,
+						`receiver_id`,
+						`received_at`
+					FROM `postcard`
+					) AS `received_postcard`
+					ON `received_postcard`.`receiver_id`=`user`.`id`
+				LEFT JOIN
+					(SELECT
+						`id`,
+						`sender_id`,
+						`received_at`
+					FROM `postcard`
+					) AS `sent_postcard`
+					ON `sent_postcard`.`sender_id`=`user`.`id`
+				LEFT JOIN
+					(SELECT
+						`val` AS `home_location`,
+						`user_id`
+					FROM `user_preference`
+					WHERE `key` = \'home_location\'
+					) AS `home_loc`
+					ON `user`.`id` = `home_loc`.`user_id`
+			GROUP BY `user`.`id`
+			HAVING `sent_postcards_1` > 0 OR `sent_postcards_2` > 0 OR `received_postcard_1` > 0 OR `received_postcard_2` > 0
+				OR JULIANDAY(\'now\') - JULIANDAY(`user`.`loggedin_at`) < 30
+			ORDER BY `user`.`id`
+			'
+		);
+		$res = $stmt->execute();
+		?>
+			<table>
+				<thead><tr>
+					<th>№</th>
+					<th>User</th>
+					<th>Polite name</th>
+					<th>Home</th>
+					<th>Registered at</th>
+					<th>Last login</th>
+					<th>Birthday</th>
+					<th>Mailed by</th>
+					<th>Sent by</th>
+					<th>Mailed to</th>
+					<th>Received by</th>
+				</tr></thead>
+			<tbody>
+		<?php
+		while($row = $stmt->fetch(PDO::FETCH_ASSOC))
+		{
+			?>
+				<tr>
+					<th><?= $row['num'] ?></th>
+					<td><a href='/user/<?= $row['login'] ?>'><?= $row['login'] ?></a></td>
+					<td><?= $row['polite_name'] ?></td>
+					<td><a href='/location/<?= $row['home_location'] ?>'><?= $row['home_location'] ?></a></td>
+					<td><?= $this->timestampHtml($row['registered_at']) ?></td>
+					<td><?= $row['loggedin_at'] ?></td>
+					<td><?= $row['birthday'] ?></td>
+					<td><?= $row['sent_postcards_1'] ?></td>
+					<td><?= $row['sent_postcards_2'] ?></td>
+					<td><?= $row['received_postcard_1'] ?></td>
+					<td><?= $row['received_postcard_2'] ?></td>
+				</tr>
+			<?php
+		}
+		?>
+			</tbody>
+			</table>
+		<?php
+	}
+	public function random_postcard() : void
+	{
+		try
+		{
+			$rCard = Card::getRandomCardImage();
+			HtmlSnippets::printPostcardThumb200($rCard['hash'], $rCard['extension'], $rCard['code'], true);
+		}
+		catch(Exception $e)
+		{
+			echo 'No card';
+		}
+	}
+	public function image() : void
+	{
+		$hash = $this->options['hash'];
+		try
+		{
+			$image = PictureScan::constructByHash($hash);
+		}
+		catch(Exception $ex)
+		{
+			try
+			{
+				$image = PicturePhoto::constructByHash($hash);
+			}
+			catch(Exception $ex)
+			{
+				?>No such image<?php
+				return;
+			}
+		}
+		?><img src='<?= $image->getThumb800() ?>' /><?php
+	}
+	public function image_information() : void
+	{
+		$hash = $this->options['hash'];
+		try
+		{
+			$image = PictureScan::constructByHash($hash);
+			$cardIds = $image->getCardIds();
+			$first = true;
+			foreach( $cardIds as $cardId )
+			{
+				$card = Card::constructById($cardId);
+				if(
+					!$card->isRegistered()
+					and
+						!(
+							$this->template->isLoggedIn()
+							and
+							$this->template->getUserId() == $card->getSenderId()
+						) 
+				) continue;
+				
+				if(!$first) echo ', ';
+				$first = false;
+				?><a href='<?= $card->getCardUrl() ?>'><?= $card->getCode() ?></a><?php
+			}
+		}
+		catch(Exception $ex)
+		{}
+		try
+		{
+			$image = PicturePhoto::constructByHash($hash);
+			$userId = $image->getUserId();
+			$user = UserExisting::constructById($userId);
+			echo $this->userPoliteName($user->getLogin(), $user->getPoliteName(), true);
+		}
+		catch(Exception $ex)
+		{}
+	}
+	public function user_info_edit_travelling() : void
+	{
+		$user = $this->options['user'];
+		if(!isset($user) or !($user instanceof UserExisting))
+		{
+			echo 'User is not set';
+			return;
+		}
+		if($user->isTravelling())
+		{
+			$travellingLocation = $user->getTravellingLocation();
+			?>
+			<form action='/perform_useredittravelling' method='POST'>
+				You are currently in the travel mode. You can:
+				<input type='hidden' name='travelling_location' value='off' />
+				<button type='submit'>End travelling</button>
+			</form>
+			<form action='/perform_useredittravelling' method='POST'>
+				Alternatively you can change your travel location:
+				<select name='travelling_location' id='travelling_location'>
+					<?php $this->locationselectoptionlist($travellingLocation['code']); ?>
+				</select>
+				<?php $this->locationselection_codeentry('travelling_location'); ?>
+				<?php $this->locationselection_about('travelling_location'); ?>
+				<button type='submit'>Change</button>
+			</form>
+			<?php
+		}
+		else
+		{
+			$homeLocation = $user->getHomeLocation();
+			?>
+			<form action='/perform_useredittravelling' method='POST'>
+				If you are travelling, you can set your place:
+				<select name='travelling_location' id='travelling_location'>
+					<?php $this->locationselectoptionlist($homeLocation['code']); ?>
+				</select>
+				<?php $this->locationselection_about('travelling_location_id'); ?>
+				<button type='submit'>Set</button>
+			</form>
+			<p>Note: If you set travelling location, you will not be receiving any postcards until you end your travels.</p>
+			<?php
+		}
+	}
+	public function select_birthday_recepient() : void
+	{
+		if(!$this->template->isLoggedIn())
+		{
+			echo 'Must be logged in';
+			return;
+		}
+		$sender = $this->template->getUser();
+		
+		$db = Database::getInstance();
+		
+		$stmt = $db->prepare('
+			SELECT * FROM (
+				SELECT `id`, `login`, `polite_name`,
+					CASE WHEN JULIANDAY(SUBSTR(DATE(\'now\'), 1, 5) || SUBSTR(`birthday`, 6, 5)) > JULIANDAY(\'now\')
+					THEN CAST(
+							JULIANDAY(SUBSTR(DATE(\'now\'), 1, 5) || SUBSTR(`birthday`, 6, 5)) - JULIANDAY(\'now\')
+						AS INTEGER)
+					ELSE CAST(
+							JULIANDAY(SUBSTR(DATE(\'now\'), 1, 5) || \'12-31\') - JULIANDAY(\'now\') +
+							JULIANDAY(SUBSTR(DATE(\'now\'), 1, 5) || SUBSTR(`birthday`, 6, 5)) -
+							JULIANDAY(SUBSTR(DATE(\'now\'), 1, 5) || \'01-01\')
+						AS INTEGER)
+					END AS `days_left`,
+					CAST(JULIANDAY(\'now\') - JULIANDAY(`last_sent_at`) AS INTEGER) AS `sent_days_ago`
+				FROM `user`
+				LEFT JOIN (
+					SELECT `receiver_id`, MAX(`sent_at`) AS `last_sent_at`
+					FROM `postcard`
+					WHERE `sender_id` = :sender_id AND `type` = 2
+					GROUP BY `receiver_id`
+				) AS `last_birthday_card` ON `user`.`id` = `last_birthday_card`.`receiver_id`
+				WHERE
+					`deleted_on` IS NULL
+					AND `blocked_on` IS NULL
+					AND `disabled_on` IS NULL
+					AND JULIANDAY(\'now\') - JULIANDAY(`user`.`loggedin_at`) < 30
+			) AS `t`
+			WHERE `days_left` < 90
+			ORDER BY `days_left`
+		');
+		$stmt->bindValue(':sender_id', $sender->getId());
+		$stmt->execute();
+		?>
+			<form method='POST' action='/performselectaddress'>
+			<input type='hidden' name='type' value='2' />
+			<table>
+				<thead><tr>
+					<th>Send</th>
+					<th>User</th>
+					<th>Days left</th>
+				</tr></thead>
+			<tbody>
+		<?php
+		while($row = $stmt->fetch(PDO::FETCH_ASSOC))
+		{
+			?>
+				<tr>
+					<?php
+					if(is_numeric($row['sent_days_ago']) and intval($row['sent_days_ago']) <= 90)
+					{
+						?><td>&#127874;</td><?php
+					}
+					else if($row['id'] == $sender->getId())
+					{
+						?><td>&#9786;</td><?php
+					}
+					else
+					{
+						?><td><input type='radio' name='receiver_login' value='<?= $row['login'] ?>' /></td><?php
+					}
+					?>
+					<td><?= $this->userPoliteName($row['login'], $row['polite_name'], true) ?></td>
+					<td><?= $row['days_left'] ?></td>
+				</tr>
+			<?php
+		}
+		?>
+			</tbody>
+			</table>
+			<div><label>Your location:
+				<select name='location'>
+					<?php $this->locationselectoptionlist_user($sender); ?>
+				</select>
+			</label></div>
+			<div>
+				<label>
+					Confirm that you are willing to send a postcard to a chosen person.
+					<input type='checkbox' name='confirm' />
+				</label>
+			</div>
+			<div><button>Get an address</button></div>
+			</form>
+		<?php
+	}
+	public function latestpostcards_interuser() : bool
+	{
+		try
+		{
+			$user = $this->template->getUser();
+			if(isset($this->options['card_code']))
+			{
+				$card = Card::constructByCode($this->options['card_code']);
+				$cardUserIds = $card->getUserIds();
+				$secondId = $cardUserIds['sender'];
+				$thirdId = $cardUserIds['receiver'];
+				$cardCodeToExclude=$card->getCode();
+				unset($card);
+				unset($cardUserIds);
+			}
+			else if(isset($this->options['user']))
+			{
+				$secondId = $this->options['user']->getId();
+				$thirdId = -1;
+				$cardCodeToExclude='';
+			}
+			else
+			{
+				return false;
+			}
+		}
+		catch(Exception $e)
+		{
+			return false;
+		}
+		
+		$db = Database::getInstance();
+		$stmt = $db->prepare('
+			SELECT `postcard`.`code`, `hash`, `extension`, `mime`, `postcard`.`received_at`
+			FROM `postcard_image`
+			INNER JOIN `postcard` ON `postcard`.`id`=`postcard_image`.`postcard_id`
+			WHERE
+				(
+					(`sender_id` = :user_id AND `receiver_id` = :second_user_id)
+					OR
+					(`sender_id` = :user_id AND `receiver_id` = :third_user_id)
+					OR
+					(`sender_id` = :second_user_id AND `receiver_id` = :user_id AND `received_at` NOT NULL)
+					OR
+					(`sender_id` = :third_user_id AND `receiver_id` = :user_id AND `received_at` NOT NULL)
+				)
+				AND
+				`postcard_image`.`id` IN
+					(SELECT MIN(`id`) FROM `postcard_image` GROUP BY `postcard_id`)
+				AND
+				`postcard`.`code` != :card_code
+			ORDER BY `sent_at` DESC
+			LIMIT :count
+		');
+		$stmt->bindValue(':user_id', $user->getId());
+		$stmt->bindValue(':second_user_id', $secondId);
+		$stmt->bindValue(':third_user_id', $thirdId);
+		$stmt->bindValue(':card_code', $cardCodeToExclude);
+		$stmt->bindValue(':count', 99, PDO::PARAM_INT);
+		$stmt->execute();
+		$res = $stmt->fetchAll();
+		
+		if(empty($res)) return false;
+		
+		$this->postcard200thumbs($res, true);
+		
+		return true;
+	}
+	public function latestpostcards_location() : bool
+	{
+		$location = Location::getLocationByCode($this->options['location_code']);
+		
+		$db = Database::getInstance();
+		$stmt = $db->prepare('
+			SELECT `postcard`.`code`, `hash`, `extension`, `mime`, `postcard`.`received_at`
+			FROM `postcard_image`
+			INNER JOIN `postcard` ON `postcard`.`id`=`postcard_image`.`postcard_id`
+			WHERE
+				(
+					`postcard`.`send_location_id` = :location_id
+					OR
+					`postcard`.`receive_location_id` = :location_id
+				)
+				AND
+					`postcard`.`received_at` IS NOT NULL
+				AND
+					`postcard_image`.`id` IN
+						(SELECT MIN(`id`) FROM `postcard_image` GROUP BY `postcard_id`)
+			ORDER BY `sent_at` DESC
+			LIMIT :count
+		');
+		$stmt->bindValue(':location_id', $location['id']);
+		$stmt->bindValue(':count', 99, PDO::PARAM_INT);
+		$stmt->execute();
+		$res = $stmt->fetchAll();
+		
+		if(empty($res)) return false;
+		
+		$this->postcard200thumbs($res, true);
+		
+		return true;
+	}
+	
+	public function user_main_image() : void
+	{
+		if(isset($this->options['user']))
+		{
+			$user = $this->options['user'];
+		}
+		else
+		{
+			$card = Card::constructByCode($this->options['card_code']);
+			if($this->template->isLoggedIn())
+			{
+				try
+				{
+					$user = $card->getOtherUser($this->template->getUser());
+				}
+				catch(Exception $e)
+				{
+					$user = $card->getSender();
+				}
+			}
+			else
+			{
+				$user = $card->getSender();
+			}
+		}
+		?><div><a href='/userphotos/<?= $user->getLogin() ?>'>all photos</a></div><?php
+		$image = $user->getMainImage();
+		HtmlSnippets::printPhotoThumb200($image, $user->getLogin(), true, false);
+	}
+	
+	public function user_disable() : void
+	{
+		$user = $this->options['user'];
+		$enabled = $user->isEnabled();
+		if($enabled)
+		{
+			?><h1>Disable postal exchange temporarily</h1><?php
+		}
+		else
+		{
+			?><h1>Enable postcard exchange</h1><?php
+		}
+		
+		?>
+		<form action='/performenable' method='post' id='disable_user_form'>
+			<input type='hidden' name='login' value='<?= $user->getLogin() ?>' />
+			I am 
+			<?php if($enabled) { ?>
+				<input type='hidden' name='enabled' value='off' />
+				<button type='submit'>✋ unable to receive ✋</button>
+			<?php } else { ?>
+				<input type='hidden' name='enabled' value='on' />
+				<button type='submit'>✌ able to receive ✌</button>
+			<?php } ?>
+			 postcards.
+		</form>
+		<?php
+		if($enabled)
+		{
+			?><dialog id='disable_user_dialog'>
+				<p>You are about to disable your account. This means other people will no longer
+					get your address to send postcards to you, until you reenable it later.</p>
+				<button id='disable_user_confirm_button'>Disable the account</button>
+				<button id='disable_user_reject_button'>Do not disable</button>
+			</dialog>
+			<script>
+				const disableUserDialog = document.getElementById('disable_user_dialog');
+				const disableUserForm = document.getElementById('disable_user_form');
+				const disableUserConfirmButton = document.getElementById('disable_user_confirm_button');
+				const disableUserRejectButton = document.getElementById('disable_user_reject_button');
+				disableUserForm.addEventListener('submit', (event) => {
+					event.preventDefault();
+					try
+					{
+						disableUserDialog.showModal();
+					}
+					catch(ex) <?php // fall back ?>
+					{
+						if(confirm('Do you really want to disable your account?'))
+						{
+							disableUserForm.submit();
+						}
+					}
+				});
+				disableUserConfirmButton.addEventListener('click', (event) => {
+					disableUserForm.submit();
+				});
+				disableUserRejectButton.addEventListener('click', (event) => {
+					disableUserDialog.close();
+				});
+			</script><?php
+		}
+	}
+	
+	public function user_info_add_photo() : void
+	{
+		$user = $this->options['user'];
+		
+		HtmlSnippets::printImageUploadForm('photo', $user->getLogin());
+	}
+	
+	public function user_photographs() : bool
+	{
+		$viewer = $this->template->getUser();
+		$user = $this->options['user'];
+		$photos = $user->getUploadedImages();
+		
+		?><h1>Photographs</h1><?php
+		?><p>User: <?= $this->userPoliteName($user->getLogin(), $user->getPoliteName(), true) ?></p><?php
+		
+		$viewOfSelf = ($viewer->getId() == $user->getId());
+		$prev = null;
+		foreach($photos as $photo)
+		{
+			if($viewOfSelf and $prev != null)
+			{
+				?><form method='post' action='/performswapimageposition'><?php
+					?><button class='thumblike'>&#8644;</button><?php
+					?><input type='hidden' name='type' value='photo' /><?php
+					?><input type='hidden' name='what' value='<?= $user->getLogin() ?>' /><?php
+					?><input type='hidden' name='a' value='<?= $prev->getHash() ?>' /><?php
+					?><input type='hidden' name='b' value='<?= $photo->getHash() ?>' /><?php
+				?></form><?php
+			}
+			HtmlSnippets::printPhotoThumb200($photo, $user->getLogin(), false, $viewOfSelf);
+			$prev = $photo;
+		}
+		
+		return true;
+	}
+	public function user_waitingapproval() : bool
+	{
+		$user = $this->options['user'];
+		$viewer = $this->template->getUser();
+		
+		$db = Database::getInstance();
+		$stmt = $db->prepare('
+			SELECT `user_waiting_approval`.*, `address`.`addr`,  `address`.`language_code`, `user`.`login`
+			FROM `user_waiting_approval`
+			INNER JOIN `address` ON `user_waiting_approval`.`user_id`=`address`.`user_id`
+			INNER JOIN `user` ON `user_waiting_approval`.`user_id`=`user`.`id`
+			WHERE `user_waiting_approval`.`user_id`=:user_id
+		');
+		$stmt->bindValue(':user_id', $user->getId());
+		$stmt->execute();
+		$result = false;
+		while($row = $stmt->fetch(PDO::FETCH_ASSOC))
+		{
+			?><form method='post' action='/performapproveaddress'><?php
+				?><input type='hidden' name='id' value='<?= $row['id'] ?>' /><?php
+				?><input type='hidden' name='login' value='<?= $row['login'] ?>' /><?php
+				?><div class='addresses'><?php
+					?><div lang='<?= $row['language_code'] ?>' class='address'><?= $row['addr'] ?></div><?php
+				?></div><?php
+				?><button type='submit'>approve</button><?php
+			?></form><?php
+			$result = true;
+		}
+		return $result;
+	}
+	public function world_postcard_day_postcards() : void
+	{
+		$db = Database::getInstance();
+		$stmt = $db->prepare('
+			SELECT `postcard`.`code`, `hash`, `extension`, `mime`, `postcard`.`received_at`
+			FROM `postcard_image`
+			INNER JOIN `postcard` ON `postcard`.`id`=`postcard_image`.`postcard_id`
+			WHERE
+				`received_at` NOT NULL
+				AND
+				`postcard_image`.`id` IN
+					(SELECT MIN(`id`) FROM `postcard_image` GROUP BY `postcard_id`)
+				AND STRFTIME(\'%m%d\', `postcard`.`sent_at`) = \'1001\'
+			ORDER BY `received_at` DESC
+		');
+		$stmt->execute();
+		$this->postcard200thumbs($stmt->fetchAll(), true);
+	}
+	public function text(string $html) : void
+	{
+		echo $html;
+	}
+}

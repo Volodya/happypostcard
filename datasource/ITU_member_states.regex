@@ -1,0 +1,16 @@
+#deleting from the start
+
+/<table><tr> 
+dgg
+
+#deleting to the end
+
+/<\/table
+dG
+
+#preparing data
+
+:g!/^<!--/d
+
+:%s/^.*<td align=center>\([A-Z]\{1,3\}\)<\/td><td align=center>.\([A-Z]\{2\}\).*$/UPDATE `location_code` SET `itu`='\1'
+WHERE `iso3166_1_a2`='\2';

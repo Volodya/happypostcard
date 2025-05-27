@@ -1,0 +1,22 @@
+#deleting from the start
+
+/id=\"GeoGroupsENG" 
+dgg
+
+#deleting to the end
+
+/\/table
+
+#preparing the data lines and removing the rest
+
+:g/data-tt-id/j
+:g!/data-tt-id/d
+
+
+:%s/^\s*<tr data-tt-id="\(\d\{3\}\)"> <td>\([^<]*\).*$/INSERT INTO `location_code`(`name`, `un_m49`) VALUES('\2',
+ '\1');
+:%s/^\s*<tr data-tt-id="\(\d\{3\}\)" data-tt-parent-id="\(\d\{3\}\)"> <td>\([^<]*\).*>\([A-Z]\{3\}\)<\/td>$/UPDAT
+E `location_code` SET `un_m49`='\1', `parent`=(SELECT `id` FROM `location_code` WHERE `un_m49`='\2') WHERE `iso31
+66_1_a3`='\4';
+:%s/^\s*<tr data-tt-id="\(\d\{3\}\)" data-tt-parent-id="\(\d\{3\}\)"> <td>\([^<]*\).*$/INSERT INTO `location_code
+`(`name`, `un_m49`, `parent`) VALUES('\3', '\1', (SELECT `id` FROM `location_code` WHERE `un_m49`='\2'));

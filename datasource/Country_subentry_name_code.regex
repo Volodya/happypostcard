@@ -1,0 +1,9 @@
+# initial cleaning
+
+:g!/WIDTH=\("99%"\|"14%"\)/d 
+:1
+dd
+
+:g/$/j
+
+:%s/^.*  CLASS="f5">\([^-]\{2\}\)-\([^<]\+\).* CLASS="f6"><[^>]*>\([^<]*\).*$/INSERT INTO `location_code`(`name`, `iso3166_2_ext`, `parent`) VALUES("\3", '\1-\2', (SELECT `id` FROM `location_code` WHERE `iso3166_1_a2`='\1'));

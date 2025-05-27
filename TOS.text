@@ -1,0 +1,20 @@
+Terms of service:
+1. USER MUST
+1.1. User must provide their true address if they wish to receive postcards.
+1.2. User must use a password that is difficult to guess. It is highly recommended that the password is unique.
+1.3. User must only register one account.
+1.4. User must not register an account for anybody else.
+1.5. User must give the project the right to distribute the text of their profile to everybody and their address to those, who have requested to send a postcard.
+1.6. User must give the projects administrators the right to see and alter all of the information provided to the site with the exception of the password that cannot be seen.
+1.7. User must make sure that all the applicable laws of their country are followed with the respect to their registration and postal exchanges. If the laws cannot be followed, the user must contact an administrator to terminate their registration.
+2. PROJECT WILL
+2.1. Attempt to provide a user with a way to mail a postcard to another pseudorandom user.
+2.2. Provide reasonable security protections, such as not storing plain-text version of the password, providing an authentication system to change personal settings, allowing the user to change passwords frequently.
+2.3. Provide a way to upload true images of the sent postcards. Images will be reencoded partially to make them smaller, and will be used to allow any user to recognise the specific postcard.
+2.4. Project will continue to be improved, time permitting. What constitutes "improvement" will be left to the developer.
+3. WAVER OF WARRANTY
+3.1. This project gives no guarantees that it will work at any specific time.
+3.2. This project may delete personal data off of the server, make some parts unavailable, or available to only a subgroup of users.
+3.3. This project is not guaranteed to provide true and correct address. There is no way to validate the address provided by users, nor is there a way to validate the correct working of postal services around the world. If you find that an address is false, you can contact an administrator.
+3.4. Technical malfunctions and unintended error in the code may cause the project to malfunction. No user can hold any administrator or developer responsible for such.
+3.5. This project may change these terms of service.

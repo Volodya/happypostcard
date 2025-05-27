@@ -1,0 +1,1 @@
+<header><span class='logo'> 〠 </span> <span class='title'> Happy Postcard </span></header>

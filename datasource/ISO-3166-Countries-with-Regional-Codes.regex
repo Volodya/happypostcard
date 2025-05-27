@@ -1,0 +1,7 @@
+setting up countries
+
+%s/\'/ʼ/g
+%s/\"\([^,"]\+\), \([^"]*\)"/\2 \1/g
+%s/^\([^,]*\),\([^,]*\),\([^,]*\),\([^,]*\).*$/INSERT INTO `location_code`(`name`, `iso3166_1_a2`, `iso3166_1_a3`, `iso3166_1_num`) VALUES('\1', '\2', '\3', '\4');/g
+
+setting up regions
