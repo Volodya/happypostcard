@@ -197,6 +197,7 @@ class Template
 				}
 				elseif((@include("template/cw_{$w[0]}.php")) !== false)
 				{
+					echo '<!-- old style complex widget -->';
 					if(!is_callable($w[0]))
 					{
 						ob_end_clean();
