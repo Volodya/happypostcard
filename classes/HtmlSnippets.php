@@ -111,10 +111,24 @@ class HtmlSnippets
 		try
 		{
 			$hours = intval($timeParts[0]);
+			
+			$minutes = intval($timeParts[1]);
+			if($minutes>45)
+			{
+				$minutes = 0;
+				$hours = ($hours+1) % 24;
+			}
+			else if($minutes<15)
+			{
+				$minutes = 0;
+			}
+			else
+			{
+				$minutes = 30;
+			}
+			
 			$ampm = ($hours < 12) ? 'am' : 'pm';
 			$hours %= 12;
-			$minutes = intval($timeParts[1]);
-			$minutes = intdiv($minutes, 30)*30; // rounding to 30 minutes
 		}
 		catch(Exception $e)
 		{
