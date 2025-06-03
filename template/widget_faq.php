@@ -49,8 +49,8 @@
 </p>
 <h3>What do I write on a postcards I am sending?</h3>
 <p>
-	You absolutely <strong>must</strong> write a code, so that the receiver can register the card. The number
-	is given to you and will be in the form of LOC-LOC-2023-101, where LOC is the location of first sender and
+	You absolutely <strong>must</strong> write a code, so that the receiver can register the card. The code
+	is the secret given to you and will be in the form of LOC-LOC-2023-101, where LOC is the location of first sender and
 	then the receiver of the postcard. Unless you are sending a card in an envelope, you must write an address.
 	Everything else is up to you. It is perfectly OK to just say «Here is a Happy Postcard for you.» but many
 	people like to share a little bit about themselves, about the card… Some people write the the weather now,
