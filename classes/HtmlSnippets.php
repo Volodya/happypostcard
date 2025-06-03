@@ -225,4 +225,73 @@ class HtmlSnippets
 			}, true);
 		</script><?php
 	}
+	
+	public static function printLocationSelection_About(string $selectId, string $aboutDivClass = '') : void
+	{
+		$aboutId = "{$selectId}_about";
+		?>
+		<div id='<?= $aboutId ?>'>
+			<noscript>
+				<p>Your postcards will have a code selected. You will be able to change the location in case you are traveling.</p>
+			</noscript>
+		</div>
+		<script type='text/javascript' defer='defer'>
+			document.getElementById('<?= $selectId ?>').addEventListener('change', (event) => {
+				console.log(event.target.value);
+				
+				document.getElementById('<?= $aboutId ?>').innerHTML = 
+					'<p>Your postcards will have a code: '+event.target.value+'. You will be able to change the location in case you are traveling.</p>'+
+					'<p>Read more about this location <a href=\'/location/'+event.target.value+'\'>here</a>.</p>';
+			});
+		</script>
+		<?php
+	}
+	public static function printLocationSelection_CodeEntry(string $selectId, string $entryDivClass = '') : void
+	{
+		$codeentryId = "{$selectId}_codeentry";
+		?>
+		<div id='<?= $codeentryId ?>'>
+			<noscript>
+			</noscript>
+		</div>
+		<script type='text/javascript' defer='defer'>
+			const select = document.getElementById('<?= $selectId ?>');
+			const codeentryDiv = document.getElementById('<?= $codeentryId ?>');
+			const codeentryInput = document.createElement('input');
+			codeentryInput.setAttribute('type', 'text');
+			codeentryInput.setAttribute('autocapitalize', 'autocapitalize');
+			codeentryInput.setAttribute('placeholder', 'Code of location (if known)');
+			codeentryDiv.appendChild(codeentryInput);
+			codeentryInput.addEventListener('keydown', (event) => {
+				let value= codeentryInput.value;
+				value = value.trim();
+				value = value.toUpperCase();
+				console.log(event.key);
+				if (event.key == "Enter" || event.key == ' ')
+				{
+					select.value=value;
+					
+					event.preventDefault();
+				}
+				else if(value.length === 4)
+				{
+					select.value=value;
+				}
+			});
+		</script>
+		<?php
+	}
+	
+	public static function printLocationSelectOptionList(string $defaultLocation = 'SOL3') : void
+	{
+		$db = Database::getInstance();
+		
+		$stmt = $db->prepare('SELECT `code`, `name` FROM `location_code`');
+		$stmt->execute();
+		while($row = $stmt->fetch(PDO::FETCH_ASSOC))
+		{
+			$selected = $row['code']==$defaultLocation ? ' selected=\'selected\'' : '';
+			echo "<option value='{$row['code']}'{$selected}>{$row['name']} [{$row['code']}]</option>";
+		}
+	}
 }

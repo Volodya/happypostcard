@@ -14,7 +14,12 @@ class PageUserEdit extends Page_Abstract
 				)
 				->withRight(
 					[
-						['user_info_edit', 'logged_in' => true/*, 'view_of_self' => true*/], // will check permission in complexwidgets
+						[
+							'user_info_edit',
+							'logged_in' => true, /* 'view_of_self' => true,*/  // will check permission in complexwidgets
+							'parameter' => ['user' => $user],
+							'make_section' => true, 'section_header' => 'Edit information',
+						],
 						[
 							'user_info_edit_travelling',
 							'logged_in' => true, 'view_of_self' => true,

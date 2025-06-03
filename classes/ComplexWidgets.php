@@ -92,79 +92,6 @@ class ComplexWidgets
 		}
 	}
 	
-	public function locationselectoptionlist_user(User $user) : void
-	{
-		$homeLocation = $user->getActiveLocation();
-		$this->locationselectoptionlist($homeLocation['code']);
-	}
-	public function locationselectoptionlist(string $defaultLocation = 'SOL3') : void
-	{
-		$db = Database::getInstance();
-		
-		$stmt = $db->prepare('SELECT `code`, `name` FROM `location_code`');
-		$stmt->execute();
-		while($row = $stmt->fetch(PDO::FETCH_ASSOC))
-		{
-			$selected = $row['code']==$defaultLocation ? ' selected=\'selected\'' : '';
-			echo "<option value='{$row['code']}'{$selected}>{$row['name']} [{$row['code']}]</option>";
-		}
-	}
-	public function locationselection_about(string $selectId, string $aboutDivClass = '') : void
-	{
-		$aboutId = "{$selectId}_about";
-		?>
-		<div id='<?= $aboutId ?>'>
-			<noscript>
-				<p>Your postcards will have a code selected. You will be able to change the location in case you are traveling.</p>
-			</noscript>
-		</div>
-		<script type='text/javascript' defer='defer'>
-			document.getElementById('<?= $selectId ?>').addEventListener('change', (event) => {
-				console.log(event.target.value);
-				
-				document.getElementById('<?= $aboutId ?>').innerHTML = 
-					'<p>Your postcards will have a code: '+event.target.value+'. You will be able to change the location in case you are traveling.</p>'+
-					'<p>Read more about this location <a href=\'/location/'+event.target.value+'\'>here</a>.</p>';
-			});
-		</script>
-		<?php
-	}
-	public function locationselection_codeentry(string $selectId, string $entryDivClass = '') : void
-	{
-		$codeentryId = "{$selectId}_codeentry";
-		?>
-		<div id='<?= $codeentryId ?>'>
-			<noscript>
-			</noscript>
-		</div>
-		<script type='text/javascript' defer='defer'>
-			const select = document.getElementById('<?= $selectId ?>');
-			const codeentryDiv = document.getElementById('<?= $codeentryId ?>');
-			const codeentryInput = document.createElement('input');
-			codeentryInput.setAttribute('type', 'text');
-			codeentryInput.setAttribute('autocapitalize', 'autocapitalize');
-			codeentryInput.setAttribute('placeholder', 'Code of location (if known)');
-			codeentryDiv.appendChild(codeentryInput);
-			codeentryInput.addEventListener('keydown', (event) => {
-				let value= codeentryInput.value;
-				value = value.trim();
-				value = value.toUpperCase();
-				console.log(event.key);
-				if (event.key == "Enter" || event.key == ' ')
-				{
-					select.value=value;
-					
-					event.preventDefault();
-				}
-				else if(value.length === 4)
-				{
-					select.value=value;
-				}
-			});
-		</script>
-		<?php
-	}
-	
 	private function getUserNews(User $user) : Array
 	{
 		$db = Database::getInstance();
@@ -474,7 +401,7 @@ class ComplexWidgets
 			$collapsed = false;
 			foreach($rows as $rowKey => $rowVal)
 			{
-				if($rowVal['type'] == $row['type'] and $rowVal['login'] == $row['login'] and (new DateTime($row['ts']))->diff(new DateTime($rowVal['ts']))->h < 6)
+				if($rowVal['type'] == $row['type'] and $rowVal['login'] == $row['login'] and (new DateTime($row['ts']))->diff(new DateTime($rowVal['ts']))->h < 3)
 				{
 					$rows[$rowKey]['card_code'][] = $row['card_code'];
 					$collapsed = true;
@@ -811,122 +738,10 @@ class ComplexWidgets
 	}
 	public function displayAddresses(User $user) : void
 	{
-		foreach($this->getUserAddresses($user) as $row)
+		foreach($user->getUserAddresses() as $row)
 		{
 			echo "<div lang='{$row['language_code']}' class='address'>{$row['addr']}</div>";
 		}
-	}
-	private function getUserInfo(User $user) : Array
-	{
-		$db = Database::getInstance();
-		
-		$stmt = $db->prepare('
-			SELECT
-				CASE WHEN LENGTH(`polite_name`)>0 THEN `polite_name` ELSE `login` END as `polite_name`,
-				Cast(JulianDay("now") - JulianDay(`registered_at`) AS INTEGER) `days_registered`,
-				Cast(JulianDay("now") - JulianDay(`loggedin_at`) AS INTEGER) `days_since_last_login`,
-				`birthday`,
-				`location_code`.`code` AS `home_location_code`, `location_code`.`name` AS `home_location`,
-				`about`, `desires`, `hobbies`, `phobias`, `languages`
-			FROM `user`
-				LEFT JOIN (SELECT * FROM `user_preference` WHERE `key`="home_location") AS `home` ON `home`.`user_id`=`user`.`id`
-				LEFT JOIN `location_code` ON `location_code`.`code`=`home`.`val`
-			WHERE `login`=:login
-		');
-		$stmt->bindValue(':login', $user->getLogin());
-		$stmt->execute();
-		if(!($row = $stmt->fetch(PDO::FETCH_ASSOC)))
-		{
-			return [];
-		}
-		return $row;
-	}
-	private function getUserAddresses(User $user) : Array
-	{
-		$db = Database::getInstance();
-		
-		$stmt = $db->prepare('
-			SELECT `id`, `language_code`, `addr`
-			FROM `address`
-			WHERE `user_id`=:user_id
-		');
-		$stmt->bindValue(':user_id', $user->getId());
-		$stmt->execute();
-		$res = $stmt->fetchAll(PDO::FETCH_ASSOC);
-		return $res;
-	}
-	public function user_info_edit(UserExisting $user, UserExisting $editor) : void
-	{
-		if($user->getId() == $editor->getId())
-		{
-			// all is well
-		}
-		elseif($editor->isAdmin())
-		{
-			?>
-				You are an admin and are editing another user's profile.
-			<?php
-		}
-		else
-		{
-			?>
-				You are not allowed to edit another user&apos;s profile.
-			<?php
-			return;
-		}
-		$userInfo = $this->getUserInfo($user);
-		$addresses = $this->getUserAddresses($user);
-		?>
-		<form method='POST' action='/performprofileedit' enctype='multipart/form-data'>
-			<div>Login: <tt><?= $user->getLogin() ?></tt></div>
-			<div>Name: <input name='polite_name' value='<?= $userInfo['polite_name'] ?>' /></div>
-			<div>Days on this site: <?= $userInfo['days_registered'] ?></div>
-			<div>Birthday: <input type='date' name='birthday' value='<?= $userInfo['birthday'] ?>' /></div>
-			<div>Home location: <select name='home_location' id='home_location'>
-				<?php $this->locationselectoptionlist($userInfo['home_location_code']) ?>
-			</select></div>
-			<?php $this->locationselection_about('home_location', 'home_location_about'); ?>
-			<?php $this->locationselection_codeentry('home_location', 'home_location_codeentry'); ?>
-			
-			<div>Address (with name):
-				<div class='addresses_input'>
-					<?php foreach($addresses as $addr) { ?>
-						<div class='address_input'>
-							<input type='hidden' name='addr_id[]' value='<?php echo $addr['id'] ?>' />
-							<textarea name='addr_addr[]' rows='6' cols='27'><?php echo $addr['addr'] ?></textarea>
-							<input type='text' name='addr_lang_code[]' value='<?php echo $addr['language_code'] ?>' />
-						</div>
-					<?php } ?>
-					<div class='address_input'>
-						<input type='hidden' name='addr_id[]' value='0' />
-						<textarea name='addr_addr[]' rows='6' cols='27' placeholder='Your address in a different script/language'></textarea>
-						<input type='text' name='addr_lang_code[]' value='en' />
-					</div>
-				</div>
-			</div>
-			<div>About yourself: <div class='userinfo_input'>
-					<textarea name='about' rows='15' cols='27'
-						placeholder='Introduce yourself'><?php echo $userInfo['about'] ?></textarea>
-				</div>
-			</div>
-			<div>Your postcard preferences: <div class='userinfo_input'>
-					<textarea name='desires' rows='15' cols='27'
-						placeholder='What type of cards you enjoy most of all'><?php echo $userInfo['desires'] ?></textarea>
-				</div>
-			</div>
-			<div>Hobbies:
-				<input name='hobbies'
-					placeholder='What are your hobbies?' value='<?php echo $userInfo['hobbies'] ?>' />
-			</div>
-			<div>Languages:
-				<input name='languages'
-					placeholder='Languages you undersand' value='<?php echo $userInfo['languages'] ?>' /></div>
-			<div>Phobias:
-				<input name='phobias'
-					placeholder='Topics to avoid with you' value='<?php echo $userInfo['phobias'] ?>' /></div>
-			<input type='submit' value='Save' />
-		</form>
-		<?php
 	}
 	public function user_info(User $user) : void
 	{
@@ -944,7 +759,7 @@ class ComplexWidgets
 			<div>You can <a href='/useredit/<?= $user->getLogin() ?>'>edit</a> this information.</div>
 			<?php
 		}
-		$userInfo = $this->getUserInfo($user);
+		$userInfo = $user->getUserInfo();
 		// https://stackoverflow.com/questions/19372458/convert-multiple-new-lines-to-paragraphs
 		$userAbout = preg_replace('~(*BSR_ANYCRLF)\R\R\K(?>[^<\r\n]++|<(?!h[1-6]\b)|\R(?!\R))+(?=\R\R|$)~u',
 			'<p>$0</p>', $userInfo['about']);
@@ -1619,10 +1434,10 @@ class ComplexWidgets
 			<form action='/perform_useredittravelling' method='POST'>
 				Alternatively you can change your travel location:
 				<select name='travelling_location' id='travelling_location'>
-					<?php $this->locationselectoptionlist($travellingLocation['code']); ?>
+					<?php HtmlSnippets::printLocationSelectOptionList($travellingLocation['code']); ?>
 				</select>
-				<?php $this->locationselection_codeentry('travelling_location'); ?>
-				<?php $this->locationselection_about('travelling_location'); ?>
+				<?php HtmlSnippets::printLocationSelection_CodeEntry('travelling_location'); ?>
+				<?php HtmlSnippets::printLocationSelection_About('travelling_location'); ?>
 				<button type='submit'>Change</button>
 			</form>
 			<?php
@@ -1634,9 +1449,9 @@ class ComplexWidgets
 			<form action='/perform_useredittravelling' method='POST'>
 				If you are travelling, you can set your place:
 				<select name='travelling_location' id='travelling_location'>
-					<?php $this->locationselectoptionlist($homeLocation['code']); ?>
+					<?php HtmlSnippets::printLocationSelectOptionList($homeLocation['code']); ?>
 				</select>
-				<?php $this->locationselection_about('travelling_location_id'); ?>
+				<?php HtmlSnippets::printLocationSelection_About('travelling_location_id'); ?>
 				<button type='submit'>Set</button>
 			</form>
 			<p>Note: If you set travelling location, you will not be receiving any postcards until you end your travels.</p>
@@ -1725,7 +1540,7 @@ class ComplexWidgets
 			</table>
 			<div><label>Your location:
 				<select name='location'>
-					<?php $this->locationselectoptionlist_user($sender); ?>
+					<?php HtmlSnippets::printLocationSelectOptionList($sender); ?>
 				</select>
 			</label></div>
 			<div>

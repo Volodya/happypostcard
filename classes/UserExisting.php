@@ -639,4 +639,43 @@ class UserExisting extends User
 		
 		return $stmt->fetchAll(PDO::FETCH_ASSOC);
 	}
+	public function getUserInfo() : array
+	{
+		$db = Database::getInstance();
+		
+		$stmt = $db->prepare('
+			SELECT
+				CASE WHEN LENGTH(`polite_name`)>0 THEN `polite_name` ELSE `login` END as `polite_name`,
+				Cast(JulianDay("now") - JulianDay(`registered_at`) AS INTEGER) `days_registered`,
+				Cast(JulianDay("now") - JulianDay(`loggedin_at`) AS INTEGER) `days_since_last_login`,
+				`birthday`,
+				`location_code`.`code` AS `home_location_code`, `location_code`.`name` AS `home_location`,
+				`about`, `desires`, `hobbies`, `phobias`, `languages`
+			FROM `user`
+				LEFT JOIN (SELECT * FROM `user_preference` WHERE `key`="home_location") AS `home` ON `home`.`user_id`=`user`.`id`
+				LEFT JOIN `location_code` ON `location_code`.`code`=`home`.`val`
+			WHERE `login`=:login
+		');
+		$stmt->bindValue(':login', $this->getLogin());
+		$stmt->execute();
+		if(!($row = $stmt->fetch(PDO::FETCH_ASSOC)))
+		{
+			return [];
+		}
+		return $row;
+	}
+	public function getUserAddresses() : array
+	{
+		$db = Database::getInstance();
+		
+		$stmt = $db->prepare('
+			SELECT `id`, `language_code`, `addr`
+			FROM `address`
+			WHERE `user_id`=:user_id
+		');
+		$stmt->bindValue(':user_id', $this->getId());
+		$stmt->execute();
+		$res = $stmt->fetchAll(PDO::FETCH_ASSOC);
+		return $res;
+	}
 }

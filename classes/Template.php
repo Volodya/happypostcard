@@ -182,7 +182,10 @@ class Template
 				{
 					$className = "ComWid_{$w[0]}";
 					$widget = new $className();
-					$widget->invoke($w['parameter'], $performerResults);
+					$widget->setEditor($this->user);
+					$widget->setTemplateParameter($w['parameter']);
+					$widget->setPerformerResults($performerResults);
+					$widget->invoke();
 					
 					if(!$widget->haveDisplayed() and isset($w['clear_on_false']) and $w['clear_on_false'])
 					{
