@@ -55,11 +55,19 @@
 	Everything else is up to you. It is perfectly OK to just say «Here is a Happy Postcard for you.» but many
 	people like to share a little bit about themselves, about the card… Some people write the the weather now,
 	what music they are listening to while signing, share plans for the future, maybe even share an interesting
-	anecdote about one's life. It is also a custom by many people to decorate their card with stickers, stamps,
+	anecdote about one&apos;s life. It is also a custom by many people to decorate their card with stickers, stamps,
 	drawings or doodles.
 </p>
 <p>
 	Be creative!
+</p>
+<h3>What if I do not speak the language of the user I am sending a card to?</h3>
+<p>
+	You must write an address and the code, other things are a nice addition. If you know at least a couple
+	phrases, it is nice to write them. However, it is perfectly OK to write in the language that a you know,
+	even when the receiver is not a speaker of that language. Perhaps they will use the opportunity to learn a word
+	or two. Or maybe they will just smile and say «I have received a card, it&apos;s a wonderful day, I will assume
+	that I am told something very nice».
 </p>
 <h3>What is a «postcard»?</h3>
 <p>
@@ -113,7 +121,8 @@
 <h3>What to do if I cannot figure out the code of the card that I have received?</h3>
 <p>
 	Short answer is: <a href='/help'>contact</a> and provide as much information as you can. If you can make out
-	even a small part of the code, this may help out a lot to locate the correct one.
+	even a small part of the code, this may help out a lot to locate the correct one. Date that the postcard is sent
+	is also something that provides a lot of information, which will aid in findin the correct code.
 </p>
 <h3>How late may I register the card?</h3>
 <p>
@@ -145,7 +154,7 @@
 </p>
 <h3>Should I tell a person, that I have sent a card to them?</h3>
 <p>
-	Don't. Let it be a surprise. Happy Postcard already tells the person that they are going to receive a card from
+	Don&apos;t. Let it be a surprise. Happy Postcard already tells the person that they are going to receive a card from
 	somebody, that is more than enough information for the unspoiled expectation.
 </p>
 <h3>How and when did Happy Postcard start?</h3>
