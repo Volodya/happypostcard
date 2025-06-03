@@ -97,7 +97,7 @@
 	<li>User is waiting to receive 15 postcards, but none of their sent cards have arrived</li>
 	<li>The user sent out less than half of what is sent to them</li>
 </ol>
-<h3>Where to write the ID of the card?</h3>
+<h3>Where to write the code of the card?</h3>
 <p>
 	Write it on the card itself. Write it clearly and legibly somewhere not too close to the address and stamps.
 	If you write too close to the address it is possible that the mail couriers will get confused and interpret
@@ -105,10 +105,10 @@
 	impossible to read.
 </p>
 <p>
-	Some people prefer to write the ID more than once, to make it easier to be found. This is a good idea, but is
+	Some people prefer to write the code more than once, to make it easier to be found. This is a good idea, but is
 	not needed most of the time.
 </p>
-<h3>What to do if I cannot figure out the ID of the card that I have received?</h3>
+<h3>What to do if I cannot figure out the code of the card that I have received?</h3>
 <p>
 	Short answer is: <a href='/help'>contact</a> and provide as much information as you can. If you can make out
 	even a small part of the code, this may help out a lot to locate the correct one.
