@@ -7,7 +7,9 @@
 <h3>How to get started?</h3>
 <p>
 	First you need to <a href='/register'>register</a> and <a href='/login'>login</a>. After that you will
-	be able to <a href='/send'>send postcards</a>. At the same time other users will be sending cards to you,
+	be able to <a href='/send'>send postcards</a>
+	(do not forget to write a code on in).
+	At the same time other users will be sending cards to you,
 	once you receive them, you <a href='/receive'>register those cards</a>.
 </p>
 <h3>I am in a country with several spoken languages/used scripts. How should I write my address?</h3>
@@ -47,7 +49,7 @@
 </p>
 <h3>What do I write on a postcards I am sending?</h3>
 <p>
-	You absolutely <strong>must</strong> write a number, so that the receiver can register the card. The number
+	You absolutely <strong>must</strong> write a code, so that the receiver can register the card. The number
 	is given to you and will be in the form of LOC-LOC-2023-101, where LOC is the location of first sender and
 	then the receiver of the postcard. Unless you are sending a card in an envelope, you must write an address.
 	Everything else is up to you. It is perfectly OK to just say «Here is a Happy Postcard for you.» but many
