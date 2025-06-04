@@ -2,9 +2,10 @@
 	<header>Ready to make somebody happy with a Happy Postcard</header>
 	<form method='POST' action='/performselectaddress'>
 		<div><label>Your location:
-			<select name='location'>
-				<?php $this->complexWidgets->locationselectoptionlist_user($this->user); ?>
-			</select>
+			<select name='location'><?php
+					$homeLocation = $this->user->getActiveLocation();
+					HtmlSnippets::printLocationSelectOptionList($homeLocation['code']);
+			?></select>
 		</label></div>
 		<div>
 			<label>

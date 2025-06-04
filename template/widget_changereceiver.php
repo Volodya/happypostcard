@@ -4,9 +4,10 @@
 	<form method='POST' action='/performreselectaddress'>
 		<input type='hidden' name='code' value='<?= $this->options['card_code'] ?>' />
 		<div><label>Your location:
-			<select name='location'>
-				<?php $this->complexWidgets->locationselectoptionlist_user($this->user); ?>
-			</select>
+			<select name='location'><?php
+					$homeLocation = $this->user->getActiveLocation();
+					HtmlSnippets::printLocationSelectOptionList($homeLocation['code']);
+			?></select>
 		</label></div>
 		<div>
 			<label>
