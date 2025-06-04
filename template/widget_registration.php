@@ -9,8 +9,8 @@
 			placeholder='secret' /></label></div>
 		<div><label>Repeat password: <input type='password' name='password2' required='required'
 			placeholder='secret' /></label></div>
-		<div><label>Your home location: <select name='home_location' id='home_location'><?php $this->complexWidgets->locationselectoptionlist(); ?></select></label></div>
-		<?php $this->complexWidgets->locationselection_about('home_location'); ?>
+		<div><label>Your home location: <select name='home_location' id='home_location'><?php HtmlSnippets::printLocationSelectOptionList(); ?></select></label></div>
+		<?php HtmlSnippets::printLocationSelection_About('home_location'); ?>
 		<button type='submit'>Register</button>
 		<button type='reset'>Reset</button>
 	</form>
