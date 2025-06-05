@@ -12,7 +12,7 @@ class JsonResult extends JsonGenerator
 	{
 		return true;
 	}
-	public function withPerformerResult(array $performerResult)
+	public function withPerformerResults(array $performerResult)
 	{
 		$new = clone $this;
 		$new->performerResult = $performerResult;

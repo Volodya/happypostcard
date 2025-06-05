@@ -3,6 +3,7 @@
 class PerformerLinkImageToCard extends Performer_Abstract
 {
 	private $config;
+	private array $result;
 	
 	private function linkPostcardImage(Response $response, User $uploader, string $cardCode, string $hash) : Response
 	{
@@ -51,7 +52,8 @@ class PerformerLinkImageToCard extends Performer_Abstract
 			return $this->abandon($response, 'Error adding image to the DB');
 		}
 		
-		return $response->withPerformerResult(['status'=>'ok']);
+		$this->result = ['image_link_status'=>'ok'];
+		return $response;
 	}
 	private function receiveUserImage(Response $response, User $uploader, string $userLogin, array $files) : Response
 	{
@@ -90,5 +92,9 @@ class PerformerLinkImageToCard extends Performer_Abstract
 				return $response->withErrorMessage('Unknown type');
 
 		}
+	}
+	public function getResult() : array
+	{
+		return $this->result;
 	}
 }

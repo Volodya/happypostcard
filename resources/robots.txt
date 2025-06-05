@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /uploads/
+Disallow: /perform
+Sitemap: https://www.happypostcard.fun/sitemap.xml
+Sitemap: https://www.happypostcard.fun/sitemap.txt
