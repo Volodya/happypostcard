@@ -33,13 +33,13 @@ class ComWid_registration implements ComWid
 				<div><label>Repeat password: <input type='password' name='password2' required='required'
 					placeholder='secret' /></label></div><?php
 				
-				if(!empty($this->guessedLocation))
+				if(!empty($this->guessedLocation) and $this->guessedLocation['code'] != 'SOL3')
 				{
 					$guessedLocationCode=$this->guessedLocation['code'];
 					?><p>The system has determined that your location is <?= $this->guessedLocation['name'] ?>, if that
 					is not correct, please change it below.</p><?php
 				}
-				
+								
 				?><div><label>Your home location: <select name='home_location' id='home_location'><?php
 					HtmlSnippets::printLocationSelectOptionList($guessedLocationCode);
 				?></select></label></div>
