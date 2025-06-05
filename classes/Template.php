@@ -10,6 +10,8 @@ class Template
 	private array $userNotices;
 	private array $errors;
 	
+	private array $performerResults;
+	
 	private array $widgetsLeft;
 	private array $widgetsRight;
 	private array $widgetsBottom;
@@ -24,6 +26,7 @@ class Template
 		$this->siteNotices = [];
 		$this->userNotices = [];
 		$this->errors = [];
+		$this->performerResults = [];
 		$this->options = $op;
 		
 		$this->widgetsLeft = [];
@@ -91,6 +94,12 @@ class Template
 		
 		return $new;
 	}
+	public function withPerformerResults(array $performerResults) : Template
+	{
+		$new = clone $this;
+		$new->performerResults = $performerResults;
+		return $new;
+	}
 	public function isLoggedIn() : bool
 	{
 		return $this->loginStatus;
@@ -121,7 +130,7 @@ class Template
 	 * If a widget is a function inside CustomWidgets, it terminates if returns non-bool
 	 * If it returns bool it terminates if it returns true
 	 */
-	private function includeWidgets(array $widgets, array $performerResults = array())
+	private function includeWidgets(array $widgets)
 	{
 		foreach($widgets as $widgetQueue)
 		{
@@ -147,6 +156,8 @@ class Template
 				
 				echo "<!--{$w[0]}-->";
 				ob_start();
+				
+				if(!isset($w['parameter'])) $w['parameter'] = [];
 				
 				if(isset($w['logged_in']))
 				{
@@ -184,7 +195,7 @@ class Template
 					$widget = new $className();
 					$widget->setEditor($this->user);
 					$widget->setTemplateParameter($w['parameter']);
-					$widget->setPerformerResults($performerResults);
+					$widget->setPerformerResults($this->performerResults);
 					$widget->invoke();
 					
 					if(!$widget->haveDisplayed() and isset($w['clear_on_false']) and $w['clear_on_false'])

@@ -21,12 +21,13 @@ class AppStateReadyToPerformTasks
 		$performers = $this->router->getPerformers($pageRequested);
 		
 		$response = $this->response;
-		$responseResults = [];
+		$performerResults = [];
 		foreach($performers as $performer)
 		{
 			$response = $performer->perform($this->request, $response, $this->config);
-			$responseResults = array_merge($responseResults, $performer->getResult());
+			$performerResults = array_merge($performerResults, $performer->getResult());
 		}
+		$response = $response->withPerformerResults($performerResults);
 		
 		return new AppStateReadyToMakePage($this->request, $this->config, $this->router, $response);
 	}

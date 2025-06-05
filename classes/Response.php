@@ -7,6 +7,8 @@ class Response
 	private array $errorMessages;
 	private array $noticeMessages;
 	
+	private array $performerResults;
+	
 	private Page $page;
 	
 	public function __construct()
@@ -15,6 +17,7 @@ class Response
 		$this->page = new Page500('Page has not been initialised'); // needs to be substituted for something
 		$this->errorMessages = [];
 		$this->noticeMessages = [];
+		$this->performerResults = [];
 	}
 	
 	public function withErrorMessage(string $errorMessage) : Response
@@ -28,6 +31,13 @@ class Response
 	{
 		$new = clone $this;
 		$new->noticeMessages[] = $noticeMessage;
+		return $new;
+	}
+	
+	public function withPerformerResults(array $performerResults) : Response
+	{
+		$new = clone $this;
+		$new->performerResults = $performerResults;
 		return $new;
 	}
 	
@@ -45,19 +55,25 @@ class Response
 	
 	public function send() : void
 	{
+		$page = $this->page;
+		if($page->showsPerformerResults())
+		{
+			$page = $page->withPerformerResults($this->performerResults);
+		}
+		
 		header('Content-Type: '.$this->page->contentType());
 		http_response_code($this->errorCode);
 		
-		if($this->page->isDisplayed()) // add stored messages
+		if($page->isDisplayed()) // add stored messages
 		{
-			$this->page = $this->page
+			$page = $page
 				->withExtraErrors($this->errorMessages)
 				->withExtraUserNotices($this->noticeMessages);
 		}
 		
-		echo $this->page->toString();
+		echo $page->toString();
 		
-		if($this->page->isDisplayed()) // wipe messages in SESSION (they are displayed)
+		if($page->isDisplayed()) // wipe messages in SESSION (they are displayed)
 		{
 			$this->wipeUserNotices();
 		}

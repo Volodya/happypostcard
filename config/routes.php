@@ -207,6 +207,7 @@ return [
 	],
 	'/register' => [
 		'permissions required' => [],
+		'performers' => ['PerformerGuessUserLocation'],
 		'page' => 'PageRegister',
 		'subpath_allowed' => false,
 	],

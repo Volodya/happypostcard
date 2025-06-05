@@ -13,13 +13,13 @@
 		</div>
 		<div class='middle'>
 			<div class='left'>
-				<?php $this->includeWidgets($this->widgetsLeft); ?>
+				<?php $this->includeWidgets($this->widgetsLeft, $this->performerResults); ?>
 			</div>
 			<div class='right'>
-				<?php $this->includeWidgets($this->widgetsRight); ?>
+				<?php $this->includeWidgets($this->widgetsRight, $this->performerResults); ?>
 			</div>
 		</div>
-		<?php $this->includeWidgets($this->widgetsBottom); ?>
+		<?php $this->includeWidgets($this->widgetsBottom, $this->performerResults); ?>
 	</div>
 	<?php include('widget_sitemap.php') ?>
 	<?php include('widget_footer.php') ?>

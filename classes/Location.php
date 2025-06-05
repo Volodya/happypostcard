@@ -10,7 +10,7 @@ class Location
 	{
 		return Location::getLocationByCode($code)['id'];
 	}
-	public static function getLocationById(int $id) : Array // ['id' => int, 'code' => string, 'name' => string]
+	public static function getLocationById(int $id) : array // ['id' => int, 'code' => string, 'name' => string]
 	{
 		$db = Database::getInstance();
 		$stmt = $db->prepare('SELECT `id`, `code`, `name` FROM `location_code` WHERE `id`=:id');
@@ -24,7 +24,7 @@ class Location
 		$row['id'] = intval($row['id']);
 		return $row;
 	}
-	public static function getLocationByCode(string $code) : Array // ['id' => int, 'code' => string, 'name' => string]
+	public static function getLocationByCode(string $code) : array // ['id' => int, 'code' => string, 'name' => string]
 	{
 		$db = Database::getInstance();
 		$stmt = $db->prepare('SELECT `id`, `code`, `name` FROM `location_code` WHERE `code`=:code');
@@ -38,20 +38,50 @@ class Location
 		$row['id'] = intval($row['id']);
 		return $row;
 	}
-	public static function getSublocations(int $id) : Array // of arrays
+	public static function getSublocations(int $id) : array // of arrays
 	{
 		$db = Database::getInstance();
 		$stmt = $db->prepare('SELECT `id`, `code`, `name` FROM `location_code` WHERE `parent`=:parent_id');
 		$stmt->bindParam(':parent_id', $id);
 		$stmt->execute();
 		$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-		$rows = array_map(function(Array $loc): Array {
+		$rows = array_map(function(array $loc): array {
 			$loc['id'] = intval($loc['id']);
 			return $loc;
 		}, $rows);
 		return $rows;
 	}
-	public static function getUserCounts(string $code) : Array // ['now' => int, 'ever_from' => int, 'ever_to' => int]
+	public static function getLocationByISO3166_1_a2(string $country) : array
+	{
+		$db = Database::getInstance();
+		$stmt = $db->prepare('SELECT `id`, `code`, `name` FROM `location_code` WHERE `iso3166_1_a2`=:country');
+		$stmt->bindParam(':country', $country);
+		$stmt->execute();
+		$row = $stmt->fetch(PDO::FETCH_ASSOC);
+		if(!$row)
+		{
+			throw new Exception('Location not found');
+		}
+		$row['id'] = intval($row['id']);
+		return $row;
+	}
+	public static function getLocationByUN_sub(string $country, string $region) : array
+	{
+		$db = Database::getInstance();
+		$stmt = $db->prepare('SELECT `id`, `code`, `name` FROM `location_code` WHERE `un_sub`=:ext_code');
+		$ext_code="{$country}-{$region}";
+		$stmt->bindParam(':ext_code', $ext_code);
+		$stmt->execute();
+		$row = $stmt->fetch(PDO::FETCH_ASSOC);
+		if(!$row)
+		{
+			var_dump($ext_code);
+			throw new Exception('Location not found');
+		}
+		$row['id'] = intval($row['id']);
+		return $row;
+	}
+	public static function getUserCounts(string $code) : array // ['now' => int, 'ever_from' => int, 'ever_to' => int]
 	{
 		$db = Database::getInstance();
 		$stmt = $db->prepare('
@@ -96,7 +126,7 @@ class Location
 		
 		return $result;
 	}
-	public static function getPostcardCounts(string $code) : Array // ['sent_from' => int, 'sent_to' => int]
+	public static function getPostcardCounts(string $code) : array // ['sent_from' => int, 'sent_to' => int]
 	{
 		$db = Database::getInstance();
 		$stmt = $db->prepare('
