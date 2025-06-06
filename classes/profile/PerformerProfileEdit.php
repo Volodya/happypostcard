@@ -4,11 +4,10 @@ class PerformerProfileEdit extends Performer_Abstract
 {
 	public function perform(Request $request, Response $response, Config $config) : Response
 	{
-		if(!$request->allSetPOST([]))
+		if(!$request->allSetPOST(['login', 'home_location']))
 		{
 			return $this->abandon($response, 'all fields must exist');
 		}
-		$user = $request->getLoggedInUser();
 		
 		$post = $request->getPOST([
 			'login'			=>['custom_filter'=>'FILTER_SANITIZE_LOGIN'],
@@ -24,7 +23,15 @@ class PerformerProfileEdit extends Performer_Abstract
 			'addr_id'		=>['filter'=>FILTER_VALIDATE_INT, 'isArray'=>true],
 			'addr_addr'		=>['custom_filter'=>'FILTER_SANITIZE_NOSCRIPT', 'isArray'=>true],
 			'addr_lang_code'=>['custom_filter'=>'FILTER_SANITIZE_NOSCRIPT', 'isArray'=>true],
-			]);
+		]);
+		
+		$editor = $request->getLoggedInUser();
+		$user = User::constructByLogin($post['login']);
+		
+		if($editor->getId() != $user->getId() and !$editor->isAdmin())
+		{
+			return $this->abandon($response, 'Cannot edit another person\'s account.');
+		}
 		
 		$db = Database::getInstance();
 		
