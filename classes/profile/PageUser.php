@@ -29,6 +29,12 @@ class PageUser extends Page_Abstract
 				)
 				->withRight(
 					[
+						[
+							'user_edit_button',
+							'make_section' => true,
+							'admin' => true,
+							'parameter' => ['user' => $user],
+						],
 						['user_info'],
 						['user_news_for_user'],
 						['inter_user_news', 'logged_in' => true, 'view_of_self' => false],
