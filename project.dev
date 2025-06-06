@@ -28,26 +28,14 @@ long_line_behaviour=1
 long_line_column=120
 
 [files]
-current_page=15
-FILE_NAME_0=722;PHP;0;EUTF-8;1;1;0;%2Fhome%2Fva%2Fwork%2Fworkspace%2Fwww%2Fhappypostcard%2Fclasses%2FAppStateReadyToPerformTasks.php;0;4
-FILE_NAME_1=1334;PHP;0;EUTF-8;1;1;0;%2Fhome%2Fva%2Fwork%2Fworkspace%2Fwww%2Fhappypostcard%2Fclasses%2FResponse.php;0;4
-FILE_NAME_2=5854;PHP;0;EUTF-8;1;1;0;%2Fhome%2Fva%2Fwork%2Fworkspace%2Fwww%2Fhappypostcard%2Fclasses%2FRequest.php;0;4
-FILE_NAME_3=93;PHP;0;EUTF-8;1;1;0;%2Fhome%2Fva%2Fwork%2Fworkspace%2Fwww%2Fhappypostcard%2Fclasses%2FPerformer.php;0;4
-FILE_NAME_4=417;PHP;0;EUTF-8;1;1;0;%2Fhome%2Fva%2Fwork%2Fworkspace%2Fwww%2Fhappypostcard%2Fclasses%2FPerformer_Abstract.php;0;4
-FILE_NAME_5=709;PHP;0;EUTF-8;1;1;0;%2Fhome%2Fva%2Fwork%2Fworkspace%2Fwww%2Fhappypostcard%2Fclasses%2FPerformerCardList.php;0;4
-FILE_NAME_6=6575;PHP;0;EUTF-8;1;1;0;%2Fhome%2Fva%2Fwork%2Fworkspace%2Fwww%2Fhappypostcard%2Fconfig%2Froutes.php;0;4
-FILE_NAME_7=1436;PHP;0;EUTF-8;1;1;0;%2Fhome%2Fva%2Fwork%2Fworkspace%2Fwww%2Fhappypostcard%2Fclasses%2FRouter.php;0;4
-FILE_NAME_8=9027;PHP;0;EUTF-8;1;1;0;%2Fhome%2Fva%2Fwork%2Fworkspace%2Fwww%2Fhappypostcard%2Fclasses%2FCard.php;0;4
-FILE_NAME_9=50463;PHP;0;EUTF-8;1;1;0;%2Fhome%2Fva%2Fwork%2Fworkspace%2Fwww%2Fhappypostcard%2Fclasses%2FComplexWidgets.php;0;4
-FILE_NAME_10=4587;SQL;0;EUTF-8;1;1;0;%2Fhome%2Fva%2Fwork%2Fworkspace%2Fwww%2Fhappypostcard%2Fdatasource%2F00_init.sql;0;4
-FILE_NAME_11=304;PHP;0;EUTF-8;1;1;0;%2Fhome%2Fva%2Fwork%2Fworkspace%2Fwww%2Fhappypostcard%2Fclasses%2FEMail.php;0;4
-FILE_NAME_12=333;PHP;0;EUTF-8;1;1;0;%2Fhome%2Fva%2Fwork%2Fworkspace%2Fwww%2Fhappypostcard%2Fclasses%2FSvgGraph.php;0;4
-FILE_NAME_13=14761;PHP;0;EUTF-8;1;1;0;%2Fhome%2Fva%2Fwork%2Fworkspace%2Fwww%2Fhappypostcard%2Fclasses%2FUserExisting.php;0;4
-FILE_NAME_14=310;PHP;0;EUTF-8;1;1;0;%2Fhome%2Fva%2Fwork%2Fworkspace%2Fwww%2Fhappypostcard%2Fclasses%2FPageSendPostcard.php;0;4
-FILE_NAME_15=5590;PHP;0;EUTF-8;1;1;0;%2Fhome%2Fva%2Fwork%2Fworkspace%2Fwww%2Fhappypostcard%2Fclasses%2FHtmlSnippets.php;0;4
-FILE_NAME_16=469;PHP;0;EUTF-8;1;1;0;%2Fhome%2Fva%2Fwork%2Fworkspace%2Fwww%2Fhappypostcard%2Ftemplate%2Fwidget_sendpostcard.php;0;4
-FILE_NAME_17=2511;PHP;0;EUTF-8;1;1;0;%2Fhome%2Fva%2Fwork%2Fworkspace%2Fwww%2Fhappypostcard%2Fclasses%2FPerformerSelectAddress.php;0;4
-FILE_NAME_18=314;HTML;0;EUTF-8;1;1;0;%2Ftmp%2Ftest.html;0;4
+current_page=4
+FILE_NAME_0=3199;PHP;0;EUTF-8;1;1;0;%2Fhome%2Fva%2Fwork%2Fworkspace%2Fwww%2Fhappypostcard%2Fclasses%2FTemplate.php;0;4
+FILE_NAME_1=3248;PHP;0;EUTF-8;1;1;0;%2Fhome%2Fva%2Fwork%2Fworkspace%2Fwww%2Fhappypostcard%2Fclasses%2Fprofile%2FPerformerProfileEdit.php;0;4
+FILE_NAME_2=0;PHP;0;EUTF-8;1;1;0;%2Fhome%2Fva%2Fwork%2Fworkspace%2Fwww%2Fhappypostcard%2Fclasses%2FUser.php;0;4
+FILE_NAME_3=16133;PHP;0;EUTF-8;1;1;0;%2Fhome%2Fva%2Fwork%2Fworkspace%2Fwww%2Fhappypostcard%2Fclasses%2FUserExisting.php;0;4
+FILE_NAME_4=861;PHP;0;EUTF-8;1;1;0;%2Fhome%2Fva%2Fwork%2Fworkspace%2Fwww%2Fhappypostcard%2Fclasses%2Fprofile%2FPageUser.php;0;4
+FILE_NAME_5=258;PHP;0;EUTF-8;1;1;0;%2Fhome%2Fva%2Fwork%2Fworkspace%2Fwww%2Fhappypostcard%2Fclasses%2FSimpWid.php;0;4
+FILE_NAME_6=267;PHP;0;EUTF-8;1;1;0;%2Fhome%2Fva%2Fwork%2Fworkspace%2Fwww%2Fhappypostcard%2Fclasses%2Fprofile%2FComWid_user_edit_button.php;0;4
 
 [VTE]
 last_dir=/home/va/work/workspace/www/happypostcard/data

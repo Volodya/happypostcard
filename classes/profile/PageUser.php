@@ -25,16 +25,16 @@ class PageUser extends Page_Abstract
 							'section_header' => 'Waiting for aproval',
 							'clear_on_false' => true
 						],
-					]
-				)
-				->withRight(
-					[
 						[
 							'user_edit_button',
 							'make_section' => true,
 							'admin' => true,
 							'parameter' => ['user' => $user],
 						],
+					]
+				)
+				->withRight(
+					[
 						['user_info'],
 						['user_news_for_user'],
 						['inter_user_news', 'logged_in' => true, 'view_of_self' => false],
