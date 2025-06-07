@@ -33,6 +33,10 @@ class EMail
 	{
 		$new = clone $this;
 		
+		$unsafe= array('<', '>');
+		$safe  = array('〈', '〉');
+		$name = str_replace($unsafe, $safe, html_entity_decode($name));
+		
 		if(!empty($name))
 		{
 			$name = '=?UTF-8?B?' . base64_encode($name) . '?=';
@@ -45,6 +49,10 @@ class EMail
 	public function withExtraTo(string $email, string $name='') : Email
 	{
 		$new = clone $this;
+		
+		$unsafe= array('<', '>');
+		$safe  = array('〈', '〉');
+		$name = str_replace($unsafe, $safe, html_entity_decode($name));
 		
 		if(!empty($name))
 		{
