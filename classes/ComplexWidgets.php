@@ -303,7 +303,7 @@ class ComplexWidgets
 								if($viewOfSelf)
 								{
 									$willDisplay=true;
-									$receiverName = $this->userPoliteName($row['login'], $row['polite_name'], true);
+									$receiverName = HtmlSnippets::getUserPoliteName($row['login'], $row['polite_name'], true);
 									?>
 										<td>You sent a <a href='/card/<?= $row['card_code'] ?>'>happy postcard</a>
 											to <?= $receiverName ?>.
@@ -313,7 +313,7 @@ class ComplexWidgets
 								break;
 							case 'postcard_yousent_received':
 								$willDisplay=true;
-								$receiverName = $this->userPoliteName($row['login'], $row['polite_name'], true);
+								$receiverName = HtmlSnippets::getUserPoliteName($row['login'], $row['polite_name'], true);
 								?>
 									<td><?= $receiverName ?> received a <a href='/card/<?= $row['card_code'] ?>'>happy postcard</a>
 										from <?= $userName ?>.
@@ -324,7 +324,7 @@ class ComplexWidgets
 								if($viewer->getLogin() == $row['login'])
 								{
 									$willDisplay=true;
-									$senderName = $this->userPoliteName($row['login'], 'You', true);
+									$senderName = HtmlSnippets::getUserPoliteName($row['login'], 'You', true);
 									?>
 										<td><?= $senderName ?> sent <?= $userName ?> a
 											<a href='/card/<?= $row['card_code'] ?>'>happy postcard</a>
@@ -336,11 +336,11 @@ class ComplexWidgets
 								$willDisplay=true;
 								if($viewer->getLogin() == $row['login'])
 								{
-									$senderName = $this->userPoliteName($row['login'], 'Your', true);
+									$senderName = HtmlSnippets::getUserPoliteName($row['login'], 'Your', true);
 								}
 								else
 								{
-									$senderName = $this->userPoliteName($row['login'], $row['polite_name'], true).'&apos;s';
+									$senderName = HtmlSnippets::getUserPoliteName($row['login'], $row['polite_name'], true).'&apos;s';
 								}
 									
 								?>
@@ -366,164 +366,6 @@ class ComplexWidgets
 	}
 	public function site_news() : void
 	{
-		$db = Database::getInstance();
-		
-		$stmt = $db->prepare('
-			SELECT * FROM(
-				SELECT "new_user" as `type`, `registered_at` AS `ts`, `login`,
-					CASE WHEN LENGTH(`polite_name`)<>0 THEN `polite_name` ELSE `login` END AS `polite_name`,
-					NULL as `card_code`
-					FROM `user`
-				UNION ALL
-				SELECT "postcard_sent_received", `sent_at`, `login`, 
-					CASE WHEN LENGTH(`polite_name`)<>0 THEN `polite_name` ELSE `login` END AS `polite_name`,
-					`code`
-					FROM `postcard` INNER JOIN `user` ON `postcard`.`sender_id`=`user`.`id`
-					WHERE `received_at` IS NOT NULL
-				UNION ALL
-				SELECT "postcard_sent", `sent_at`, `login`, 
-					CASE WHEN LENGTH(`polite_name`)<>0 THEN `polite_name` ELSE `login` END AS `polite_name`,
-					`code`
-					FROM `postcard` INNER JOIN `user` ON `postcard`.`sender_id`=`user`.`id`
-					WHERE `received_at` IS NULL
-				UNION ALL
-				SELECT "postcard_received", `received_at`, `login`, 
-					CASE WHEN LENGTH(`polite_name`)<>0 THEN `polite_name` ELSE `login` END AS `polite_name`,
-					`code` FROM `postcard` INNER JOIN `user` ON `postcard`.`receiver_id`=`user`.`id`
-					WHERE `received_at` IS NOT NULL
-			) AS t ORDER BY `ts` DESC LIMIT 150
-		');
-		$stmt->execute();
-		
-		$rows = [];
-		while($row = $stmt->fetch(PDO::FETCH_ASSOC))
-		{
-			$collapsed = false;
-			foreach($rows as $rowKey => $rowVal)
-			{
-				if($rowVal['type'] == $row['type'] and $rowVal['login'] == $row['login'] and (new DateTime($row['ts']))->diff(new DateTime($rowVal['ts']))->h < 3)
-				{
-					$rows[$rowKey]['card_code'][] = $row['card_code'];
-					$collapsed = true;
-					break;
-				}
-			}
-			if(!$collapsed)
-			{
-				$row['card_code'] = [ $row['card_code'] ];
-				$rows[] = $row;
-			}
-		}
-		$rows = array_slice($rows, 0, 15);
-		
-		foreach($rows as $row)
-		{
-			$len = count($row['card_code']);
-			
-			echo '<div class="newsitem">';
-			$userLink = $this->userPoliteName($row['login'], $row['polite_name'], true);
-			switch($row['type'])
-			{
-				case 'new_user':
-					echo "{$userLink} has joined  «Happy Postcard».";
-					break;
-				case 'postcard_sent_received':
-					if($len > 2)
-					{
-						?><?= $userLink ?> has sent happy postcards:
-						<?php
-						$first = true;
-						foreach($row['card_code'] as $cardCode)
-						{
-							if(!$first)
-							{
-								echo ', ';
-								if($len == 1)
-								{
-									echo 'and ';
-								}
-							}
-							$first = false;
-							?><a href='/card/<?= $cardCode ?>'>📨</a><?php
-							--$len;
-						}
-					}
-					else if($len == 2)
-					{
-						?><?= $userLink ?> has sent happy postcards:
-						<?php
-						$first = true;
-						foreach($row['card_code'] as $cardCode)
-						{
-							if(!$first)
-							{
-								echo ' and ';
-							}
-							$first = false;
-							?><a href='/card/<?= $cardCode ?>'>📨</a><?php
-						}
-					}
-					else
-					{
-						?><?= $userLink ?> has sent a <a href='/card/<?= $row['card_code'][0] ?>'>happy postcard</a><?php
-					}
-					echo '.';
-					break;
-				case 'postcard_sent':
-					if($len > 1)
-					{
-						?><?= $userLink ?> has sent <?php HtmlSnippets::printCircledDigits($len) ?> happy postcards.<?php
-					}
-					else
-					{
-						?><?= $userLink ?> has sent a <span title='Number hidden'>happy postcard</span>.<?php
-					}
-					break;
-				case 'postcard_received':
-					if($len > 2)
-					{
-						?><?= $userLink ?> has received <?php HtmlSnippets::printCircledDigits($len) ?> happy postcards:
-						<?php
-						$first = true;
-						foreach($row['card_code'] as $cardCode)
-						{
-							if(!$first)
-							{
-								echo ', ';
-								if($len == 1)
-								{
-									echo 'and ';
-								}
-							}
-							$first=false;
-							?><a href='/card/<?= $cardCode ?>'>📩</a><?php
-							--$len;
-						}
-					}
-					else if($len == 2)
-					{
-						?><?= $userLink ?> has received <?php HtmlSnippets::printCircledDigits($len) ?> happy postcards:
-						<?php
-						$first = true;
-						foreach($row['card_code'] as $cardCode)
-						{
-							if(!$first)
-							{
-								echo ' and ';
-							}
-							$first=false;
-							?><a href='/card/<?= $cardCode ?>'>📩</a><?php
-						}
-					}
-					else
-					{
-						?><?= $userLink ?> has received a <a href='/card/<?= $row['card_code'][0] ?>'>happy postcard</a><?php
-					}
-					echo '.';
-					break;
-			}
-			echo '</div>';
-		}
 	}
 	public function user_statistics(User $user) : void
 	{
@@ -1093,22 +935,6 @@ class ComplexWidgets
 			There seems to be no location like this. Are you sure you know what you are doing?<?php
 		}
 	}
-	private function userPoliteName(string $login, string $polite_name, bool $link=false) : string
-	{
-		if(!isset($polite_name) || empty($polite_name))
-		{
-			$polite_name = $login;
-		}
-		
-		if($link)
-		{
-			return "<a href='/user/{$login}'>{$polite_name}</a>";
-		}
-		else
-		{
-			return $polite_name;
-		}
-	}
 	public function travelling_postcards(User $user) : void
 	{
 		$travelling = $user->getTravellingPostcards();
@@ -1133,7 +959,7 @@ class ComplexWidgets
 					<td><?= $row['days_travelling'] ?></span></td>
 					<td><a href='/card/<?= $row['postcard_code'] ?>'><?= $row['postcard_code'] ?></a></td>
 					<td><a href='/location/<?= $row['loc_code'] ?>'><?= $row['loc_name'] ?></a></td>
-					<td><?= $this->userPoliteName($row['receiver_login'], $row['receiver_polite_name'], true) ?></td>
+					<td><?php HtmlSnippets::printUserPoliteName($row['receiver_login'], $row['receiver_polite_name'], true); ?></td>
 					<?php
 					if(!empty($row['first_image_hash']))
 					{
@@ -1159,7 +985,7 @@ class ComplexWidgets
 			return;
 		}
 		
-		?><p>User: <?= $this->userPoliteName($user->getLogin(), $user->getPoliteName(), true) ?></p><?php
+		?><p>User: <?php HtmlSnippets::printUserPoliteName($user->getLogin(), $user->getPoliteName(), true); ?></p><?php
 		
 		$sent = $user->getSentPostcards();
 		
@@ -1182,7 +1008,7 @@ class ComplexWidgets
 					<td><?= $row['days_travelled'] ?></span></td>
 					<td><a href='/card/<?= $row['postcard_code'] ?>'><?= $row['postcard_code'] ?></a></td>
 					<td><a href='/location/<?= $row['loc_code'] ?>'><?= $row['loc_name'] ?></a></td>
-					<td><?= $this->userPoliteName($row['receiver_login'], $row['receiver_polite_name'], true) ?></td>
+					<td><?php HtmlSnippets::printUserPoliteName($row['receiver_login'], $row['receiver_polite_name'], true); ?></td>
 				</tr><?php
 			}
 			?>
@@ -1198,7 +1024,7 @@ class ComplexWidgets
 			return;
 		}
 		
-		?><p>User: <?= $this->userPoliteName($user->getLogin(), $user->getPoliteName(), true) ?></p><?php
+		?><p>User: <?php HtmlSnippets::printUserPoliteName($user->getLogin(), $user->getPoliteName(), true); ?></p><?php
 		
 		$sent = $user->getReceivedPostcards();
 		
@@ -1221,7 +1047,7 @@ class ComplexWidgets
 					<td><?= $row['days_travelled'] ?></span></td>
 					<td><a href='/card/<?= $row['postcard_code'] ?>'><?= $row['postcard_code'] ?></a></td>
 					<td><a href='/location/<?= $row['loc_code'] ?>'><?= $row['loc_name'] ?></a></td>
-					<td><?= $this->userPoliteName($row['sender_login'], $row['sender_polite_name'], true) ?></td>
+					<td><?php HtmlSnippets::printUserPoliteName($row['sender_login'], $row['sender_polite_name'], true); ?></td>
 				</tr><?php
 			}
 			?>
@@ -1409,7 +1235,7 @@ class ComplexWidgets
 			$image = PicturePhoto::constructByHash($hash);
 			$userId = $image->getUserId();
 			$user = UserExisting::constructById($userId);
-			echo $this->userPoliteName($user->getLogin(), $user->getPoliteName(), true);
+			HtmlSnippets::printUserPoliteName($user->getLogin(), $user->getPoliteName(), true);
 		}
 		catch(Exception $ex)
 		{}
@@ -1530,7 +1356,7 @@ class ComplexWidgets
 						?><td><input type='radio' name='receiver_login' value='<?= $row['login'] ?>' /></td><?php
 					}
 					?>
-					<td><?= $this->userPoliteName($row['login'], $row['polite_name'], true) ?></td>
+					<td><?php HtmlSnippets::printUserPoliteName($row['login'], $row['polite_name'], true); ?></td>
 					<td><?= $row['days_left'] ?></td>
 				</tr>
 			<?php
@@ -1764,7 +1590,7 @@ class ComplexWidgets
 		$photos = $user->getUploadedImages();
 		
 		?><h1>Photographs</h1><?php
-		?><p>User: <?= $this->userPoliteName($user->getLogin(), $user->getPoliteName(), true) ?></p><?php
+		?><p>User: <?php HtmlSnippets::printUserPoliteName($user->getLogin(), $user->getPoliteName(), true); ?></p><?php
 		
 		$viewOfSelf = ($viewer->getId() == $user->getId());
 		$prev = null;

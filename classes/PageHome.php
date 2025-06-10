@@ -24,7 +24,12 @@ class PageHome extends Page_Abstract
 				->withRight(
 					[
 						['development_news', 'logged_in' => true],
-						['site_news', 'logged_in' => true],
+						[
+							'site_news',
+							'logged_in' => true,
+							'make_section' => true,
+							'section_header' => 'Site News',
+						],
 						['sitedescription', 'logged_in' => false],
 					]
 				)

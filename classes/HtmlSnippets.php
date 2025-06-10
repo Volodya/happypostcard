@@ -294,4 +294,20 @@ class HtmlSnippets
 			echo "<option value='{$row['code']}'{$selected}>{$row['name']} [{$row['code']}]</option>";
 		}
 	}
+	private static function printUserPoliteName(string $login, string $polite_name, bool $link=false) : void
+	{
+		if(!isset($polite_name) || empty($polite_name))
+		{
+			$polite_name = $login;
+		}
+		
+		if($link)
+		{
+			echo "<a href='/user/{$login}'>{$polite_name}</a>";
+		}
+		else
+		{
+			echo $polite_name;
+		}
+	}
 }
