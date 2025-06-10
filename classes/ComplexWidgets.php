@@ -1540,7 +1540,7 @@ class ComplexWidgets
 			</table>
 			<div><label>Your location:
 				<select name='location'>
-					<?php HtmlSnippets::printLocationSelectOptionList($sender); ?>
+					<?php HtmlSnippets::printLocationSelectOptionList($sender->getActiveLocation()['code']); ?>
 				</select>
 			</label></div>
 			<div>
