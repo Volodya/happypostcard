@@ -4,6 +4,10 @@ class HtmlSnippets
 {
 	public static function __callStatic(string $method, array $parameters)
     {
+		if(str_starts_with($method, 'print'))
+		{
+			return HtmlSnippets::get($method, $parameters);
+		}
 		if(str_starts_with($method, 'get'))
 		{
 			$newMethod = 'print'.substr($method, strlen('get'));
