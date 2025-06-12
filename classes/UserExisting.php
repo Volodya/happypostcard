@@ -342,6 +342,19 @@ class UserExisting extends User
 			$stmt->bindValue(':reason', 'address changed');
 			$stmt->execute();
 		}
+		else
+		{
+			$stmt = $db->prepare('
+				UPDATE `address`
+				SET
+					`language_code` = :lang_code
+				WHERE id=:id AND `user_id`=:user_id AND `language_code`<>:lang_code
+			');
+			$stmt->bindValue(':user_id', $this->id);
+			$stmt->bindValue(':id', $id);
+			$stmt->bindValue(':lang_code', $lang_code);
+			$stmt->execute();
+		}
 	}
 	public function removeAddress(int $id) : void
 	{
