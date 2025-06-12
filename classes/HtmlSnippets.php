@@ -6,9 +6,9 @@ class HtmlSnippets
     {
 		if(str_starts_with($method, 'print'))
 		{
-			return HtmlSnippets::get($method, $parameters);
+			call_user_func_array("self::{$method}", $parameters);
 		}
-		if(str_starts_with($method, 'get'))
+		else if(str_starts_with($method, 'get'))
 		{
 			$newMethod = 'print'.substr($method, strlen('get'));
 			return HtmlSnippets::get($newMethod, $parameters);
@@ -298,7 +298,7 @@ class HtmlSnippets
 			echo "<option value='{$row['code']}'{$selected}>{$row['name']} [{$row['code']}]</option>";
 		}
 	}
-	private static function printUserPoliteName(string $login, string $polite_name, bool $link=false) : void
+	public static function printUserPoliteName(string $login, string $polite_name, bool $link=false) : void
 	{
 		if(!isset($polite_name) || empty($polite_name))
 		{
