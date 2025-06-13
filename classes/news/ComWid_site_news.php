@@ -53,9 +53,13 @@ class ComWid_site_news implements ComWid
 		while($row = $stmt->fetch(PDO::FETCH_ASSOC))
 		{
 			$collapsed = false;
+			$row['Date'] = new DateTime($row['ts']);
 			foreach($rows as $rowKey => $rowVal)
 			{
-				if($rowVal['type'] == $row['type'] and $rowVal['login'] == $row['login'] and (new DateTime($row['ts']))->diff(new DateTime($rowVal['ts']))->h < 3)
+				$dateDiff = $row['Date']->diff($rowVal['Date']);
+				if($rowVal['type'] == $row['type'] and $rowVal['login'] == $row['login'] and 
+					($dateDiff->h < 3 and $dateDiff->d == 0 and $dateDiff->m == 0 and $dateDiff->y == 0)
+				)
 				{
 					$rows[$rowKey]['card_code'][] = $row['card_code'];
 					$collapsed = true;
