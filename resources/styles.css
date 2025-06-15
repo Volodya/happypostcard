@@ -1,3 +1,9 @@
+@font-face
+{
+	font-family: 'ChocolateClassicalSans-Regular';
+	src: url('ChocolateClassicalSans-Regular-part.woff'); /* OFL, taken only glyphs that are needed */
+}
+
 body, html
 {
 	margin: 0;
@@ -7,6 +13,8 @@ body, html
 body
 {
 	background-color: #BFBFBF;
+	
+	font-family: 'ChocolateClassicalSans-Regular', 'Verdana', 'Arial', 'Helvetica', sans-serif;
 }
 
 table
@@ -97,7 +105,7 @@ div.page
 
 	font-size: xx-large;
 	font-weight: bold;
-	font-family: 'sans-serif';
+	font-family: 'ChocolateClassicalSans-Regular', 'Verdana', 'Arial', 'Helvetica', sans-serif;
 	line-height: 42px;
 }
 

@@ -143,7 +143,7 @@ class HtmlSnippets
 	}
 	public static function printCircledDigits(int $num) : void
 	{
-		static $circled = mb_str_split('⓪①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳㉑㉒㉓㉔㉕㉖㉗㉘㉙㉚㉛㉜㉝㉞㉟');
+		static $circled = mb_str_split('⓪①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳㉑㉒㉓㉔㉕㉖㉗㉘㉙㉚㉛㉜㉝㉞㉟㊱㊲㊳㊴㊵㊶㊷㊸㊹㊺㊻㊼㊽㊾㊿');
 		if($num < count($circled))
 		{
 			echo $circled[$num];
