@@ -1612,36 +1612,6 @@ class ComplexWidgets
 		
 		return true;
 	}
-	public function user_waitingapproval() : bool
-	{
-		$user = $this->options['user'];
-		$viewer = $this->template->getUser();
-		
-		$db = Database::getInstance();
-		$stmt = $db->prepare('
-			SELECT `user_waiting_approval`.*, `address`.`addr`,  `address`.`language_code`, `user`.`login`
-			FROM `user_waiting_approval`
-			INNER JOIN `address` ON `user_waiting_approval`.`user_id`=`address`.`user_id`
-			INNER JOIN `user` ON `user_waiting_approval`.`user_id`=`user`.`id`
-			WHERE `user_waiting_approval`.`user_id`=:user_id
-		');
-		$stmt->bindValue(':user_id', $user->getId());
-		$stmt->execute();
-		$result = false;
-		while($row = $stmt->fetch(PDO::FETCH_ASSOC))
-		{
-			?><form method='post' action='/performapproveaddress'><?php
-				?><input type='hidden' name='id' value='<?= $row['id'] ?>' /><?php
-				?><input type='hidden' name='login' value='<?= $row['login'] ?>' /><?php
-				?><div class='addresses'><?php
-					?><div lang='<?= $row['language_code'] ?>' class='address'><?= $row['addr'] ?></div><?php
-				?></div><?php
-				?><button type='submit'>approve</button><?php
-			?></form><?php
-			$result = true;
-		}
-		return $result;
-	}
 	public function world_postcard_day_postcards() : void
 	{
 		$db = Database::getInstance();

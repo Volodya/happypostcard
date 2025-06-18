@@ -19,11 +19,12 @@ class PageUser extends Page_Abstract
 						],
 						['user_main_image', 'make_section' => true],
 						[
-							'user_waitingapproval',
+							'address_waitingapproval',
 							'admin' => true,
 							'make_section' => true,
 							'section_header' => 'Waiting for aproval',
-							'clear_on_false' => true
+							'clear_on_false' => true,
+							'parameter' => ['user' => $user],
 						],
 						[
 							'user_edit_button',

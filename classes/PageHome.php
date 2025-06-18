@@ -19,6 +19,14 @@ class PageHome extends Page_Abstract
 						['learnlanguages', 'logged_in' => true],
 						['login', 'logged_in' => false],
 						['random_postcard', 'make_section' => true, 'section_header' => 'Random postcard', 'logged_in' => true],
+						[
+							'users_waitingapproval',
+							'admin' => true,
+							'make_section' => true,
+							'section_header' => 'Waiting for aproval',
+							'clear_on_false' => true,
+							'parameter' => [],
+						],
 					]
 				)
 				->withRight(
