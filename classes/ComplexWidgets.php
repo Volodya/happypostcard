@@ -38,22 +38,6 @@ class ComplexWidgets
 			HtmlSnippets::printPostcardThumb200($row['hash'], $row['extension'], $row['code'], $link, false, $received);
 		}
 	}
-	public function learnlanguages() : void
-	{
-		$db = Database::getInstance();
-		$stmt = $db->prepare('
-			SELECT `language`, `language_code`, `phrase` FROM `learnlanguages_thanks` ORDER BY Random() LIMIT 1
-		');
-		$stmt->execute();
-		$result = $stmt->fetch(PDO::FETCH_ASSOC);
-		?>
-		<section>
-			<h1>Learn the languages</h1>
-			In <?= $result['language']; ?> thank a postal worker with:<br/>
-			<span lang='<?= $result['language_code'] ?>'><?= $result['phrase'] ?></span>.
-		</section>
-		<?php
-	}
 	
 	public function siteNotices(array $siteNotices) : void
 	{

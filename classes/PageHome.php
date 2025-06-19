@@ -20,7 +20,12 @@ class PageHome extends Page_Abstract
 							'logged_in' => true,
 							'make_section' => true,
 						],
-						['learnlanguages', 'logged_in' => true],
+						[
+							'learn_languages',
+							'make_section' => true,
+							'section_header' => 'Learn languages',
+							'logged_in' => true,
+						],
 						['login', 'logged_in' => false],
 						['random_postcard', 'make_section' => true, 'section_header' => 'Random postcard', 'logged_in' => true],
 						[
