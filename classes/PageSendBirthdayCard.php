@@ -8,7 +8,11 @@ class PageSendBirthdayCard extends Page_Abstract
  			(new Template('page', ['additional_title' => 'Send birthday card']))
 				->withLeft(
 					[
-						['account_stats', 'logged_in' => true],
+						[
+							'user_statistics',
+							'make_section' => true,
+							'logged_in' => true,
+						],
 					]
 				)
 				->withRight(

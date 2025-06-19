@@ -9,7 +9,11 @@ class PageFAQ extends Page_Abstract
 				->withLeft(
 					[
 						['login', 'logged_in' => false],
-						['account_stats', 'logged_in' => true],
+						[
+							'user_statistics',
+							'make_section' => true,
+							'logged_in' => true,
+						],
 						['random_card', 'logged_in' => true],
 					]
 				)

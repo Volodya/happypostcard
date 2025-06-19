@@ -9,13 +9,21 @@ class PageLocation extends Page_Abstract
  			(new Template('page', ['location_code' => $locationCode, 'additional_title' => 'Location:'.$locationCode]))
 				->withLeft(
 					[
-						['account_stats', 'logged_in' => true],
+						[
+							'user_statistics',
+							'make_section' => true,
+							'logged_in' => true,
+						],
 					]
 				)
 				->withRight(
 					[
 						['location_info'],
-						['location_stats'],
+						[
+							'location_statistics',
+							'make_section' => true,
+							'parameter' => ['location_code' => $locationCode],
+						],
 					]
 				)
 				->withBottom(

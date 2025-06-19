@@ -364,45 +364,6 @@ class ComplexWidgets
 			?></tbody>
 		</table><?php
 	}
-	public function site_news() : void
-	{
-	}
-	public function user_statistics(User $user) : void
-	{
-		if(!($user instanceof UserExisting))
-		{
-			?>
-				This user is not registered!
-			<?php
-			return;
-		}
-		$db = Database::getInstance();
-		
-		$stmt = $db->prepare('
-			SELECT
-				COUNT(DISTINCT `out`.`id`) `sent`,
-				COUNT(DISTINCT `out`.`received_at`) `sent_arrived`,
-				COUNT(DISTINCT `in`.`id`) `incoming`,
-				COUNT(DISTINCT `in`.`received_at`) `incoming_arrived`
-				FROM `user`
-					LEFT JOIN `postcard` `out` ON `user`.`id`=`out`.`sender_id`
-					LEFT JOIN `postcard` `in` ON `user`.`id`=`in`.`receiver_id`
-				WHERE `user`.`login`=:login
-		');
-		$stmt->bindValue(':login', $user->getLogin());
-		$stmt->execute();
-		if($row = $stmt->fetch(PDO::FETCH_ASSOC))
-		{
-			$travelling = intval($row['sent'])-intval($row['sent_arrived']);
-			$waiting = intval($row['incoming'])-intval($row['incoming_arrived']);
-			?>
-				<div><a href='/sent/<?= $user->getLogin() ?>'>Sent</a>: <?= $row['sent_arrived'] ?></div>
-				<div>Travelling: <?= $travelling ?></div>
-				<div><a href='/received/<?= $user->getLogin() ?>'>Received</a>: <?= $row['incoming_arrived'] ?></div>
-				<div>Waiting: <?= $waiting ?></div>
-			<?php
-		}
-	}
 	public function card_information(string $cardCode, User $user)
 	{
 		$db = Database::getInstance();
@@ -714,117 +675,6 @@ class ComplexWidgets
 			<?php
 		}
 	}
-	public function statistics() : void
-	{
-		$db = Database::getInstance();
-		
-		$stmt = $db->prepare('SELECT COUNT(`id`) `cnt`, COUNT(`received_at`) AS `cnt_received` FROM `postcard`');
-		$stmt->execute();
-		if($row = $stmt->fetch(PDO::FETCH_ASSOC))
-		{
-			?><div>Total postcards sent: <?= $row['cnt'] ?></div><?php
-			?><div>Total postcards sent and arrived at destination: <?= $row['cnt_received'] ?></div><?php
-		}
-		
-		$stmt = $db->prepare('
-			SELECT COUNT(`id`) `cnt`, COUNT(`received_at`) AS `cnt_received`
-			FROM `postcard` WHERE `year` = strftime(\'%Y\')
-		');
-		$stmt->execute();
-		if($row = $stmt->fetch(PDO::FETCH_ASSOC))
-		{
-			?><div>This year sent: <?= $row['cnt'] ?></div><?php
-			?><div>This year postcards sent and arrived at destination: <?= $row['cnt_received'] ?></div><?php
-		}
-		
-		$stmt = $db->prepare('
-			SELECT COUNT(`postcard`.`id`) `cnt`, `location`.`code` `loc_code`, `location`.`name` `loc_name`
-			FROM `postcard`
-				INNER JOIN `location_code` `location` ON `location`.`id` = `postcard`.`send_location_id`
-			GROUP BY `location`.`id`
-			ORDER BY COUNT(`postcard`.`id`) DESC
-			LIMIT 3
-		');
-		$stmt->execute();
-		?><ol>The top sending locations:<?php
-		while($row = $stmt->fetch(PDO::FETCH_ASSOC))
-		{
-			?><li><a href='/location/<?= $row['loc_code'] ?>'><?= $row['loc_name'] ?></a> — <?= $row['cnt'] ?></li><?php
-		}
-		?></ol><?php
-		
-		$stmt = $db->prepare('
-			SELECT COUNT(`postcard`.`id`) `cnt`, `location`.`code` `loc_code`, `location`.`name` `loc_name`
-			FROM `postcard`
-				INNER JOIN `location_code` `location` ON `location`.`id` = `postcard`.`send_location_id`
-			WHERE  `year` = strftime(\'%Y\')
-			GROUP BY `location`.`id`
-			ORDER BY COUNT(`postcard`.`id`) DESC
-			LIMIT 3
-		');
-		$stmt->execute();
-		?><ol>The top sending locations this year:<?php
-		while($row = $stmt->fetch(PDO::FETCH_ASSOC))
-		{
-			?><li><a href='/location/<?= $row['loc_code'] ?>'><?= $row['loc_name'] ?></a> — <?= $row['cnt'] ?></li><?php
-		}
-		?></ol><?php
-		
-		
-		$stmt = $db->prepare('
-			WITH RECURSIVE dates(dt) AS (
-				VALUES(DATE(\'now\', \'-1 month\'))
-				UNION ALL SELECT DATE(`dt`, \'+1 day\') FROM dates WHERE dt<DATE(\'now\')
-			)
-			SELECT COUNT(`postcard`.`id`) `cnt`, `dates`.`dt` `sent_at`
-			FROM `postcard`
-			RIGHT JOIN `dates` ON `dates`.`dt` = DATE(`postcard`.`sent_at`)
-			GROUP BY `dates`.`dt`
-			ORDER BY `dates`.`dt` ASC
-		');
-		$stmt->execute();
-		$svgGraph = new SvgGraph();
-		while($row = $stmt->fetch(PDO::FETCH_ASSOC))
-		{
-			$svgGraph->addPoint(floatval($row['cnt']));
-		}
-		$svgGraph->print();
-		/*
-		?>
-		<svg width='340' height='310' viewBox='-5 -5 325 305'
-			xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-			
-			<rect fill='#fff' stroke='#000' x='-5' y='-5' width='410' height='310'/>
-			
-			<line x1="0" y1="-3" x2="0" y2="303" stroke="black" stroke-width="1" />
-			<line x1="-3" y1="300" x2="403" y2="300" stroke="black" stroke-width="1" />
-			<?php
-			$count = 0;
-			while($row = $stmt->fetch(PDO::FETCH_ASSOC))
-			{
-				++$count;
-				if($count == 1)
-				{
-					$prev = $row;
-					continue;
-				}
-				?><line
-					x1="<?= ($count-1) * 10 ?>" y1="<?= 300 - intval($prev['cnt']) * 10 ?>"
-					x2="<?= ($count-0) * 10 ?>" y2="<?= 300 - intval( $row['cnt']) * 10 ?>" stroke="blue" stroke-width="1" /><?php
-				$direction = ( (intval($prev['cnt']) - intval($row['cnt'])) <=> 0 );
-				if($direction * $prevDir == -1 or $count == 2) // if direction changes
-				{
-					?><text x="<?= ($count-1) * 10 - 5 ?>" y="<?= 300 - intval( $prev['cnt']) * 10 + (-10 * $direction) ?>"
-						font-size="8"><?= $prev['cnt'] ?></text><?php
-				}
-				$prev = $row;
-				$prevDir = $direction;
-			}
-			?>
-		</svg>
-		<?php
-		*/
-	}
 	public function location_info($locationCode) : void
 	{
 		$db = Database::getInstance();
@@ -1053,29 +903,6 @@ class ComplexWidgets
 			?>
 			</tbody>
 		</table><?php
-	}
-	public function location_stats(string $locationCode) : void
-	{
-		$userCounts = Location::getUserCounts($locationCode);
-		$postcardCounts = Location::getPostcardCounts($locationCode);
-		
-		?>
-		<div>
-			Total users with this location set: <?= $userCounts['now'] ?>
-		</div>
-		<div>
-			Total users who ever sent from this location: <?= $userCounts['ever_from'] ?>
-		</div>
-		<div>
-			Total users who ever had cards sent to them at this location: <?= $userCounts['ever_to'] ?>
-		</div>
-		<div>
-			Total postcards sent from this location: <?= $postcardCounts['sent_from'] ?>
-		</div>
-		<div>
-			Total postcards sent to this location: <?= $postcardCounts['sent_to'] ?>
-		</div>
-		<?php
 	}
 	
 	public function list_of_users() : void

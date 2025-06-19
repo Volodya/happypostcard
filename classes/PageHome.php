@@ -15,7 +15,11 @@ class PageHome extends Page_Abstract
 							'parameter' => 'Happy <a href="/wpd_cards">World Postcard Day</a>!',
 						],*/
 						['account', 'logged_in' => true],
-						['account_stats', 'logged_in' => true],
+						[
+							'user_statistics',
+							'logged_in' => true,
+							'make_section' => true,
+						],
 						['learnlanguages', 'logged_in' => true],
 						['login', 'logged_in' => false],
 						['random_postcard', 'make_section' => true, 'section_header' => 'Random postcard', 'logged_in' => true],

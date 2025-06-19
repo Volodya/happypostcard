@@ -9,7 +9,11 @@ class PageAccount extends Page_Abstract
 				->withLeft(
 					[
 						['account', 'logged_in' => true],
-						['account_stats', 'logged_in' => true],
+						[
+							'user_statistics',
+							'make_section' => true,
+							'logged_in' => true,
+						],
 						['login', 'logged_in' => false],
 					]
 				)

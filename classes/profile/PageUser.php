@@ -9,7 +9,12 @@ class PageUser extends Page_Abstract
  			(new Template('page', ['user' => $user, 'additional_title' => $user->getLogin()]))
 				->withLeft(
 					[
-						['account_stats_for_user'],
+						[
+							'user_statistics',
+							'make_section' => true,
+							'section_header' => $user->getLogin(),
+							'parameter' => ['user' => $user],
+						],
 						[
 							'user_status',
 							'logged_in' => true,

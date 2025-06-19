@@ -8,12 +8,20 @@ class PageStatistics extends Page_Abstract
  			(new Template('page', ['additional_title' => 'Statistics']))
 				->withLeft(
 					[
-						['account_stats', 'logged_in' => true],
+						[
+							'user_statistics',
+							'make_section' => true,
+							'parameter' => ['user' => $user],
+						],
 					]
 				)
 				->withRight(
 					[
-						['statistics'],
+						[
+							'site_statistics',
+							'make_section' => true,
+							'section_header' => 'Happy Postcard statistics',
+						],
 					]
 				)
 				->withBottom(

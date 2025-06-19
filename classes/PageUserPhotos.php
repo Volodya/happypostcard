@@ -9,7 +9,11 @@ class PageUserPhotos extends Page_Abstract
  			(new Template('page', ['user' => $user, 'additional_title' => $user->getLogin().'&apos;s photoalbum']))
 				->withLeft(
 					[
-						['account_stats_for_user'],
+						[
+							'user_statistics',
+							'make_section' => true,
+							'parameter' => ['user' => $user],
+						],
 						//['user_main_image', 'make_section' => true]
 					]
 				)
