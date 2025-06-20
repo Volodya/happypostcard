@@ -26,6 +26,16 @@ class ComWid_site_statistics extends SimpWid
 			?><div>This year sent: <?= $row['cnt'] ?></div><?php
 			?><div>This year postcards sent and arrived at destination: <?= $row['cnt_received'] ?></div><?php
 		}
+		$stmt = $db->prepare('
+			SELECT COUNT(`id`) `cnt`
+			FROM `postcard`
+			WHERE `year` < strftime(\'%Y\') AND `received_at` > DATE(\'now\', \'start of year\')
+		');
+		$stmt->execute();
+		if($row = $stmt->fetch(PDO::FETCH_ASSOC))
+		{
+			?><div>Arrived this year from previous years: <?= $row['cnt'] ?></div><?php
+		}
 		
 		$stmt = $db->prepare('
 			SELECT COUNT(`postcard`.`id`) `cnt`, `location`.`code` `loc_code`, `location`.`name` `loc_name`
