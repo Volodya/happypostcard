@@ -83,9 +83,11 @@ class ComWid_site_news implements ComWid
 			switch($row['type'])
 			{
 				case 'new_user':
+					echo '&#12320; ';
 					echo "{$userLink} has joined  «Happy Postcard».";
 					break;
 				case 'postcard_sent_received':
+					echo '&#128238; ';
 					if($len > 2)
 					{
 						?><?= $userLink ?> has sent happy postcards:
@@ -128,6 +130,7 @@ class ComWid_site_news implements ComWid
 					echo '.';
 					break;
 				case 'postcard_sent':
+					echo '&#128238; ';
 					if($len > 1)
 					{
 						?><?= $userLink ?> has sent <?php HtmlSnippets::printCircledDigits($len) ?> happy postcards.<?php
@@ -138,6 +141,7 @@ class ComWid_site_news implements ComWid
 					}
 					break;
 				case 'postcard_received':
+					echo '&#128236; ';
 					if($len > 2)
 					{
 						?><?= $userLink ?> has received <?php HtmlSnippets::printCircledDigits($len) ?> happy postcards:
