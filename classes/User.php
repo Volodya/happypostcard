@@ -5,6 +5,10 @@ class User
 	private function __construct()
 	{
 	}
+	public function isAdmin() : bool
+	{
+		return false;
+	}
 	
 	public static function constructByLogin(string $login) : User
 	{
