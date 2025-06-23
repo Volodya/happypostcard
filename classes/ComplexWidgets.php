@@ -131,16 +131,6 @@ class ComplexWidgets
 		$stmt->execute();
 		return $stmt->fetchAll(PDO::FETCH_ASSOC);
 	}
-	private function timestampHtml(string $ts) : string
-	{
-		$date = substr($ts, 0, 10);
-		$time = substr($ts, 11);
-		ob_start();
-		
-		?><span><?= $date ?>&nbsp;<?php HtmlSnippets::printTimeClock($time); ?></span><?php
-		
-		return ob_get_clean();
-	}
 	public function user_news(User $user) : void
 	{
 		if(!($user instanceof UserExisting))
@@ -165,9 +155,8 @@ class ComplexWidgets
 					$willDisplay = false;
 					ob_start();
 					
-					$timestamp = $this->timestampHtml($row['ts']);
 					?><tr>
-						<td><?= $timestamp ?></td>
+						<td><?php HtmlSnippets::printTimestamp($row['ts']) ?></td>
 						<?php
 						switch($row['type'])
 						{
@@ -406,7 +395,7 @@ class ComplexWidgets
 			$birthdayMark = ' &#127874';
 		}
 		
-		if(!$cardWasReceived and !$cardOfSender)
+		if(!$cardWasReceived and !$cardOfSender and !$user->isAdmin())
 		{
 			?>
 				<h1><?= $cardCode ?><?= $birthdayMark ?></h1>
@@ -420,7 +409,7 @@ class ComplexWidgets
 			$wpd='';
 			if(substr($row['sent_at'], 5, 5)=='10-01') $wpd = " <a href='/wpd_cards'>Word Postcard Day</a>";
 			?>
-			<div>Sent: <?= $this->timestampHtml($row['sent_at']) ?><?= $wpd ?></div>
+			<div>Sent: <?php HtmlSnippets::printTimestamp($row['sent_at']) ?><?= $wpd ?></div>
 			<div>Sender: <a href='/user/<?= $row['sender_login'] ?>'><?= $row['sender_name'] ?></a></div>
 			<div>Sent from: <a href='/location/<?= $row['sent_location_code'] ?>'><?= $row['sent_location_name'] ?></a></div>
 		</div>
@@ -431,7 +420,7 @@ class ComplexWidgets
 			$wpd='';
 			if(substr($row['received_at'], 5, 5)=='10-01') $wpd = " <a href='/wpd_cards'>Word Postcard Day</a>";
 			?>
-			<div>Received: <?= $this->timestampHtml($row['received_at']) ?><?= $wpd ?></div>
+			<div>Received: <?php HtmlSnippets::printTimestamp($row['received_at']) ?><?= $wpd ?></div>
 			<div>Days travelled: <?=$row['days_travelled'] ?></div>
 			<?php
 		}
@@ -442,7 +431,7 @@ class ComplexWidgets
 			<div>Days travelling: <?= $row['days_travelling'] ?></div>
 			<?php
 		}
-		if($cardWasReceived or $cardOfSender)
+		if($cardWasReceived or $cardOfSender or $user->isAdmin())
 		{
 			?>
 			<div>Receiver: <a href='/user/<?= $row['receiver_login'] ?>'><?= $row['receiver_name'] ?></a></div>
@@ -789,7 +778,7 @@ class ComplexWidgets
 				$date = substr($row['sent_at'], 0, 10);
 				$time = substr($row['sent_at'], 11);
 				?><tr>
-					<td><?= $this->timestampHtml($row['sent_at']) ?></td>
+					<td><?php HtmlSnippets::printTimestamp($row['sent_at']) ?></td>
 					<td><?= $row['days_travelling'] ?></span></td>
 					<td><a href='/card/<?= $row['postcard_code'] ?>'><?= $row['postcard_code'] ?></a></td>
 					<td><a href='/location/<?= $row['loc_code'] ?>'><?= $row['loc_name'] ?></a></td>
@@ -837,8 +826,8 @@ class ComplexWidgets
 			foreach($sent as $row)
 			{
 				?><tr>
-					<td><?= $this->timestampHtml($row['sent_at']) ?></td>
-					<td><?= $this->timestampHtml($row['received_at']) ?></td>
+					<td><?php HtmlSnippets::printTimestamp($row['sent_at']) ?></td>
+					<td><?php HtmlSnippets::printTimestamp($row['received_at']) ?></td>
 					<td><?= $row['days_travelled'] ?></span></td>
 					<td><a href='/card/<?= $row['postcard_code'] ?>'><?= $row['postcard_code'] ?></a></td>
 					<td><a href='/location/<?= $row['loc_code'] ?>'><?= $row['loc_name'] ?></a></td>
@@ -876,8 +865,8 @@ class ComplexWidgets
 			foreach($sent as $row)
 			{
 				?><tr>
-					<td><?= $this->timestampHtml($row['sent_at']) ?></td>
-					<td><?= $this->timestampHtml($row['received_at']) ?></td>
+					<td><?php HtmlSnippets::printTimestamp($row['sent_at']) ?></td>
+					<td><?php HtmlSnippets::printTimestamp($row['received_at']) ?></td>
 					<td><?= $row['days_travelled'] ?></span></td>
 					<td><a href='/card/<?= $row['postcard_code'] ?>'><?= $row['postcard_code'] ?></a></td>
 					<td><a href='/location/<?= $row['loc_code'] ?>'><?= $row['loc_name'] ?></a></td>
@@ -965,7 +954,7 @@ class ComplexWidgets
 					<td><a href='/user/<?= $row['login'] ?>'><?= $row['login'] ?></a></td>
 					<td><?= $row['polite_name'] ?></td>
 					<td><a href='/location/<?= $row['home_location'] ?>'><?= $row['home_location'] ?></a></td>
-					<td><?= $this->timestampHtml($row['registered_at']) ?></td>
+					<td><?php HtmlSnippets::printTimestamp($row['registered_at']) ?></td>
 					<td><?= $row['loggedin_at'] ?></td>
 					<td><?= $row['birthday'] ?></td>
 					<td><?= $row['sent_postcards_1'] ?></td>

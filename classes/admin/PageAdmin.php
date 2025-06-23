@@ -26,7 +26,16 @@ class PageAdmin extends Page_Abstract
 				)
 				->withRight(
 					[
-						//['user_photographs', 'make_section' => true],
+						[
+							'display_list_of_cards',
+							'make_section' => true,
+							'parameter' => [
+								'columns'=> [
+									'sender', 'sender_loc', 'sent_at', 'days_travelling', 'postcard_code',
+									'receiver', 'receive_loc', 'first_image_hash',
+								]
+							],
+						],
 					]
 				)
 				->withBottom(
@@ -45,5 +54,15 @@ class PageAdmin extends Page_Abstract
 						]
 					]
 				);
+	}
+	public function showsPerformerResults() : bool
+	{
+		return true;
+	}
+	public function withPerformerResults(array $performerResults) : Page
+	{
+		$new = clone $this;
+		$new->templated = $this->templated->withPerformerResults($performerResults);
+		return $new;
 	}
 }

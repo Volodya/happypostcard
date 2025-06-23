@@ -90,6 +90,13 @@ class HtmlSnippets
 		$imageTag = "<div class='{$classes}'>{$imageTag}</div>";
 		echo $imageTag;
 	}
+	public static function printTimestamp(string $ts) : void
+	{
+		$date = substr($ts, 0, 10);
+		$time = substr($ts, 11);
+		
+		?><span><?= $date ?>&nbsp;<?php HtmlSnippets::printTimeClock($time); ?></span><?php
+	}
 	public static function printTimeClock(string $time) : void
 	{
 		static $CLOCKS = [

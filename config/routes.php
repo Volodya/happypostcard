@@ -11,8 +11,9 @@ return [
 		'page' => 'PageSuperadmin',
 		'subpath_allowed' => false,
 	],
-	'/admin' => [
+	'/admin' => [	
 		'permissions required' => ['admin'],
+		'performers' => ['PerformerListAllTravellingPostcards'],
 		'page' => 'PageAdmin',
 		'subpath_allowed' => false,
 	],
