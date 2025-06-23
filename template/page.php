@@ -4,7 +4,7 @@
 <body>
 <div class='page'>
 	<?php include('widget_header.php') ?>
-	<?php include('widget_menu.php') ?>
+	<?php $this->includeWidgets([['sitemenu', 'parameter'=>['menutype'=>'top']]], $this->performerResults); ?>
 	<div class='main'>
 		<div class='top'>
 			<?php include('widget_errors.php') ?>
@@ -21,7 +21,7 @@
 		</div>
 		<?php $this->includeWidgets($this->widgetsBottom, $this->performerResults); ?>
 	</div>
-	<?php include('widget_sitemap.php') ?>
+	<footer><?php $this->includeWidgets([['sitemenu', 'parameter'=>['menutype'=>'bottom']]], $this->performerResults); ?></footer>
 	<?php include('widget_footer.php') ?>
 </div>
 </body>
