@@ -90,6 +90,20 @@ class HtmlSnippets
 		$imageTag = "<div class='{$classes}'>{$imageTag}</div>";
 		echo $imageTag;
 	}
+	public static function printTelegraphTimestamp(string $ts) : void
+	{
+		// 2025-06-24 16:15:15
+		$y =        substr($ts,  0, 4);
+		$m = intval(substr($ts,  5, 2)) - 1;
+		$d = intval(substr($ts,  8, 2)) - 1;
+		$h = intval(substr($ts, 11, 2)) - 1;
+		
+		static $months = mb_str_split('㋀㋁㋂㋃㋄㋅㋆㋇㋈㋉㋊㋋');
+		static $days = mb_str_split('㏠㏡㏢㏣㏤㏥㏦㏧㏨㏩㏪㏫㏬㏭㏮㏯㏰㏱㏲㏳㏴㏵㏶㏷㏸㏹㏺㏻㏼㏽㏾');
+		static $hours = mb_str_split('㍘㍙㍚㍛㍜㍝㍞㍟㍠㍡㍢㍣㍤㍥㍦㍧㍨㍩㍪㍫㍬㍭㍮㍯㍰');
+		
+		?><span><?= $y ?>㞸&nbsp;<?= $months[$m] ?>&nbsp;<?= $days[$d] ?>&nbsp;<?= $hours[$h] ?>&nbsp;</span><?php
+	}
 	public static function printTimestamp(string $ts) : void
 	{
 		$date = substr($ts, 0, 10);
