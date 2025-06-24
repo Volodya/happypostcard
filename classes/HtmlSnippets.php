@@ -96,7 +96,7 @@ class HtmlSnippets
 		$y =        substr($ts,  0, 4);
 		$m = intval(substr($ts,  5, 2)) - 1;
 		$d = intval(substr($ts,  8, 2)) - 1;
-		$h = intval(substr($ts, 11, 2)) - 1;
+		$h = intval(substr($ts, 11, 2));
 		
 		static $months = mb_str_split('㋀㋁㋂㋃㋄㋅㋆㋇㋈㋉㋊㋋');
 		static $days = mb_str_split('㏠㏡㏢㏣㏤㏥㏦㏧㏨㏩㏪㏫㏬㏭㏮㏯㏰㏱㏲㏳㏴㏵㏶㏷㏸㏹㏺㏻㏼㏽㏾');
