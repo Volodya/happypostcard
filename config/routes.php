@@ -13,9 +13,15 @@ return [
 	],
 	'/admin' => [	
 		'permissions required' => ['admin'],
-		'performers' => ['PerformerListAllTravellingPostcards'],
+		'performers' => [],
 		'page' => 'PageAdmin',
 		'subpath_allowed' => false,
+	],
+	'/admin_travelling' => [	
+		'permissions required' => ['admin'],
+		'performers' => ['PerformerListAllTravellingPostcards'],
+		'page' => 'PageAdminTravelling',
+		'subpath_allowed' => true,
 	],
 	'/mod' => [
 		'permissions required' => ['moderator'],

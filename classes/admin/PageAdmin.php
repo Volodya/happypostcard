@@ -27,42 +27,26 @@ class PageAdmin extends Page_Abstract
 				->withRight(
 					[
 						[
-							'display_list_of_cards',
+							'text',
 							'make_section' => true,
-							'parameter' => [
-								'columns'=> [
-									'sender', 'sender_loc', 'sent_at', 'days_travelling', 'postcard_code',
-									'receiver', 'receive_loc', 'first_image_hash',
-								]
-							],
-						],
+							'section_header' => 'Menu',
+							'parameter' => "
+								<form method='get' action='/admin_travelling'>
+									<button>List of All Travelling Postcards</button>
+								</form>
+								<form method='get' action='/admin_sql'>
+									<button>Direct SQL access</button>
+								</form>
+							",
+						]
 					]
 				)
 				->withBottom(
 					[
 						[
-							'queue' => [
-								[
-									'latestpostcards_interuser',
-									'logged_in' => true,
-									'make_section'=> true,
-									'section_header' => 'Latest exchanges with this user',
-									'clear_on_false' => true
-								],
-								['latestpostcards'],
-							]
+							['latestpostcards'],
 						]
 					]
 				);
-	}
-	public function showsPerformerResults() : bool
-	{
-		return true;
-	}
-	public function withPerformerResults(array $performerResults) : Page
-	{
-		$new = clone $this;
-		$new->templated = $this->templated->withPerformerResults($performerResults);
-		return $new;
 	}
 }
