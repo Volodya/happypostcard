@@ -14,6 +14,12 @@ class PageReceivePostcard extends Page_Abstract
 							'make_section' => true,
 							'logged_in' => true,
 						],
+						[
+							'FAQ',
+							'make_section' => true,
+							'section_header' => 'From the FAQ',
+							'parameter' => ['questions'=>[15]],
+						],
 					]
 				)
 				->withRight(

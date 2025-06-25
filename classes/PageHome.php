@@ -36,6 +36,26 @@ class PageHome extends Page_Abstract
 							'clear_on_false' => true,
 							'parameter' => [],
 						],
+						
+						[
+							'FAQ',
+							'make_section' => true,
+							'section_header' => 'From the FAQ',
+							'parameter' => [
+								'questions'=>[1],
+							],
+							'logged_in' => false,
+						],
+						[
+							'FAQ',
+							'make_section' => true,
+							'section_header' => 'From the FAQ',
+							'parameter' => [
+								'questions'=>[2, 5, 11, 14, 15, 16, 17],
+								'type'=>'random',
+							],
+							'logged_in' => true,
+						],
 					]
 				)
 				->withRight(

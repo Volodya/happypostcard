@@ -19,7 +19,11 @@ class PageFAQ extends Page_Abstract
 				)
 				->withRight(
 					[
-						['faq', 'make_section' => true, 'section_header' => 'Frequently Asked Questions'],
+						[
+							'FAQ',
+							'make_section' => true,
+							'section_header' => 'Frequently Asked Questions'
+						],
 						['how2help', 'make_section' => true, 'section_header' => 'How to contribute'],
 					]
 				)
