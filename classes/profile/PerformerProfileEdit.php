@@ -75,15 +75,15 @@ class PerformerProfileEdit extends Performer_Abstract
 		{
 			if($ad['id']==0 and !empty($ad['addr']))
 			{
-				$user->addAddress($ad['addr'], $ad['lang_code']);
+				$user->addAddress($ad['addr'], $ad['lang_code'], $editor->isAdmin());
 			}
 			else if(!empty($ad['addr']))
 			{
-				$user->changeAddress(intval($ad['id']), $ad['addr'], $ad['lang_code']);
+				$user->changeAddress(intval($ad['id']), $ad['addr'], $ad['lang_code'], $editor->isAdmin());
 			}
 			else
 			{
-				$user->removeAddress(intval($ad['id']));
+				$user->removeAddress(intval($ad['id']), $editor->isAdmin());
 			}
 		}
 		

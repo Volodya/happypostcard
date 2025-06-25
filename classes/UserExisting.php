@@ -290,7 +290,7 @@ class UserExisting extends User
 		$stmt->execute();
 		return $stmt->fetchAll(PDO::FETCH_COLUMN, 0);
 	}
-	public function addAddress(string $addr, string $lang_code) : void
+	public function addAddress(string $addr, string $lang_code, boolean $byAdmin=false) : void
 	{
 		$db = Database::getInstance();
 		
@@ -303,18 +303,21 @@ class UserExisting extends User
 		$stmt->bindValue(':addr', $addr);
 		$stmt->execute();
 		
-		$addressId = $db->lastInsertId();
-		
-		$stmt = $db->prepare(
-			'INSERT INTO `address_waiting_approval`(`user_id`, `address_id`, `reason`)
-			VALUES(:user_id, :address_id, :reason)'
-			);
-		$stmt->bindValue(':user_id', $this->id);
-		$stmt->bindValue(':address_id', $addressId);
-		$stmt->bindValue(':reason', 'address added');
-		$stmt->execute();
+		if(!$byAdmin)
+		{
+			$addressId = $db->lastInsertId();
+			
+			$stmt = $db->prepare(
+				'INSERT INTO `address_waiting_approval`(`user_id`, `address_id`, `reason`)
+				VALUES(:user_id, :address_id, :reason)'
+				);
+			$stmt->bindValue(':user_id', $this->id);
+			$stmt->bindValue(':address_id', $addressId);
+			$stmt->bindValue(':reason', 'address added');
+			$stmt->execute();
+		}
 	}
-	public function changeAddress(int $id, string $addr, string $lang_code) : void
+	public function changeAddress(int $id, string $addr, string $lang_code, boolean $byAdmin=false) : void
 	{
 		$db = Database::getInstance();
 		
@@ -331,32 +334,35 @@ class UserExisting extends User
 		$stmt->bindValue(':addr', $addr);
 		$stmt->execute();
 		
-		if($stmt->rowCount() > 0)
+		if(!$byAdmin)
 		{
-			$stmt = $db->prepare('
-				INSERT INTO `address_waiting_approval`(`user_id`, `address_id`, `reason`)
-				VALUES(:user_id, :address_id, :reason)
-			');
-			$stmt->bindValue(':user_id', $this->id);
-			$stmt->bindValue(':address_id', $id);
-			$stmt->bindValue(':reason', 'address changed');
-			$stmt->execute();
-		}
-		else
-		{
-			$stmt = $db->prepare('
-				UPDATE `address`
-				SET
-					`language_code` = :lang_code
-				WHERE id=:id AND `user_id`=:user_id AND `language_code`<>:lang_code
-			');
-			$stmt->bindValue(':user_id', $this->id);
-			$stmt->bindValue(':id', $id);
-			$stmt->bindValue(':lang_code', $lang_code);
-			$stmt->execute();
+			if($stmt->rowCount() > 0)
+			{
+				$stmt = $db->prepare('
+					INSERT INTO `address_waiting_approval`(`user_id`, `address_id`, `reason`)
+					VALUES(:user_id, :address_id, :reason)
+				');
+				$stmt->bindValue(':user_id', $this->id);
+				$stmt->bindValue(':address_id', $id);
+				$stmt->bindValue(':reason', 'address changed');
+				$stmt->execute();
+			}
+			else
+			{
+				$stmt = $db->prepare('
+					UPDATE `address`
+					SET
+						`language_code` = :lang_code
+					WHERE id=:id AND `user_id`=:user_id AND `language_code`<>:lang_code
+				');
+				$stmt->bindValue(':user_id', $this->id);
+				$stmt->bindValue(':id', $id);
+				$stmt->bindValue(':lang_code', $lang_code);
+				$stmt->execute();
+			}
 		}
 	}
-	public function removeAddress(int $id) : void
+	public function removeAddress(int $id, boolean $byAdmin=false) : void
 	{
 		$db = Database::getInstance();
 		
