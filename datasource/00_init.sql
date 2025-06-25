@@ -1,16 +1,21 @@
 SELECT 'whiping old tables';
 
-DROP TABLE IF EXISTS `user`;
+DROP TABLE IF EXISTS `sending_status_type`;
+DROP TABLE IF EXISTS `user_image`;
+DROP TABLE IF EXISTS `postcard_image`;
+DROP TABLE IF EXISTS `postcard`;
+DROP TABLE IF EXISTS `learnlanguages_thanks`;
+DROP TABLE IF EXISTS `address_waiting_approval`;
+DROP TABLE IF EXISTS `address`;
 DROP TABLE IF EXISTS `user_blacklist`;
 DROP TABLE IF EXISTS `user_preference`;
+DROP TABLE IF EXISTS `user_password_recover_secret`;
 DROP TABLE IF EXISTS `user_persistent_login`;
-DROP TABLE IF EXISTS `address`;
-DROP TABLE IF EXISTS `profile_photo`;
-DROP TABLE IF EXISTS `learnlanguages_thanks`;
-DROP TABLE IF EXISTS `postcard`;
-DROP TABLE IF EXISTS `postcard_image`;
+DROP TABLE IF EXISTS `user_waiting_approval`;
+DROP TABLE IF EXISTS `user`;
 DROP TABLE IF EXISTS `location_code`;
-DROP TABLE IF EXISTS `sending_status_type`;
+DROP TABLE IF EXISTS `type_boolean`;
+
 --
 SELECT 'creating tables';
 
@@ -78,6 +83,7 @@ CREATE TABLE `user`
 	`languages` TEXT DEFAULT ''
 );
 
+SELECT '-- user_waiting_approval';
 CREATE TABLE `user_waiting_approval`
 (
 	`id` INTEGER PRIMARY KEY,
@@ -127,22 +133,13 @@ CREATE TABLE `address`
 	`addr` TEXT NOT NULL
 );
 
+SELECT '-- address_waiting_approval';
 CREATE TABLE `address_waiting_approval`
 (
 	`id` INTEGER PRIMARY KEY,
 	`user_id` INTEGER NOT NULL,
 	`address_id` INTEGER NOT NULL UNIQUE,
 	`reason` VARCHAR(255) -- 'address changed', 'address added'
-);
-
-SELECT '-- profile_photo';
-CREATE TABLE `profile_photo`
-(
-	`id` INTEGER PRIMARY KEY,
-	`user_id` INTEGER NOT NULL,
-	`num` INTEGER,
-	`hash` VARCHAR(255) NOT NULL,
-	`mime` VARCHAR(64) NOT NULL
 );
 
 SELECT '-- learnlanguages_thanks';
