@@ -1,16 +1,16 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
  <url>
-  <loc>http://www.happypostcard.fun/home</loc>
+  <loc>https://www.happypostcard.fun/home</loc>
   <changefreq>daily</changefreq>
   <priority>1.0</priority>
  </url>
  <url>
-  <loc>http://www.happypostcard.fun/news</loc>
+  <loc>https://www.happypostcard.fun/news</loc>
   <changefreq>hourly</changefreq>
   <priority>0.8</priority>
  </url>
  <url>
-  <loc>http://www.happypostcard.fun/users</loc>
+  <loc>https://www.happypostcard.fun/users</loc>
   <changefreq>daily</changefreq>
   <priority>0.6</priority>
  </url>
