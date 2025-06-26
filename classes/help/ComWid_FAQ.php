@@ -227,6 +227,18 @@ class ComWid_FAQ implements ComWid
 			EOQ
 			,
 			<<<'EOQ'
+			<h3>What images should be uploaded on a postcard page?</h3>
+			<p>
+				It is always nice to upload a true and correct depiction of a postcard. If you have a scanner, scan
+				the image portion of a card, if not you can always take a photograph. Keep in mind, however, that you
+				must <strong>not</strong> upload the portion depicting the addresses that is considered to be
+				a violation of privacy, and such images will be deleted by an administrator, when found.
+			</p>
+			<p>
+				Some people also upload images of stamps used to send the postcard, that is wondeful, but try
+				to upload the image of the card as the first image in that scenario.
+			</p>
+			<<<'EOQ'
 			<h3>How and when did Happy Postcard start?</h3>
 			<p>
 				The <a href='/user/v010dya'>developer of this site</a> is a very engaged postcrosser, who sends out many
@@ -238,6 +250,8 @@ class ComWid_FAQ implements ComWid
 				The development began in 2021, with hopes to make the site public that same year. Unfortunately it took more time
 				to complete, and the alpha testing started on 2023-10-01, and beta testing open to all on 2023-11-12.
 			</p>
+			EOQ
+			,
 EOQ
 			, // indenting the las close incorrectly just to pacify the IDE
 		];
