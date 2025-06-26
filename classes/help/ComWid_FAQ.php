@@ -238,6 +238,8 @@ class ComWid_FAQ implements ComWid
 				Some people also upload images of stamps used to send the postcard, that is wondeful, but try
 				to upload the image of the card as the first image in that scenario.
 			</p>
+			EOQ
+			,
 			<<<'EOQ'
 			<h3>How and when did Happy Postcard start?</h3>
 			<p>
@@ -250,8 +252,6 @@ class ComWid_FAQ implements ComWid
 				The development began in 2021, with hopes to make the site public that same year. Unfortunately it took more time
 				to complete, and the alpha testing started on 2023-10-01, and beta testing open to all on 2023-11-12.
 			</p>
-			EOQ
-			,
 EOQ
 			, // indenting the las close incorrectly just to pacify the IDE
 		];
