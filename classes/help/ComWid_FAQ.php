@@ -252,6 +252,17 @@ class ComWid_FAQ implements ComWid
 				The development began in 2021, with hopes to make the site public that same year. Unfortunately it took more time
 				to complete, and the alpha testing started on 2023-10-01, and beta testing open to all on 2023-11-12.
 			</p>
+			EOQ
+			,
+			<<<'EOQ'
+			<h3>Does Happy Postcard compete against other similar websites?</h3>
+			<p>
+				Absolutely not! The goals are quite similar to many other websites, but there is (and should not be)
+				no animosity against any other developers or communities. All users are welcome, and it is quite
+				common to see users on multiple platforms. It is nice to invite people from other platforms to check out
+				this one, but the goal is not for any other website to shut down or for any users to stop participating
+				in other communities.
+			</p>
 EOQ
 			, // indenting the las close incorrectly just to pacify the IDE
 		];
