@@ -33,7 +33,11 @@ class SiteMenu
 				{
 					?><li><a href='/admin'>Admin</a></li><?php
 				}
-				?><li><a href='/news'>News</a></li><?php
+				?><li><a href='/news'>News</a><?php
+					?><ul class='<?= $this->submenuUlClass ?>'><?php
+						?><li><a href='/development_news/'>Development</a></li><?php
+					?></ul><?php
+				?></li><?php
 				if($isLoggedIn)
 				{
 					?><li><a href='/travelling'>Travelling</a><?php

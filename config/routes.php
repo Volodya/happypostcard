@@ -33,6 +33,11 @@ return [
 		'page' => 'PageNews',
 		'subpath_allowed' => false,
 	],
+	'/development_news' => [
+		'permissions required' => [],
+		'page' => 'PageDevNews',
+		'subpath_allowed' => false,
+	],
 	'/faq' => [
 		'permissions required' => [],
 		'page' => 'PageFAQ',
