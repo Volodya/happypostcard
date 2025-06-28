@@ -346,6 +346,7 @@ div.thumbimage
 .thumb div.thumbtext
 {
 	text-align: center;
+	font-size: smaller;
 }
 div.newsitem
 {
