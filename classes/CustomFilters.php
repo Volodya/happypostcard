@@ -2,6 +2,12 @@
 
 class CustomFilters
 {
+	// https://www.php.net/manual/en/function.str-contains.php#128796
+	private static function str_contains_any(string $haystack, array $needles): bool
+	{
+		return array_reduce($needles, fn($a, $n) => $a || str_contains($haystack, $n), false);
+	}
+	
 	public static function FILTER_SANITIZE_NOSCRIPT(string $data): string
 	{
 		$unsafe= array('<', '>');
@@ -37,7 +43,7 @@ class CustomFilters
 		
 		$data = str_replace($unsafe, $safe, $data);
 		
-		if(str_contains($data, '.'))
+		if(CustomFilters::str_contains_any($data, $unsafe))
 		{
 			echo 'Somehing horrible is happening, that makes no sense! '.base64_encode($data);
 			die();
