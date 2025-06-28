@@ -32,8 +32,8 @@ class CustomFilters
 		
 		$data = trim($data);
 		
-		$unsafe= array('<', '>', '/', ' ', '.', "'", '"');
-		$safe  = array('〈', '〉', '╱', '_', '․', '’', '”');
+		$unsafe= array('<', '>', '/', ' ', '.', "'", '"', '@');
+		$safe  = array('〈', '〉', '╱', '_', '․', '’', '”', 'ⓐ');
 		
 		$data = str_replace($unsafe, $safe, $data);
 		
