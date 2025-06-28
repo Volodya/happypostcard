@@ -75,7 +75,7 @@ class ComWid_display_list_of_cards implements ComWid
 					{
 						?><td><?php HtmlSnippets::printUserPoliteName($row['sender_login'], $row['sender_polite_name'], true); ?></td><?php
 					}
-					if($disp['send_loc'])
+					if($disp['sender_loc'])
 					{
 						?><td><a href='/location/<?= $row['send_loc_code'] ?>'><?= $row['send_loc_name'] ?></a></td><?php
 					}
