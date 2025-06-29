@@ -34,7 +34,7 @@ class ComWid_display_list_of_cards implements ComWid
 				{
 					?><th>Sender</th><?php
 				}
-				if($disp['send_loc'])
+				if($disp['sender_loc'])
 				{
 					?><th>Sent from</th><?php
 				}
