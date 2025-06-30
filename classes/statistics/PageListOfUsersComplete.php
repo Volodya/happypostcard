@@ -1,6 +1,6 @@
 <?php
 
-class PageListOfUsers extends Page_Abstract
+class PageListOfUsersComplete extends Page_Abstract
 {
 	public function __construct()
 	{

@@ -17,11 +17,17 @@ return [
 		'page' => 'PageAdmin',
 		'subpath_allowed' => false,
 	],
-	'/admin_travelling' => [	
+	'/admin_travelling' => [
 		'permissions required' => ['admin'],
 		'performers' => ['PerformerListAllTravellingPostcards'],
 		'page' => 'PageAdminTravelling',
 		'subpath_allowed' => true,
+	],
+	'/admin_users' => [
+		'permissions required' => ['admin'],
+		'performers' => [],
+		'page' => 'PageListOfUsersComplete',
+		'subpath_allowed' => false,
 	],
 	'/mod' => [
 		'permissions required' => ['moderator'],
@@ -258,6 +264,7 @@ return [
 	],
 	'/users' => [
 		'permissions required' => [],
+		'performers' => ['PerformerRecentUserList', 'PerformerRecentlyJoinedUserList'],
 		'page' => 'PageListOfUsers',
 		'subpath_allowed' => false,
 	],

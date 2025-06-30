@@ -31,7 +31,11 @@ class SiteMenu
 				?><li><a href='/home'>Home</a></li><?php
 				if($viewer->isAdmin())
 				{
-					?><li><a href='/admin'>Admin</a></li><?php
+					?><li><a href='/admin'>Admin</a><?php
+						?><ul class='<?= $this->submenuUlClass ?>'><?php
+							?><li><a href='/admin_users/'>All&nbsp;Users</a></li><?php
+						?></ul><?php
+					?></li><?php
 				}
 				?><li><a href='/news'>News</a><?php
 					?><ul class='<?= $this->submenuUlClass ?>'><?php
@@ -54,7 +58,7 @@ class SiteMenu
 					?><li><a href='/receive'>Register</a></li><?php
 					?><li><a href='/statistics'>Statistics</a><?php
 						?><ul class='<?= $this->submenuUlClass ?>'><?php
-							?><li><a href='/users'>User list</a></li><?php
+							?><li><a href='/users'>Users</a></li><?php
 							?><li><a href='/wpd_cards'>WPD&nbsp;gallery</a></li><?php
 						?></ul><?php
 					?></li><?php
