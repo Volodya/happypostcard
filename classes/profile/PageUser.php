@@ -47,6 +47,13 @@ class PageUser extends Page_Abstract
 							'section_header' => 'User&apos;s Informaion',
 							'parameter' => ['user' => $user],
 						],
+						[
+							'user_addresses',
+							'make_section' => true,
+							'section_header' => 'Your Addresses',
+							'parameter' => ['user' => $user],
+//							'view_of_self' => true,
+						],
 						['user_news_for_user'],
 						['inter_user_news', 'logged_in' => true, 'view_of_self' => false],
 						['send_private_message', 'logged_in' => true, 'view_of_self' => false],

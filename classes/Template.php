@@ -151,6 +151,7 @@ class Template
 				}
 				if( !isset($w[0]) )
 				{
+					// This is actually quite serious
 					continue;
 				}
 				

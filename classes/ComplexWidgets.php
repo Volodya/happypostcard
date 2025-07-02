@@ -462,16 +462,22 @@ class ComplexWidgets
 			?>
 			<div class='card_information card_information_travelling'>
 				<div>Number: <strong><?= $cardCode ?></strong> (write it on your card)</div>
-				<div class="addresses">
-				<?php $this->displayAddresses($receiver); ?>
-				</div>
+				<div class="addresses"><?php
+				foreach($receiver->getUserAddresses() as $addr)
+				{
+					?><div lang='<?= $addr['language_code'] ?>' class='address'><?= $addr['addr'] ?></div><?php
+				}
+				?></div>
 			</div>
 			
 			<section>
-				<h1>Personal description of the receiver</h1>
-				<?php $this->user_info($receiver); ?>
-			</section>
-			<?php
+				<h1>Personal description of the receiver</h1><?php
+				$wid = new ComWid_user_info();
+				$wid->setEditor($user);
+				$wid->setTemplateParameter(['user' => $receiver]);
+				$wid->invoke();
+				
+			?></section><?php
 		}
 		
 		$this->card_gallery(intval($row['id']), $cardCode, $cardOfSender or $cardOfReceiver);
@@ -511,13 +517,6 @@ class ComplexWidgets
 			HtmlSnippets::printPostcardThumb200($row['hash'], $row['extension'], $cardCode, false, $canEditThis, true);
 		}
 		echo '</div>';
-	}
-	public function displayAddresses(User $user) : void
-	{
-		foreach($user->getUserAddresses() as $row)
-		{
-			echo "<div lang='{$row['language_code']}' class='address'>{$row['addr']}</div>";
-		}
 	}
 	public function user_status() : bool
 	{

@@ -40,7 +40,7 @@ class ComWid_user_info implements ComWid
 			<?php
 			return;
 		}
-		$viewOfSelf = ($user->getId() == $this->editor->getId());
+		$viewOfSelf = ($this->editor instanceof UserExisting and $user->getId() == $this->editor->getId());
 		if($viewOfSelf)
 		{
 			?>
@@ -85,7 +85,7 @@ class ComWid_user_info implements ComWid
 		}
 		if($viewOfSelf)
 		{
-			$this->displayAddresses($user);
+			//$this->displayAddresses($user);
 		}
 	}
 	public function haveDisplayed() : bool
