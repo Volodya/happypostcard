@@ -52,7 +52,7 @@ class PageUser extends Page_Abstract
 							'make_section' => true,
 							'section_header' => 'Your Addresses',
 							'parameter' => ['user' => $user],
-//							'view_of_self' => true,
+							'view_of_self' => true,
 						],
 						['user_news_for_user'],
 						['inter_user_news', 'logged_in' => true, 'view_of_self' => false],
