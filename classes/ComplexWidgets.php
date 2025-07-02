@@ -519,67 +519,6 @@ class ComplexWidgets
 			echo "<div lang='{$row['language_code']}' class='address'>{$row['addr']}</div>";
 		}
 	}
-	public function user_info(User $user) : void
-	{
-		if(!($user instanceof UserExisting))
-		{
-			?>
-				This user is not registered!
-			<?php
-			return;
-		}
-		$viewOfSelf = ($this->template->isLoggedIn() and $user->getId() == $this->template->getUserId());
-		if($viewOfSelf)
-		{
-			?>
-			<div>You can <a href='/useredit/<?= $user->getLogin() ?>'>edit</a> this information.</div>
-			<?php
-		}
-		$userInfo = $user->getUserInfo();
-		// https://stackoverflow.com/questions/19372458/convert-multiple-new-lines-to-paragraphs
-		$userAbout = preg_replace('~(*BSR_ANYCRLF)\R\R\K(?>[^<\r\n]++|<(?!h[1-6]\b)|\R(?!\R))+(?=\R\R|$)~u',
-			'<p>$0</p>', $userInfo['about']);
-		$userDesires = preg_replace('~(*BSR_ANYCRLF)\R\R\K(?>[^<\r\n]++|<(?!h[1-6]\b)|\R(?!\R))+(?=\R\R|$)~u',
-			'<p>$0</p>', $userInfo['desires']);
-		if(!empty($userInfo))
-		{
-			?>
-				<div>Name: <?= $userInfo['polite_name'] ?></div>
-				<div>Days on this site: <?= $userInfo['days_registered'] ?></div>
-				<div>Birthday: <?= $userInfo['birthday'] ?></div>
-			<?php
-			if(empty($userInfo['home_location_code']))
-			{
-				?><div>Home location has not been set</div><?php
-			}
-			else
-			{
-				?>
-					<div>Home location:
-						<a href='/location/<?= $userInfo['home_location_code'] ?>'><?= $userInfo['home_location'] ?></a>
-					</div>
-				<?php
-			}
-			?>
-				<div>What is shared about oneself: <blockquote><?= $userAbout ?></blockquote></div>
-				<div>Postcard desires: <blockquote><?= $userDesires ?></blockquote></div>
-				<div>Hobbies: <?= $userInfo['hobbies'] ?></div>
-				<div>Languages: <?= $userInfo['languages'] ?></div>
-			<?php
-			if(!empty($userInfo['phobias']))
-			{
-				?><div>Phobias: <?= $userInfo['phobias'] ?></div><?php
-			}
-			else
-			{
-				?><div>Phobias: None</div><?php
-			}
-		}
-		if($viewOfSelf)
-		{
-			$this->displayAddresses($user);
-		}
-	}
 	public function user_status() : bool
 	{
 		$user = $this->options['user'];
