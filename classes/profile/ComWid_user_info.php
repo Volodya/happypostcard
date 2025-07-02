@@ -26,7 +26,8 @@ class ComWid_user_info implements ComWid
 		// https://stackoverflow.com/questions/19372458/convert-multiple-new-lines-to-paragraphs
 		$result = preg_replace('~(*BSR_ANYCRLF)\R\R\K(?>[^<\r\n]++|<(?!h[1-6]\b)|\R(?!\R))+(?=\R\R|$)~u',
 			'<p>$0</p>', $text);
-		
+		$result = preg_replace("/\R\R+/", '', $result);
+		$result = nl2br($result);
 		return $result;
 	}
 	public function invoke() : void

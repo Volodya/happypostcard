@@ -10,6 +10,14 @@ class PageUserEdit extends Page_Abstract
 				->withLeft(
 					[
 						['account_stats_for_user'],
+						[
+							'FAQ',
+							'make_section' => true,
+							'section_header' => 'From the FAQ',
+							'parameter' => [
+								'questions'=>[21],
+							],
+						],
 					]
 				)
 				->withRight(

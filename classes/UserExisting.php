@@ -659,6 +659,8 @@ class UserExisting extends User
 		return $stmt->fetchAll(PDO::FETCH_ASSOC);
 	}
 	public function getUserInfo() : array
+		// ['polite_name', 'days_registered', 'days_since_last_login', 'birthday', 'home_location_code', 'home_location',
+		//  'about', 'desires', 'hobbies', 'phobias', 'languages']
 	{
 		$db = Database::getInstance();
 		

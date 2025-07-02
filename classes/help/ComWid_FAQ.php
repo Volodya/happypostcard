@@ -12,6 +12,7 @@ class ComWid_FAQ implements ComWid
 		$this->displayedQuestions = [];
 		
 		$this->questions = [
+			// 0
 			<<<'EOQ'
 				<h3>What is «Postal/Postcard Exchange»?</h3>
 				<p>
@@ -21,6 +22,7 @@ class ComWid_FAQ implements ComWid
 				</p>
 			EOQ
 			,
+			// 1
 			<<<'EOQ'
 			<h3>How to get started?</h3>
 			<p>
@@ -32,6 +34,7 @@ class ComWid_FAQ implements ComWid
 			</p>
 			EOQ
 			,
+			// 2
 			<<<'EOQ'
 			<h3>I am in a country with several spoken languages/used scripts. How should I write my address?</h3>
 			<p>
@@ -47,6 +50,7 @@ class ComWid_FAQ implements ComWid
 			</p>
 			EOQ
 			,
+			// 3
 			<<<'EOQ'
 			<h3>Where to get postcards?</h3>
 			<p>
@@ -56,6 +60,7 @@ class ComWid_FAQ implements ComWid
 			</p>
 			EOQ
 			,
+			// 4
 			<<<'EOQ'
 			<h3>Where to get postage?</h3>
 			<p>
@@ -70,6 +75,7 @@ class ComWid_FAQ implements ComWid
 			</p>
 			EOQ
 			,
+			// 5
 			<<<'EOQ'
 			<h3>Where to go to send postcards?</h3>
 			<p>
@@ -80,6 +86,7 @@ class ComWid_FAQ implements ComWid
 			</p>
 			EOQ
 			,
+			// 6
 			<<<'EOQ'
 			<h3>What do I write on a postcards I am sending?</h3>
 			<p>
@@ -97,6 +104,7 @@ class ComWid_FAQ implements ComWid
 			</p>
 			EOQ
 			,
+			// 7
 			<<<'EOQ'
 			<h3>What if I do not speak the language of the user I am sending a card to?</h3>
 			<p>
@@ -108,6 +116,7 @@ class ComWid_FAQ implements ComWid
 			</p>
 			EOQ
 			,
+			// 8
 			<<<'EOQ'
 			<h3>What is a «postcard»?</h3>
 			<p>
@@ -122,6 +131,7 @@ class ComWid_FAQ implements ComWid
 			</p>
 			EOQ
 			,
+			// 9
 			<<<'EOQ'
 			<h3>Is postcard exchange the same thing as philacardy or deltiology?</h3>
 			<p>
@@ -132,6 +142,7 @@ class ComWid_FAQ implements ComWid
 			</p>
 			EOQ
 			,
+			// 10
 			<<<'EOQ'
 			<h3>What if there is a subject that triggers me emotionally?</h3>
 			<p>
@@ -141,6 +152,7 @@ class ComWid_FAQ implements ComWid
 			</p>
 			EOQ
 			,
+			// 11
 			<<<'EOQ'
 			<h3>How often may I send a postcard?</h3>
 			<p>
@@ -158,6 +170,7 @@ class ComWid_FAQ implements ComWid
 			</ol>
 			EOQ
 			,
+			// 12
 			<<<'EOQ'
 			<h3>Where to write the code of the card?</h3>
 			<p>
@@ -172,6 +185,7 @@ class ComWid_FAQ implements ComWid
 			</p>
 			EOQ
 			,
+			// 13
 			<<<'EOQ'
 			<h3>What to do if I cannot figure out the code of the card that I have received?</h3>
 			<p>
@@ -181,6 +195,7 @@ class ComWid_FAQ implements ComWid
 			</p>
 			EOQ
 			,
+			// 14
 			<<<'EOQ'
 			<h3>How late may I register the card?</h3>
 			<p>
@@ -191,6 +206,7 @@ class ComWid_FAQ implements ComWid
 			</p>
 			EOQ
 			,
+			// 15
 			<<<'EOQ'
 			<h3>How early may I register the card?</h3>
 			<p>
@@ -205,6 +221,7 @@ class ComWid_FAQ implements ComWid
 			</p>
 			EOQ
 			,
+			// 16
 			<<<'EOQ'
 			<h3>What if the card gets lost?</h3>
 			<p>
@@ -218,6 +235,7 @@ class ComWid_FAQ implements ComWid
 			</p>
 			EOQ
 			,
+			// 17
 			<<<'EOQ'
 			<h3>Should I tell a person, that I have sent a card to them?</h3>
 			<p>
@@ -226,6 +244,7 @@ class ComWid_FAQ implements ComWid
 			</p>
 			EOQ
 			,
+			// 18
 			<<<'EOQ'
 			<h3>What images should be uploaded on a postcard page?</h3>
 			<p>
@@ -240,6 +259,7 @@ class ComWid_FAQ implements ComWid
 			</p>
 			EOQ
 			,
+			// 19
 			<<<'EOQ'
 			<h3>How and when did Happy Postcard start?</h3>
 			<p>
@@ -254,6 +274,7 @@ class ComWid_FAQ implements ComWid
 			</p>
 			EOQ
 			,
+			// 20
 			<<<'EOQ'
 			<h3>Does Happy Postcard compete against other similar websites?</h3>
 			<p>
@@ -262,6 +283,20 @@ class ComWid_FAQ implements ComWid
 				common to see users on multiple platforms. It is nice to invite people from other platforms to check out
 				this one, but the goal is not for any other website to shut down or for any users to stop participating
 				in other communities.
+			</p>
+			EOQ
+			,
+			// 21
+			<<<'EOQ'
+			<h3>How to format the profile?</h3>
+			<p>
+				Currently very limited markup is available. If you make an empty line, that starts a paragraph.
+				If without an empty line carriage returns are preseved, this allows you to make lists.
+				URLs are <strong>not</strong> parsed and will remain as text. No other markup is available.
+			</p>
+			<p>
+				For security reasons some characters are replaced in the profile text, the intention is to have
+				characters that look similar enough. For example the character &lt; will be replaced with 〈.
 			</p>
 EOQ
 			, // indenting the las close incorrectly just to pacify the IDE
