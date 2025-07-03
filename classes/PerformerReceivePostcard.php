@@ -67,10 +67,10 @@ class PerformerReceivePostcard extends Performer_Abstract
 				'custom_filter' => 'FILTER_SANITIZE_ALPHANUMERIC',
 			],
 			'code3' => [
-				'custom_filter' => 'FILTER_SANITIZE_ALPHANUMERIC',
+				'custom_filter' => 'FILTER_SANITIZE_NUMERIC',
 			],
 			'code4' => [
-				'custom_filter' => 'FILTER_SANITIZE_ALPHANUMERIC',
+				'custom_filter' => 'FILTER_SANITIZE_NUMERIC',
 			],
 			'message' => [
 				'custom_filter' => 'FILTER_SANITIZE_NOSCRIPT',
@@ -79,7 +79,10 @@ class PerformerReceivePostcard extends Performer_Abstract
 		]);
 		
 		$user = $request->getLoggedInUser();
-		$code = strtoupper("{$post['code1']}-{$post['code2']}-{$post['code3']}-{$post['code4']}");
+		
+		$code1 = Location::guessLocationByInputCode($post['code1']);
+		$code2 = Location::guessLocationByInputCode($post['code2']);
+		$code = strtoupper("{$code1}-{$code2}-{$post['code3']}-{$post['code4']}");
 		
 		try
 		{

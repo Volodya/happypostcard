@@ -159,4 +159,82 @@ class Location
 		
 		return $result;
 	}
+	public static function guessLocationByInputCode(string $input) : string
+	{
+		$input = trim(strtoupper($input));
+		
+		$db = Database::getInstance();
+		
+		$stmt = $db->prepare('SELECT COUNT(*) AS `cnt` FROM `location_code` WHERE `code`=:code');
+		$stmt->bindValue(':code', $input);
+		$stmt->execute();
+		if($stmt->fetch(PDO::FETCH_ASSOC)['cnt'] == '1')
+		{
+			return $input;
+		}
+		
+		$lookAlikeLetter = ['O', 'I', 'S', 'B'];
+		$lookAlikeNumber = ['0', '1', '5', '8'];
+		if(strlen($input) == 3) // country or world-region
+		{
+			$attempt = str_replace($lookAlikeLetter, $lookAlikeNumber, $input);
+			if(is_numeric($attempt))
+			{
+				$stmt = $db->prepare('SELECT COUNT(*) AS `cnt` FROM `location_code` WHERE `code`=:code');
+				$stmt->bindValue(':code', $attempt);
+				$stmt->execute();
+				if($stmt->fetch(PDO::FETCH_ASSOC)['cnt'] == '1')
+				{
+					return $attempt;
+				}
+			}
+			
+			$attempt = str_replace($lookAlikeNumber, $lookAlikeLetter, $input);
+			$stmt = $db->prepare('SELECT COUNT(*) AS `cnt` FROM `location_code` WHERE `code`=:code');
+			$stmt->bindValue(':code', $attempt);
+			$stmt->execute();
+			if($stmt->fetch(PDO::FETCH_ASSOC)['cnt'] == '1')
+			{
+				return $attempt;
+			}
+		}
+		if(strlen($input) == 4) // sub-country regions
+		{
+			$attempt = str_replace($lookAlikeNumber, $lookAlikeLetter, $input);
+			$stmt = $db->prepare('SELECT COUNT(*) AS `cnt` FROM `location_code` WHERE `code`=:code');
+			$stmt->bindValue(':code', $attempt);
+			$stmt->execute();
+			if($stmt->fetch(PDO::FETCH_ASSOC)['cnt'] == '1')
+			{
+				return $attempt;
+			}
+			
+			$part1 = substr($input, 0, 3);
+			$part2 = substr($input, 3, 1);
+			$attempt =
+				str_replace($lookAlikeNumber, $lookAlikeLetter, $input) . 
+				str_replace($lookAlikeLetter, $lookAlikeNumber, $part2);
+			$stmt = $db->prepare('SELECT COUNT(*) AS `cnt` FROM `location_code` WHERE `code`=:code');
+			$stmt->bindValue(':code', $attempt);
+			$stmt->execute();
+			if($stmt->fetch(PDO::FETCH_ASSOC)['cnt'] == '1')
+			{
+				return $attempt;
+			}
+			
+			$part1 = substr($input, 0, 2);
+			$part2 = substr($input, 2, 2);
+			$attempt =
+				str_replace($lookAlikeNumber, $lookAlikeLetter, $input) . 
+				str_replace($lookAlikeLetter, $lookAlikeNumber, $part2);
+			$stmt = $db->prepare('SELECT COUNT(*) AS `cnt` FROM `location_code` WHERE `code`=:code');
+			$stmt->bindValue(':code', $attempt);
+			$stmt->execute();
+			if($stmt->fetch(PDO::FETCH_ASSOC)['cnt'] == '1')
+			{
+				return $attempt;
+			}
+		}
+		return $input;
+	}
 }

@@ -31,6 +31,12 @@ class CustomFilters
 	{
 		return preg_replace("/[^a-zA-Z0-9]+/", "", $data);
 	}
+	public static function FILTER_SANITIZE_NUMERIC(string $data) : string
+	{
+		$data = strtoupper($data);
+		$data = str_replace(['O', 'I', 'S', 'B'], ['0', '1', '5', '8'], $data);
+		return preg_replace("/[^0-9]+/", "", $data);
+	}
 	public static function FILTER_SANITIZE_LOGIN(string $data) : string
 	{
 		$data = iconv("UTF-8", "UTF-8//IGNORE", $data); // drop all non utf-8 characters
