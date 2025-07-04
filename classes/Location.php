@@ -212,7 +212,7 @@ class Location
 			$part1 = substr($input, 0, 3);
 			$part2 = substr($input, 3, 1);
 			$attempt =
-				str_replace($lookAlikeNumber, $lookAlikeLetter, $input) . 
+				str_replace($lookAlikeNumber, $lookAlikeLetter, $part1) . 
 				str_replace($lookAlikeLetter, $lookAlikeNumber, $part2);
 			$stmt = $db->prepare('SELECT COUNT(*) AS `cnt` FROM `location_code` WHERE `code`=:code');
 			$stmt->bindValue(':code', $attempt);
@@ -225,7 +225,7 @@ class Location
 			$part1 = substr($input, 0, 2);
 			$part2 = substr($input, 2, 2);
 			$attempt =
-				str_replace($lookAlikeNumber, $lookAlikeLetter, $input) . 
+				str_replace($lookAlikeNumber, $lookAlikeLetter, $part1) . 
 				str_replace($lookAlikeLetter, $lookAlikeNumber, $part2);
 			$stmt = $db->prepare('SELECT COUNT(*) AS `cnt` FROM `location_code` WHERE `code`=:code');
 			$stmt->bindValue(':code', $attempt);
