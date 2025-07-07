@@ -14,6 +14,9 @@ class PerformerReceivePostcard extends Performer_Abstract
 		$senderLocation = $sender->getHomeLocation();
 		$receiverLocation = $receiver->getHomeLocation();
 		
+		$sentDate = $card->getSentDateTime()->format('Y-m-d');
+		$daysTravelled = $card->getReceivedDateTime().diff($card->getSentDateTime)->format('%a');
+		
 		$email = new EMail();
 		
 		$email = $email
@@ -25,6 +28,8 @@ class PerformerReceivePostcard extends Performer_Abstract
 				."Thanks a lot for registering {$cardCode}. "
 				."This time the sender of a Happy Postcard was {$senderEmail['polite_name']}. "
 				."They are representing {$senderLocation['name']} as their chosen location."
+				."\r\n"."\r\n"
+				."The card was sent on {$sentDate} and took {$daysTravelled} days to arrive."
 				."\r\n"."\r\n"
 				."A message that you chose to send them as a Hurray:"
 				."\r\n"
@@ -44,6 +49,8 @@ class PerformerReceivePostcard extends Performer_Abstract
 				."Congratulations, the card {$cardCode} has been registered. "
 				."This time the receiver of a Happy Postcard was {$receiverEmail['polite_name']}. "
 				."They are representing {$receiverLocation['name']} as their chosen location."
+				."\r\n"."\r\n"
+				."The card was sent on {$sentDate} and took {$daysTravelled} days to arrive."
 				."\r\n"."\r\n"
 				."A message that they chose to send you as a Hurray:"
 				."\r\n"
@@ -94,6 +101,7 @@ class PerformerReceivePostcard extends Performer_Abstract
 		}
 		if($card->isRegistered())
 		{
+			$response = $response->withPage((new PageRedirector())->withRedirectTo('/card/'.$code));
 			return $this->abandon($response, "This postcard ({$code}) has already been registered");
 		}
 		if($card->getReceiverId() != $user->getId())

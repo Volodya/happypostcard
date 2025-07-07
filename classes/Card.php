@@ -577,4 +577,13 @@ class Card
 	{
 		return UserExisting::constructById($this->receiverId);
 	}
+	public function getSentDateTime() : DateTime
+	{
+		return new DateTime($this->sentAt);
+	}
+	public function getReceivedDateTime() : DateTime
+	{
+		if($this->receivedAt == 'CURRENT_TIMESTAMP') return new DateTime();
+		return new DateTime($this->receivedAt);
+	}
 }
