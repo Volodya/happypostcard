@@ -15,7 +15,7 @@ class PerformerReceivePostcard extends Performer_Abstract
 		$receiverLocation = $receiver->getHomeLocation();
 		
 		$sentDate = $card->getSentDateTime()->format('Y-m-d');
-		$daysTravelled = $card->getReceivedDateTime().diff($card->getSentDateTime)->format('%a');
+		$daysTravelled = $card->getReceivedDateTime()->diff($card->getSentDateTime())->format('%a');
 		
 		$email = new EMail();
 		
