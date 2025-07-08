@@ -2,6 +2,28 @@
 
 class PerformerRegisterUser extends Performer_Abstract
 {
+	public function sendEmail(User $user) : void
+	{
+		$userEmail = $user->getEmail();
+		$userLocation = $user->getHomeLocation();
+		
+		$email = new EMail();
+		
+		$email = $email
+			->withSubject('〠 You have been registered on Happy Postcard')
+			->withExtraTo($userEmail['email'], $userEmail['polite_name'])
+			->withExtraNoscriptBody(
+				"Good time of the day, {$userEmail['polite_name']}!"
+				."\r\n"."\r\n"
+				."Thanks a lot for joining the community on Happy Postcard. "
+				."You are currently representing {$senderLocation['name']}."
+				."\r\n"."\r\n"
+				."Please login to the site, set your postal address and you can start sending out postcards. "
+				."In order for other people to know what cards best suits you, you can also fill out your profile."
+			);
+		
+		$email->mail();
+	}
 	public function perform(Request $request, Response $response, Config $config) : Response
 	{
 		if(!$request->allSetPOST(['login', 'password', 'password2']))
@@ -45,6 +67,8 @@ class PerformerRegisterUser extends Performer_Abstract
 		$page = (new PageRedirector())->withRedirectTo('/login');
 		$response = $response->withPage($page);
 		$response = $response->withNoticeMessage('User has been created. Please login.');
+		
+		$this->sendEmail($user);
 		
 		return $response;
 	}
