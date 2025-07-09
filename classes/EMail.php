@@ -4,14 +4,14 @@ class EMail
 {
 	private string $from;
 	private string $replyTo;
-	private Array $to;
+	private array $to;
 	private string $subject;
 	private string $xmailer;
 	private string $contentType;
 	private string $contentTransferType;
 	private string $body;
 	
-	static private string $EOL = "\n"; // because of Unix's sendmail bug
+	public const string EOL = "\n"; // because of Unix's sendmail bug
 	
 	public function __construct()
 	{
@@ -65,7 +65,7 @@ class EMail
 	}
 	public function withExtraBody(string $body) : EMail
 	{
-		$body = str_replace(["<br />", "<br>"], self::$EOL, str_replace(["\r", "\n"], '', nl2br($body)));
+		$body = str_replace(["<br />", "<br>"], self::EOL, str_replace(["\r", "\n"], '', nl2br($body)));
 		
 		$new = clone $this;
 		$new->body .= $body;
@@ -73,7 +73,7 @@ class EMail
 	}
 	public function withExtraNoscriptBody(string $body) : EMail
 	{
-		$body = str_replace(["<br />", "<br>"], self::$EOL, str_replace(["\r", "\n"], '', nl2br($body)));
+		$body = str_replace(["<br />", "<br>"], self::EOL, str_replace(["\r", "\n"], '', nl2br($body)));
 		
 		$unsafe= array('<', '>');
 		$safe  = array('〈', '〉');
@@ -91,8 +91,8 @@ class EMail
 	public function mail() : bool
 	{
 		$to = implode(', ', $this->to);
-		$body = EMail::utf8_wordwrap($this->body, 75, self::$EOL);
-		$body = chunk_split(base64_encode($body), 76, self::$EOL);
+		$body = EMail::utf8_wordwrap($this->body, 75, self::EOL);
+		$body = chunk_split(base64_encode($body), 76, self::EOL);
 		$subject = '=?UTF-8?B?' . base64_encode($this->subject) . '?=';
 		
 		$headers = [
@@ -115,8 +115,8 @@ class EMail
 	public function mail_var_dump(bool $die = false) : void
 	{
 		$to = implode(', ', $this->to);
-		$body = EMail::utf8_wordwrap($this->body, 75, self::$EOL);
-		$body = chunk_split(base64_encode($body), 76, self::$EOL);
+		$body = EMail::utf8_wordwrap($this->body, 75, self::EOL);
+		$body = chunk_split(base64_encode($body), 76, self::EOL);
 		$subject = '=?UTF-8?B?' . base64_encode($this->subject) . '?=';
 		
 		$headers = [
@@ -166,9 +166,9 @@ class EMail
 	}
 	
 	// https://www.php.net/manual/en/function.wordwrap.php
-	static function utf8_wordwrap(string $string, int $width=75, string $break="\r\n", bool $cut=false)
+	static function utf8_wordwrap(string $string, int $width=75, string $break=EMail::EOL, bool $cut=false)
 	{
-		$string .= self::$EOL; // force wrap of the last line correctly
+		$string .= self::EOL; // force wrap of the last line correctly
 		if($cut)
 		{
 			// Match anything 1 to $width chars long followed by whitespace,

@@ -24,15 +24,15 @@ class PerformerReceivePostcard extends Performer_Abstract
 			->withExtraTo($receiverEmail['email'], $receiverEmail['polite_name'])
 			->withExtraNoscriptBody(
 				"Good time of the day, {$receiverEmail['polite_name']}!"
-				."\r\n"."\r\n"
+				.EMail::EOL.EMail::EOL
 				."Thanks a lot for registering {$cardCode}. "
 				."This time the sender of a Happy Postcard was {$senderEmail['polite_name']}. "
 				."They are representing {$senderLocation['name']} as their chosen location."
-				."\r\n"."\r\n"
+				.EMail::EOL.EMail::EOL
 				."The card was sent on {$sentDate} and took {$daysTravelled} days to arrive."
-				."\r\n"."\r\n"
+				.EMail::EOL.EMail::EOL
 				."A message that you chose to send them as a Hurray:"
-				."\r\n"
+				.EMail::EOL
 				.$hurray
 			);
 		
@@ -45,16 +45,19 @@ class PerformerReceivePostcard extends Performer_Abstract
 			->withExtraTo($senderEmail['email'], $senderEmail['polite_name'])
 			->withExtraNoscriptBody(
 				"Good time of the day, {$senderEmail['polite_name']}!"
-				."\r\n"."\r\n"
-				."Congratulations, the card {$cardCode} has been registered. "
-				."This time the receiver of a Happy Postcard was {$receiverEmail['polite_name']}. "
-				."They are representing {$receiverLocation['name']} as their chosen location."
-				."\r\n"."\r\n"
+				.EMail::EOL.EMail::EOL
+				."Congratulations, the card {$cardCode} has arrived and has been registered by {$receiverEmail['polite_name']}. "
+				."The location of the receiver is {$receiverLocation['name']}."
+				.EMail::EOL.EMail::EOL
 				."The card was sent on {$sentDate} and took {$daysTravelled} days to arrive."
-				."\r\n"."\r\n"
+				.EMail::EOL.EMail::EOL
 				."A message that they chose to send you as a Hurray:"
-				."\r\n"
+				.EMail::EOL
 				.$hurray
+				.EMail::EOL.EMail::EOL
+				."-- "
+				.EMail::EOL
+				."https://www.happypostcard.fun/card/{$cardCode}"
 			);
 		
 		$email->mail();
