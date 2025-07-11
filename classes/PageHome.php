@@ -27,7 +27,12 @@ class PageHome extends Page_Abstract
 							'logged_in' => true,
 						],
 						['login', 'logged_in' => false],
-						['random_postcard', 'make_section' => true, 'section_header' => 'Random postcard', 'logged_in' => true],
+						[
+							'random_card',
+							'make_section' => true,
+							'section_header' => 'Random postcard',
+							'logged_in' => true
+						],
 						[
 							'users_waitingapproval',
 							'admin' => true,

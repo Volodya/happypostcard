@@ -907,18 +907,6 @@ class ComplexWidgets
 			</table>
 		<?php
 	}
-	public function random_postcard() : void
-	{
-		try
-		{
-			$rCard = Card::getRandomCardImage();
-			HtmlSnippets::printPostcardThumb200($rCard['hash'], $rCard['extension'], $rCard['code'], true);
-		}
-		catch(Exception $e)
-		{
-			echo 'No card';
-		}
-	}
 	public function image() : void
 	{
 		$hash = $this->options['hash'];
