@@ -440,7 +440,7 @@ ul.bottom-sitemap > li ul > li
 }
 ul.bottom-sitemap > li ul:before
 {
-	content: '(';
+	content: ' (';
 	display: inline;
 }
 ul.bottom-sitemap > li ul:after
