@@ -448,6 +448,10 @@ ul.bottom-sitemap > li ul:after
 	content: ')';
 	display: inline;
 }
+ul.bottom-sitemap > li ul > li:not(:last-child)::after {
+    display: inline;
+    content: ', ';
+}
 .clock.am
 {
 	color: yellow;
