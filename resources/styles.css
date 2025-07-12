@@ -171,6 +171,7 @@ ul.menu,
 .menu li.help
 {
 	float: right;
+	margin-right: 9px;
 }
 ul.menu li ul
 {
