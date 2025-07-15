@@ -69,7 +69,10 @@ class ComWid_user_news_for_user implements ComWid
 						{
 							case 'registration':
 								$willDisplay=true;
-								?><td><?= $userNameUC ?> registered on this site.</td><?php
+								?><td><?php
+									?>〠 <?php
+									?><?= $userNameUC ?> registered on this site.<?php
+								?></td><?php
 								break;
 							case 'postcard_yousent':
 								if($viewOfSelf)
@@ -77,6 +80,7 @@ class ComWid_user_news_for_user implements ComWid
 									$willDisplay=true;
 									$receiverName = HtmlSnippets::getUserPoliteName($row['login'], $row['polite_name'], true);
 									?><td><?php
+										?>📮 <?php
 										?>You sent a <a href='/card/<?= $row['card_code'] ?>'>happy postcard</a> <?php
 										?>to <?= $receiverName ?>.<?php
 									?></td><?php
@@ -86,6 +90,7 @@ class ComWid_user_news_for_user implements ComWid
 								$willDisplay=true;
 								$receiverName = HtmlSnippets::getUserPoliteName($row['login'], $row['polite_name'], true);
 								?><td><?php
+									?>📬 <?php
 									?><?= $receiverName ?> received a <?php
 									?><a href='/card/<?= $row['card_code'] ?>'>happy postcard</a> from <?= $userName ?>.<?php
 								?></td><?php
@@ -96,6 +101,7 @@ class ComWid_user_news_for_user implements ComWid
 									$willDisplay=true;
 									$senderName = HtmlSnippets::getUserPoliteName($row['login'], 'You', true);
 									?><td><?php
+										?>📨 <?php
 										?><?= $senderName ?> sent <?= $userName ?> a <?php
 										?><a href='/card/<?= $row['card_code'] ?>'>happy postcard</a>.<?php
 									?></td><?php
@@ -113,6 +119,7 @@ class ComWid_user_news_for_user implements ComWid
 								}
 									
 								?><td><?php
+									?>📩 <?php
 									?><?= $senderName ?> <a href='/card/<?= $row['card_code'] ?>'>happy postcard</a> <?php
 									?>was received by <?= $userName ?>.<?php
 								?></td><?php

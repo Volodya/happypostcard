@@ -50,6 +50,7 @@ class ComWid_user_news implements ComWid
 							case 'registration':
 								$willDisplay=true;
 								?><td><?php
+									?>〠 <?php
 									?><a href='/user/<?= $row['login'] ?>'><?= $row['polite_name'] ?></a> <?php
 									?>has registered on this site.<?php
 								?></td><?php
@@ -57,6 +58,7 @@ class ComWid_user_news implements ComWid
 							case 'postcard_yousent':
 								$willDisplay=true;
 								?><td><?php
+									?>📮 <?php
 									?>You sent a <?php
 									?><a href='/card/<?= $row['card_code'] ?>' title='<?= $row['card_code'] ?>'>happy postcard</a> <?php
 									?>to <a href='/user/<?= $row['login'] ?>'><?= $row['polite_name'] ?></a>.<?php
@@ -65,6 +67,7 @@ class ComWid_user_news implements ComWid
 							case 'postcard_yousent_received':
 								$willDisplay=true;
 								?><td><?php
+									?>📬 <?php
 									?>Your sent <?php
 									?><a href='/card/<?= $row['card_code'] ?>' title='<?= $row['card_code'] ?>'>happy postcard</a> <?php
 									?>was received by <a href='/user/<?= $row['login'] ?>'><?= $row['polite_name'] ?></a>.<?php
@@ -73,6 +76,7 @@ class ComWid_user_news implements ComWid
 							case 'postcard_othersent':
 								$willDisplay=true;
 								?><td><?php
+									?>📨 <?php
 									?>Somebody has sent you a <span title='Number hidden'>happy postcard</a> <?php
 									?>you can wait for it in your letterbox.<?php
 								?></td><?php
@@ -80,6 +84,7 @@ class ComWid_user_news implements ComWid
 							case 'postcard_othersent_received':
 								$willDisplay=true;
 								?><td><?php
+									?>📩 <?php
 									?>You received a <?php
 									?><a href='/card/<?= $row['card_code'] ?>' title='<?= $row['card_code'] ?>'>happy postcard</a> <?php
 									?>from <a href='/user/<?= $row['login'] ?>'><?= $row['polite_name'] ?></a>.<?php
