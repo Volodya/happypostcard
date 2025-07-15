@@ -93,6 +93,12 @@ class PerformerSelectAddress extends Performer_Abstract
 		{
 			switch($reason)
 			{
+				case 'BLOCKED':
+					$response = $response->withPage(
+						(new PageRedirector())->withRedirectTo("/help")
+					);
+					return $this->abandon($response, "You have been blocked by an administrator, you will be unable to send more postcards.
+				Please <a href='/help'>contact</a> an administrator if you need further information!");
 				case 'NO ADDRESS':
 					$response = $response->withPage(
 						(new PageRedirector())->withRedirectTo("/useredit/{$sender->getLogin()}")

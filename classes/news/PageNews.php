@@ -15,7 +15,12 @@ class PageNews extends Page_Abstract
 				)
 				->withRight(
 					[
-						['user_news', 'logged_in' => true],
+						[
+							'user_news',
+							'logged_in' => true,
+							'make_section' => true,
+							'section_header' => 'User news',
+						],
 						[
 							'site_news',
 							'logged_in' => false,

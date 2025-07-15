@@ -54,7 +54,12 @@ class PageUser extends Page_Abstract
 							'parameter' => ['user' => $user],
 							'view_of_self' => true,
 						],
-						['user_news_for_user'],
+						[
+							'user_news_for_user',
+							'make_section' => true,
+							'section_header' => 'User news',
+							'parameter' => ['user' => $user],
+						],
 						['inter_user_news', 'logged_in' => true, 'view_of_self' => false],
 						['send_private_message', 'logged_in' => true, 'view_of_self' => false],
 					]

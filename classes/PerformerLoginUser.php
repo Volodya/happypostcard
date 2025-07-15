@@ -43,6 +43,13 @@ class PerformerLoginUser extends Performer_Abstract
 		$response->setSession('login_id', $user->getId());
 		$response = $response->withNoticeMessage("You have been logged in as {$post['login']}.");
 		
+		if($user->isBlocked())
+		{
+			$response = $response->withNoticeMessage(
+				"You have been blocked by an administrator, you will be unable to send more postcards.
+				Please <a href='/help'>contact</a> an administrator if you need further information!"
+			);
+		}
 		if(!$user->hasAddress())
 		{
 			$response = $response->withNoticeMessage(

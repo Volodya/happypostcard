@@ -11,6 +11,7 @@ class UserExisting extends User
 	private int $travellingLocationId;
 	
 	private bool $enabled;
+	private bool $blocked;
 	
 	private static $__friends = array('User');
 	public function __set($key, $value)
@@ -136,6 +137,7 @@ class UserExisting extends User
 		}
 		
 		$new->enabled = empty($info['disabled_on']);
+		$new->blocked = !empty($info['blocked_on']);
 		
 		$new->homeLocationId = $info['home_location_id'];
 		$new->travellingLocationId = $info['travelling_location_id'];
@@ -159,6 +161,10 @@ class UserExisting extends User
 	public function isEnabled() : bool
 	{
 		return $this->enabled;
+	}
+	public function isBlocked() : bool
+	{
+		return $this->blocked;
 	}
 	public function getPreferenceOrDefault(string $key, string $default) : string
 	{
@@ -290,7 +296,7 @@ class UserExisting extends User
 		$stmt->execute();
 		return $stmt->fetchAll(PDO::FETCH_COLUMN, 0);
 	}
-	public function addAddress(string $addr, string $lang_code, boolean $byAdmin=false) : void
+	public function addAddress(string $addr, string $lang_code, bool $byAdmin=false) : void
 	{
 		$db = Database::getInstance();
 		
@@ -317,7 +323,7 @@ class UserExisting extends User
 			$stmt->execute();
 		}
 	}
-	public function changeAddress(int $id, string $addr, string $lang_code, boolean $byAdmin=false) : void
+	public function changeAddress(int $id, string $addr, string $lang_code, bool $byAdmin=false) : void
 	{
 		$db = Database::getInstance();
 		
@@ -362,7 +368,7 @@ class UserExisting extends User
 			}
 		}
 	}
-	public function removeAddress(int $id, boolean $byAdmin=false) : void
+	public function removeAddress(int $id, bool $byAdmin=false) : void
 	{
 		$db = Database::getInstance();
 		
@@ -523,6 +529,7 @@ class UserExisting extends User
 		$countCardsSent = $this->countCardsSent();
 		$countCardsReceived = $this->countCardsReceived();
 		
+		if($this->blocked) return 'BLOCKED';
 		if(!$hasAddress and $countCardsTravelling > 0) return 'NO ADDRESS';
 		if($countCardsTravelling >= 24 and $countCardsSent < 6) return '24 TRAVELLING LT6 SENT';
 		if($countCardsTravelling >= 24 and $countCardsSent >= 6 and ($countCardsWaiting+$countCardsReceived) == 0) return '24 TRAVELLING 6 SENT 0 WAITING+RECEIVED';
@@ -698,5 +705,60 @@ class UserExisting extends User
 		$stmt->execute();
 		$res = $stmt->fetchAll(PDO::FETCH_ASSOC);
 		return $res;
+	}
+	public function getUserNews() : array
+	{
+		$db = Database::getInstance();
+		
+		$stmt = $db->prepare('
+			SELECT * FROM(
+				SELECT "postcard_yousent" AS `type`,
+					`sent_at` AS `ts`,
+					`receiver`.`login`,
+					`receiver`.`polite_name`,
+					`code` AS `card_code`
+					FROM `postcard`
+					INNER JOIN `user` AS `receiver` ON `postcard`.`receiver_id`=`receiver`.`id`
+					WHERE `sender_id`=:user_id
+				UNION ALL
+				SELECT "postcard_yousent_received" AS `type`,
+					`received_at` AS `ts`,
+					`receiver`.`login`, 
+					`receiver`.`polite_name`,
+					`code` AS `card_code`
+					FROM `postcard`
+					INNER JOIN `user` AS `receiver` ON `postcard`.`receiver_id`=`receiver`.`id`
+					WHERE `sender_id`=:user_id AND `postcard`.`received_at` IS NOT NULL
+				UNION ALL
+				SELECT "postcard_othersent" AS `type`,
+					`sent_at` AS `ts`,
+					`sender`.`login`,
+					"" AS `polite_name`, 
+					`code`
+					FROM `postcard`
+					INNER JOIN `user` AS `sender` ON `postcard`.`sender_id`=`sender`.`id`
+					WHERE `receiver_id`=:user_id AND `postcard`.`received_at` IS NULL
+				UNION ALL
+				SELECT "postcard_othersent_received" AS `type`,
+					`received_at` AS `ts`,
+					`sender`.`login`,
+					`sender`.`polite_name`,
+					`code`
+					FROM `postcard`
+					INNER JOIN `user` AS `sender` ON `postcard`.`sender_id`=`sender`.`id`
+					WHERE `receiver_id`=:user_id AND `postcard`.`received_at` IS NOT NULL
+				UNION ALL
+				SELECT "registration" AS `type`,
+					`registered_at` AS `ts`,
+					`login`,
+					`polite_name`,
+					""
+					FROM `user`
+					WHERE `id`=:user_id
+			) AS t ORDER BY `ts` DESC
+		');
+		$stmt->bindValue(':user_id', $this->getId());
+		$stmt->execute();
+		return $stmt->fetchAll(PDO::FETCH_ASSOC);
 	}
 }
