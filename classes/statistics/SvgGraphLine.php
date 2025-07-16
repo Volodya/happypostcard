@@ -6,11 +6,22 @@ class SvgGraphLine
 	private float $min;
 	private float $max;
 	
-	public function __construct($name)
+	private string $name;
+	private string $colour;
+	
+	public function __construct(string $name)
 	{
 		$this->points = [];
 		$this->min = 0;
 		$this->max = 0;
+		
+		$this->name = $name;
+		$this->colour = 'black';
+	}
+	
+	public function setColour(string $colour)
+	{
+		$this->colour = $colour;
 	}
 	
 	public function addPoint(float $y) : void
@@ -27,7 +38,7 @@ class SvgGraphLine
 		return ( $yFrom - $yTo ) <=> 0;
 	}
 	
-	private static function printLine(float $xUnit, float $yUnit, int $xFrom, float $yFrom, float $yTo) : void
+	private function printLine(float $xUnit, float $yUnit, int $xFrom, float $yFrom, float $yTo) : void
 	{
 		$xTo = $xFrom + 1;
 		
@@ -36,7 +47,7 @@ class SvgGraphLine
 		$x2 =   $xTo * $xUnit;
 		$y2 = - $yTo * $yUnit;
 		
-		?><line x1="<?= $x1 ?>" y1="<?= $y1 ?>" x2="<?= $x2 ?>" y2="<?= $y2 ?>" stroke="blue" stroke-width="1" /><?php
+		?><line x1="<?= $x1 ?>" y1="<?= $y1 ?>" x2="<?= $x2 ?>" y2="<?= $y2 ?>" stroke="<?= $this->colour ?>" stroke-width="1" /><?php
 	}
 	private static function printLabel(
 		float $xUnit, float $yUnit, float $fontSize, float $labelsLeftShift,
@@ -59,7 +70,7 @@ class SvgGraphLine
 			
 			$dir = self::getDirection($prev, $cur);
 			
-			self::printLine($xUnit, $yUnit, $i, $prev, $cur);
+			$this->printLine($xUnit, $yUnit, $i, $prev, $cur);
 			if(($i==1 or $dir * $prevDir == -1) and $prev > 0) // if they are different
 			{
 				self::printLabel($xUnit, $yUnit, $fontSize, $labelsLeftShift, $i, $prev, $dir < 0, strval($prev));
