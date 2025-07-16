@@ -70,27 +70,54 @@ class ComWid_site_statistics extends SimpWid
 		}
 		?></ol><?php
 		
+		$svgGraph = new SvgGraph();
 		
+		$svgLineSent = new SvgGraphLine('sent');
 		$stmt = $db->prepare('
 			WITH RECURSIVE dates(dt) AS (
 				VALUES(DATE(\'now\', \'-1 month\'))
 				UNION ALL SELECT DATE(`dt`, \'+1 day\') FROM dates WHERE dt<DATE(\'now\')
 			)
-			SELECT COUNT(`postcard`.`id`) `cnt`, `dates`.`dt` `sent_at`
-			FROM `postcard`
-			RIGHT JOIN `dates` ON `dates`.`dt` = DATE(`postcard`.`sent_at`)
+			SELECT
+				COUNT(`postcard_sent`.`id`) AS `cnt_sent`,
+				`dates`.`dt` `sent_at`
+			FROM `dates`
+			LEFT JOIN `postcard` AS `postcard_sent` ON `dates`.`dt` = DATE(`postcard_sent`.`sent_at`)
 			GROUP BY `dates`.`dt`
 			ORDER BY `dates`.`dt` ASC
 		');
 		$stmt->execute();
-		$svgGraph = new SvgGraph();
-		$svgGraphLine = new SvgGraphLine('sent');
+		
 		while($row = $stmt->fetch(PDO::FETCH_ASSOC))
 		{
-			$svgGraphLine->addPoint(floatval($row['cnt']));
+			$svgLineSent->addPoint(floatval($row['cnt_sent']));
 		}
-		$svgGraphLine->setColour('blue');
-		$svgGraph->addLine($svgGraphLine);
+		
+		$svgLineReceived = new SvgGraphLine('received');
+		$stmt = $db->prepare('
+			WITH RECURSIVE dates(dt) AS (
+				VALUES(DATE(\'now\', \'-1 month\'))
+				UNION ALL SELECT DATE(`dt`, \'+1 day\') FROM dates WHERE dt<DATE(\'now\')
+			)
+			SELECT
+				COUNT(`postcard_received`.`id`) AS `cnt_received`,
+				`dates`.`dt` `sent_at`
+			FROM `dates`
+			LEFT JOIN `postcard` AS `postcard_received` ON `dates`.`dt` = DATE(`postcard_received`.`received_at`)
+			GROUP BY `dates`.`dt`
+			ORDER BY `dates`.`dt` ASC
+		');
+		$stmt->execute();
+		
+		while($row = $stmt->fetch(PDO::FETCH_ASSOC))
+		{
+			$svgLineReceived->addPoint(floatval($row['cnt_received']));
+		}
+		
+		$svgLineSent->setColour('blue');
+		$svgLineReceived->setColour('green');
+		$svgGraph->addLine($svgLineSent);
+		$svgGraph->addLine($svgLineReceived);
 		$svgGraph->print();
 	}
 }
