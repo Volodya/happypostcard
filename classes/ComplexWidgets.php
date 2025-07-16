@@ -441,12 +441,12 @@ class ComplexWidgets
 		
 		?><table>
 			<thead>
-				<th>Date</th>
-				<th>Days travelling</th>
-				<th>Code</th>
-				<th>Destination</th>
-				<th>Receiver</th>
-				<th title='picture'>&#9215;</th>
+				<th scope='col'>Date</th>
+				<th scope='col'>Days travelling</th>
+				<th scope='col'>Code</th>
+				<th scope='col'>Destination</th>
+				<th scope='col'>Receiver</th>
+				<th scope='col' title='picture'>&#9215;</th>
 			</thead>
 			<tbody>
 			<?php
@@ -491,12 +491,12 @@ class ComplexWidgets
 		
 		?><table>
 			<thead>
-				<th>Date sent</th>
-				<th>Date received</th>
-				<th>Days travelled</th>
-				<th>Code</th>
-				<th>Destination</th>
-				<th>Receiver</th>
+				<th scope='col'>Date sent</th>
+				<th scope='col'>Date received</th>
+				<th scope='col'>Days travelled</th>
+				<th scope='col'>Code</th>
+				<th scope='col'>Destination</th>
+				<th scope='col'>Receiver</th>
 			</thead>
 			<tbody>
 			<?php
@@ -530,12 +530,12 @@ class ComplexWidgets
 		
 		?><table>
 			<thead>
-				<th>Date sent</th>
-				<th>Date received</th>
-				<th>Days travelled</th>
-				<th>Code</th>
-				<th>Sent from</th>
-				<th>Sender</th>
+				<th scope='col'>Date sent</th>
+				<th scope='col'>Date received</th>
+				<th scope='col'>Days travelled</th>
+				<th scope='col'>Code</th>
+				<th scope='col'>Sent from</th>
+				<th scope='col'>Sender</th>
 			</thead>
 			<tbody>
 			<?php
@@ -609,17 +609,17 @@ class ComplexWidgets
 		?>
 			<table>
 				<thead><tr>
-					<th>№</th>
-					<th>User</th>
-					<th>Polite name</th>
-					<th>Home</th>
-					<th>Registered at</th>
-					<th>Last login</th>
-					<th>Birthday</th>
-					<th>Mailed by</th>
-					<th>Sent by</th>
-					<th>Mailed to</th>
-					<th>Received by</th>
+					<th scope='col'>№</th>
+					<th scope='col'>User</th>
+					<th scope='col'>Polite name</th>
+					<th scope='col'>Home</th>
+					<th scope='col'>Registered at</th>
+					<th scope='col'>Last login</th>
+					<th scope='col'>Birthday</th>
+					<th scope='col'>Mailed by</th>
+					<th scope='col'>Sent by</th>
+					<th scope='col'>Mailed to</th>
+					<th scope='col'>Received by</th>
 				</tr></thead>
 			<tbody>
 		<?php
@@ -627,7 +627,7 @@ class ComplexWidgets
 		{
 			?>
 				<tr>
-					<th><?= $row['num'] ?></th>
+					<th scope='row'><?= $row['num'] ?></th>
 					<td><a href='/user/<?= $row['login'] ?>'><?= $row['login'] ?></a></td>
 					<td><?= $row['polite_name'] ?></td>
 					<td><a href='/location/<?= $row['home_location'] ?>'><?= $row['home_location'] ?></a></td>
@@ -797,9 +797,9 @@ class ComplexWidgets
 			<input type='hidden' name='type' value='2' />
 			<table>
 				<thead><tr>
-					<th>Send</th>
-					<th>User</th>
-					<th>Days left</th>
+					<th scope='col'>Send</th>
+					<th scope='col'>User</th>
+					<th scope='col'>Days left</th>
 				</tr></thead>
 			<tbody>
 		<?php

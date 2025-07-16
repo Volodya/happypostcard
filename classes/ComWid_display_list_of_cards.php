@@ -32,39 +32,39 @@ class ComWid_display_list_of_cards implements ComWid
 			?><thead><?php
 				if($disp['sender'])
 				{
-					?><th>Sender</th><?php
+					?><th scope='col'>Sender</th><?php
 				}
 				if($disp['sender_loc'])
 				{
-					?><th>Sent from</th><?php
+					?><th scope='col'>Sent from</th><?php
 				}
 				if($disp['sent_at'])
 				{
-					?><th>Date Sent</th><?php
+					?><th scope='col'>Date Sent</th><?php
 				}
 				if($disp['days_travelling'])
 				{
-					?><th>Days travelling</th><?php
+					?><th scope='col'>Days travelling</th><?php
 				}
 				if($disp['postcard_code'])
 				{
-					?><th>Code</th><?php
+					?><th scope='col'>Code</th><?php
 				}
 				if($disp['receiver'])
 				{
-					?><th>Receiver</th><?php
+					?><th scope='col'>Receiver</th><?php
 				}
 				if($disp['receive_loc'])
 				{
-					?><th>Destination</th><?php
+					?><th scope='col'>Destination</th><?php
 				}
 				if($disp['received_at'])
 				{
-					?><th>Date Received</th><?php
+					?><th scope='col'>Date Received</th><?php
 				}
 				if($disp['first_image_hash'])
 				{
-					?><th title='picture'>&#9215;</th><?php
+					?><th scope='col' title='picture'>&#9215;</th><?php
 				}
 			?></thead><?php
 			?><tbody><?php

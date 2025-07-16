@@ -31,8 +31,8 @@ class ComWid_user_news implements ComWid
 		$news = $user->getUserNews();
 		?><table><?php
 			?><thead><?php
-				?><th>Date</th><?php
-				?><th>Event</th><?php
+				?><th scope='col'>Date</th><?php
+				?><th scope='col'>Event</th><?php
 			?></thead><?php
 			?><tbody><?php
 				

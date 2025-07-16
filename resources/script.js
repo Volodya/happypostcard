@@ -9,6 +9,33 @@ window.addEventListener('load', () => {
 	document.getElementsByClassName('title')[0].classList.add('hand-mouse-cursor');
 	document.getElementsByClassName('logo')[0].addEventListener('click', goHome);
 	document.getElementsByClassName('logo')[0].classList.add('hand-mouse-cursor');
+	
+	/* SORTING COLUMNS */
+	// https://stackoverflow.com/a/49041392/2893496
+	const getCellValue = (tr, idx) => tr.children[idx].innerText || tr.children[idx].textContent;
+	const generateComparator = (idx, asc) => (a, b) => ((v1, v2) => 
+		v1 !== '' && v2 !== '' && !isNaN(v1) && !isNaN(v2) ? v1 - v2 : v1.toString().localeCompare(v2)
+		)(getCellValue(asc ? a : b, idx), getCellValue(asc ? b : a, idx));
+	
+	// https://stackoverflow.com/a/70019926/2893496
+	document.querySelectorAll('th[scope="col"]').forEach(th_elem => {
+		let asc=true;
+		const index = Array.from(th_elem.parentNode.children).indexOf(th_elem);
+		th_elem.addEventListener('click', (e) => {
+			const arr = [... th_elem.closest("table").querySelectorAll('tbody tr')];
+			arr.sort(generateComparator(index, asc));
+			arr.forEach(elem => {                   
+				th_elem.closest("table").querySelector("tbody").appendChild(elem);
+			});
+			document.querySelectorAll('th[scope="col"]').forEach(th_old => {
+				th_old.classList.remove('sorted-column-asc');
+				th_old.classList.remove('sorted-column-desc');
+			});
+			th_elem.classList.add(asc ? 'sorted-column-asc' : 'sorted-column-desc');
+			asc = !asc;
+		});
+		th_elem.classList.add('sortable-column');
+	});
 });
 
 

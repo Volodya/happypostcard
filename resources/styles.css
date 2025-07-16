@@ -39,6 +39,20 @@ td, th
 	border: 1px solid #ccc;
 	text-align: left;
 }
+th.sortable-column
+{
+	cursor: cell;
+}
+th.sorted-column-asc::after
+{
+	display: inline;
+	content: ' ▲';
+}
+th.sorted-column-desc::after
+{
+	display: inline;
+	content: ' ▼';
+}
 
 section::after
 {
