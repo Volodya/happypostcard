@@ -84,10 +84,12 @@ class ComWid_site_statistics extends SimpWid
 		');
 		$stmt->execute();
 		$svgGraph = new SvgGraph();
+		$svgGraphLine = new SvgGraphLine();
 		while($row = $stmt->fetch(PDO::FETCH_ASSOC))
 		{
-			$svgGraph->addPoint(floatval($row['cnt']));
+			$svgGraphLine->addPoint(floatval($row['cnt']));
 		}
+		$svgGraph->addLine($svgGraphLine);
 		$svgGraph->print();
 	}
 }
