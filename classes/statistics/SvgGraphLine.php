@@ -15,7 +15,7 @@ class SvgGraphLine
 		$this->min = 0;
 		$this->max = 0;
 		
-		$this->name = $name;
+		$this->name = htmlentities($name);
 		$this->colour = 'black';
 	}
 	
@@ -54,8 +54,8 @@ class SvgGraphLine
 		int $x, float $y, bool $above, string $label
 	) : void
 	{
-		?><text x="<?= $x * $xUnit - $labelsLeftShift ?>" y="-<?= $y * $yUnit + ($above ? -$fontSize : $fontSize) ?>"
-			font-size="<?= $fontSize ?>"><?= $label ?></text><?php
+		?><text x="<?= $x * $xUnit - $labelsLeftShift ?>" y="-<?= $y * $yUnit + ($above ? -$fontSize : $fontSize) ?>" <?php
+			?>font-size="<?= $fontSize ?>"><?= $label ?></text><?php
 	}
 	public function printLineAndLabels(float $xUnit, float $yUnit, float $fontSize, float $labelsLeftShift) : void
 	{
@@ -80,6 +80,17 @@ class SvgGraphLine
 			$prevDir = $dir;
 		}
 		self::printLabel($xUnit, $yUnit, $fontSize, $labelsLeftShift, count($this->points), $prev, $dir > 0, strval($prev));
+	}
+	public function printLegend(float $x, float $y, float $fontSize) : void
+	{
+		?><text <?php
+			?>x="<?= $x ?>" y="<?= $y ?>" <?php
+			?>font-size="<?= $fontSize ?>" <?php
+			?>fill="<?= $this->colour ?>"><?php
+			
+			echo $this->name;
+			
+		?></text><?php
 	}
 	public function getNumOfPoints() : int
 	{

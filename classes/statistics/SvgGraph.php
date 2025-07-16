@@ -72,6 +72,16 @@ class SvgGraph
 	{
 		$this->lines[] = $line;
 	}
+	private function printLegend() : void
+	{
+		$x = 10;
+		$y = -(count($this->lines) * $this->fontSize);
+		foreach($this->lines as $line)
+		{
+			$line->printLegend($x, $y, $this->fontSize);
+			$y += $this->fontSize;
+		}
+	}
 	public function print() : void
 	{
 		?><svg width='<?= $this->getWidth() + 10 ?>' height='<?= $this->getHeight() + 10 ?>'
@@ -85,6 +95,7 @@ class SvgGraph
 				$this->fontSize, $this->labelsLeftShift
 			);
 		}
+		$this->printLegend();
 		?></svg><?php
 	}
 }
