@@ -22,13 +22,13 @@ class PerformerSelectAddress extends Performer_Abstract
 			->withExtraTo($senderEmail['email'], $senderEmail['polite_name'])
 			->withExtraNoscriptBody(
 				"Good time of the day, {$senderEmail['polite_name']}!"
-				."\r\n"."\r\n"
+				.EMail::EOL.EMail::EOL
 				."Congratulations, you have an ability to send a postcard. "
 				."This time {$receiverName} will be a Happy Recepient. "
 				."They are representing {$receiverLocation['name']} as their chosen location."
-				."\r\n"."\r\n"
+				.EMail::EOL.EMail::EOL
 				."Please write the code {$cardCode} on the postcard, and send it to:"
-				."\r\n"."\r\n"
+				.EMail::EOL.EMail::EOL
 			);
 		$firstAddress = true;
 		foreach($receiverAddresses as $address)
@@ -37,32 +37,35 @@ class PerformerSelectAddress extends Performer_Abstract
 			{
 				$email = $email->withExtraBody(" -- or --\r\n");
 			}
-			$email = $email->withExtraBody($address."\r\n");
+			$email = $email->withExtraBody($address.EMail::EOL);
 			$firstAddress = false;
 		}
 		$email = $email
 			->withExtraNoscriptBody(
-				"\r\n"
+				EMail::EOL
 				."Some information about theirselves they chose to share:"
-				."\r\n"
+				.EMail::EOL
 				.$receiverTextInfo['about']
-				."\r\n"."\r\n"
+				.EMail::EOL.EMail::EOL
 				."They describe cards they wish to receive as:"
-				."\r\n"
+				.EMail::EOL
 				.$receiverTextInfo['desires']
-				."\r\n"."\r\n"
+				.EMail::EOL.EMail::EOL
 				."You can consider their hobbies that they have shared:"
-				."\r\n"
+				.EMail::EOL
 				.$receiverTextInfo['hobbies']
-				."\r\n"."\r\n"
+				.EMail::EOL.EMail::EOL
 				."Languages that they can understand are:"
-				."\r\n"
+				.EMail::EOL
 				.$receiverTextInfo['languages']
-				."\r\n"."\r\n"
+				.EMail::EOL.EMail::EOL
 				."Please try to stay away from themes that can cause this person emotional anguish:"
-				."\r\n"
+				.EMail::EOL
 				.$receiverTextInfo['phobias']
-				."\r\n"."\r\n"
+				.EMail::EOL.EMail::EOL
+				."-- "
+				.EMail::EOL
+				."https://www.happypostcard.fun/card/{$cardCode}"
 			);
 		
 		$email->mail();
