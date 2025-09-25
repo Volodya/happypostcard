@@ -14,7 +14,12 @@ class PageFAQ extends Page_Abstract
 							'make_section' => true,
 							'logged_in' => true,
 						],
-						['random_card', 'logged_in' => true],
+						[
+							'random_card',
+							'make_section' => true,
+							'section_header' => 'Random postcard',
+							'logged_in' => true
+						],
 					]
 				)
 				->withRight(
