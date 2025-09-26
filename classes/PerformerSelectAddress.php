@@ -35,7 +35,7 @@ class PerformerSelectAddress extends Performer_Abstract
 		{
 			if(!$firstAddress)
 			{
-				$email = $email->withExtraBody(" -- or --\r\n");
+				$email = $email->withExtraBody(' -- or --'.EMail::EOL);
 			}
 			$email = $email->withExtraBody($address.EMail::EOL);
 			$firstAddress = false;
