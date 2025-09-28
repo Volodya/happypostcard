@@ -34,6 +34,9 @@ class PageAdmin extends Page_Abstract
 								<form method='get' action='/admin_travelling'>
 									<button>List of All Travelling Postcards</button>
 								</form>
+								<form method='get' action='/admin_massannounce'>
+									<button>Mass Announce</button>
+								</form>
 								<form method='get' action='/admin_sql'>
 									<button>Direct SQL access</button>
 								</form>

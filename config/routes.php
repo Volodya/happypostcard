@@ -29,6 +29,12 @@ return [
 		'page' => 'PageListOfUsersComplete',
 		'subpath_allowed' => false,
 	],
+	'/admin_massannounce' => [
+		'permissions required' => ['v010dya'],
+		'performers' => [],
+		'page' => 'PageMassAnnounce',
+		'subpath_allowed' => false,
+	],
 	'/mod' => [
 		'permissions required' => ['moderator'],
 		'page' => 'PageModeration',
@@ -245,6 +251,12 @@ return [
 		'permissions required' => ['v010dya'],
 		'page' => 'PageRedirector',
 		'performer' => 'PerformerApproveAddress',
+		'subpath_allowed' => false,
+	],
+	'/performmassannounce' => [
+		'permissions required' => ['v010dya'],
+		'page' => 'PageRedirector',
+		'performer' => 'PerformerMassAnnounce',
 		'subpath_allowed' => false,
 	],
 	'/travelling' => [
