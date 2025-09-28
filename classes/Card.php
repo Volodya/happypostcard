@@ -479,7 +479,6 @@ class Card
 			throw new Exception('No address available');
 		}
 		$receiver = UserExisting::constructById($receiver_id);
-		//$receiver = UserExisting::constructByLogin('nataliatabbi'); $receiver_id = $receiver->getId();
 		
 		$sendLocation = Location::getLocationById($sendLocationId);
 		$receiverLocation = $receiver->getHomeLocation();
