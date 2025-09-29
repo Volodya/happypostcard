@@ -8,8 +8,9 @@ class PageSuperadmin extends Page_Abstract
  			(new Template('page', ['additional_title' => 'SUPERADMIN']))
 				->withLeft(
 					[
-						//['account_stats_for_user'],
-						//['user_main_image', 'make_section' => true]
+						[
+							'admin_section',
+						],
 					]
 				)
 				->withRight(

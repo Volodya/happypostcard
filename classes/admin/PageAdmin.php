@@ -9,10 +9,7 @@ class PageAdmin extends Page_Abstract
 				->withLeft(
 					[
 						[
-							'text',
-							'make_section' => true,
-							'section_header' => 'ADMIN',
-							'parameter' => 'You are now in the admin section',
+							'admin_section',
 						],
 						[
 							'users_waitingapproval',
