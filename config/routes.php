@@ -35,6 +35,12 @@ return [
 		'page' => 'PageMassAnnounce',
 		'subpath_allowed' => false,
 	],
+	'/admin_sql' => [
+		'permissions required' => ['v010dya'],
+		'performers' => [],
+		'page' => 'PageDirectSql',
+		'subpath_allowed' => false,
+	],
 	'/mod' => [
 		'permissions required' => ['moderator'],
 		'page' => 'PageModeration',
@@ -257,6 +263,12 @@ return [
 		'permissions required' => ['v010dya'],
 		'page' => 'PageRedirector',
 		'performer' => 'PerformerMassAnnounce',
+		'subpath_allowed' => false,
+	],
+	'/performdirectsql' => [
+		'permissions required' => ['v010dya'],
+		'page' => 'PageDirectSql',
+		'performer' => 'PerformerDirectSql',
 		'subpath_allowed' => false,
 	],
 	'/travelling' => [
