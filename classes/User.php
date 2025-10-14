@@ -55,7 +55,7 @@ class User
 		$stmt->bindParam(':login', $login);
 		$stmt->bindParam(':pass_hash', $pass_hash);
 		$stmt->bindParam(':email', $email);
-		$stmt->bindParam(':email', $homeLocation);
+		$stmt->bindParam(':home_location', $homeLocation);
 		$res = $stmt->execute();
 		if(!$res)
 		{
