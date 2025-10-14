@@ -113,6 +113,9 @@ class PerformerReceivePostcard extends Performer_Abstract
 		}
 		
 		$card->register();
+		$card->getSender()->confirmAsSender();
+		$card->getReceiver()->confirmAsReceiver();
+		
 		$this->sendEmail($card, $post['message']);
 		
 		$response = $response->withPage(

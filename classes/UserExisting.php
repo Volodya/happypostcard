@@ -13,6 +13,9 @@ class UserExisting extends User
 	private bool $enabled;
 	private bool $blocked;
 	
+	private bool $confirmedReceiver;
+	private bool $confirmedSender;
+	
 	private static $__friends = array('User');
 	public function __set($key, $value)
 	{
@@ -48,7 +51,7 @@ class UserExisting extends User
 		
 		$stmt = $db->prepare('
 			SELECT `id`, `pass_hash`, `login`, `polite_name`, `home_location_id`, `travelling_location_id`,
-				`address_changed_at`, `confirmed_as_receiver_at`,
+				`address_changed_at`, `confirmed_as_receiver_at`, `confirmed_as_sender_at`,
 				`disabled_at`, `deleted_at`, `blocked_at`
 			FROM `user` WHERE `id` = (
 				SELECT `user_id` FROM `user_persistent_login` WHERE `secret` = :secret
@@ -69,7 +72,7 @@ class UserExisting extends User
 		
 		$stmt = $db->prepare('
 			SELECT `id`, `pass_hash`, `login`, `polite_name`, `home_location_id`, `travelling_location_id`,
-				`address_changed_at`, `confirmed_as_receiver_at`,
+				`address_changed_at`, `confirmed_as_receiver_at`, `confirmed_as_sender_at`,
 				`disabled_at`, `deleted_at`, `blocked_at`
 			FROM `user` WHERE `login`=:login
 		');
@@ -88,7 +91,7 @@ class UserExisting extends User
 		$db = Database::getInstance();
 		$stmt = $db->prepare('
 			SELECT `id`, `pass_hash`, `login`, `polite_name`, `home_location_id`, `travelling_location_id`,
-				`address_changed_at`, `confirmed_as_receiver_at`,
+				`address_changed_at`, `confirmed_as_receiver_at`, `confirmed_as_sender_at`,
 				`disabled_at`, `deleted_at`, `blocked_at`
 			FROM `user` WHERE `id`=:id
 		');
@@ -108,7 +111,7 @@ class UserExisting extends User
 		
 		$stmt = $db->prepare('
 			SELECT `id`, `pass_hash`, `login`, `polite_name`, `home_location_id`, `travelling_location_id`,
-				`address_changed_at`, `confirmed_as_receiver_at`,
+				`address_changed_at`, `confirmed_as_receiver_at`, `confirmed_as_sender_at`,
 				`disabled_at`, `deleted_at`, `blocked_at`
 			FROM `user` WHERE `id` = (
 				SELECT `user_id` FROM `user_password_recover_secret` WHERE `secret_code` = :secret
@@ -139,6 +142,9 @@ class UserExisting extends User
 		$new->enabled = empty($info['disabled_at']);
 		$new->blocked = !empty($info['blocked_at']);
 		
+		$new->confirmedReceiver = !empty($info['confirmed_as_receiver_at']);
+		$new->confirmedSender = !empty($info['confirmed_as_sender_at']);
+		
 		$new->homeLocationId = $info['home_location_id'];
 		$new->travellingLocationId = $info['travelling_location_id'];
 		
@@ -165,6 +171,30 @@ class UserExisting extends User
 	public function isBlocked() : bool
 	{
 		return $this->blocked;
+	}
+	public function confirmAsSender() : void
+	{
+		$this->confirmedSender = true;
+		$db = Database::getInstance();
+		$stmt = $db->prepare('UPDATE `user` SET `confirmed_as_sender_at` = CURRENT_TIMESTAMP WHERE `id`=:id');
+		$stmt->bindParam('id', $this->id);
+		$stmt->execute();
+	}
+	public function confirmAsReceiver() : void
+	{
+		$this->confirmedReceiver = true;
+		$db = Database::getInstance();
+		$stmt = $db->prepare('UPDATE `user` SET `confirmed_as_receiver_at` = CURRENT_TIMESTAMP WHERE `id`=:id');
+		$stmt->bindParam('id', $this->id);
+		$stmt->execute();
+	}
+	public function isConfirmedSender() : bool
+	{
+		return $this->confirmedSender;
+	}
+	public function isConfirmedReceiver() : bool
+	{
+		return $this->confirmedReceiver;
 	}
 	public function getPreferenceOrDefault(string $key, string $default) : string
 	{
@@ -196,7 +226,7 @@ class UserExisting extends User
 	public function updateLoggedInDate() : void
 	{
 		$db = Database::getInstance();
-		$stmt = $db->prepare('UPDATE `user` SET `loggedin_at` = DATE("now") WHERE `id`=:id');
+		$stmt = $db->prepare('UPDATE `user` SET `loggedin_at` = CURRENT_TIMESTAMP WHERE `id`=:id');
 		$stmt->bindParam(':id', $this->id);
 		$res = $stmt->execute();
 	}

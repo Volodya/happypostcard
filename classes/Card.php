@@ -87,9 +87,9 @@ class Card
 				(
 					SELECT `id` AS `disabled_and_travelling`
 					FROM `user` WHERE
-						`deleted_on` IS NOT NULL OR
-						`blocked_on` IS NOT NULL OR
-						`disabled_on` IS NOT NULL OR
+						`deleted_at` IS NOT NULL OR
+						`blocked_at` IS NOT NULL OR
+						`disabled_at` IS NOT NULL OR
 						`travelling_location_id` IS NOT NULL
 					
 					UNION ALL

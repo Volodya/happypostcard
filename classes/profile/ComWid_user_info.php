@@ -48,6 +48,8 @@ class ComWid_user_info implements ComWid
 			<?php
 		}
 		$userInfo = $user->getUserInfo();
+		$userConfirmedSender = $user->isConfirmedSender();
+		$userConfirmedReceiver = $user->isConfirmedReceiver();
 		
 		if(!empty($userInfo))
 		{
@@ -57,6 +59,18 @@ class ComWid_user_info implements ComWid
 			?><div>Name: <?= $userInfo['polite_name'] ?></div><?php
 			?><div>Days on this site: <?= $userInfo['days_registered'] ?></div><?php
 			?><div>Birthday: <?= $userInfo['birthday'] ?></div><?php
+			if(!$userConfirmedSender and !$userConfirmedReceiver)
+			{
+				?><div>This user has not confirmed to be able to send nor to receive postcards.</div><?php
+			}
+			else if(!$userConfirmedSender)
+			{
+				?><div>This user has not confirmed to be able to send postcards.</div><?php
+			}
+			else if(!$userConfirmedReceiver)
+			{
+				?><div>This user has not confirmed to be able to receive postcards.</div><?php
+			}
 			
 			if(empty($userInfo['home_location_code']))
 			{
@@ -82,10 +96,6 @@ class ComWid_user_info implements ComWid
 			{
 				?><div>Phobias: None</div><?php
 			}
-		}
-		if($viewOfSelf)
-		{
-			//$this->displayAddresses($user);
 		}
 	}
 	public function haveDisplayed() : bool
