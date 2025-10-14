@@ -64,15 +64,25 @@ CREATE TABLE `user`
 	`registered_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	`loggedin_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	
-	`address_changed_on` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	`address_confirmed_on` TIMESTAMP DEFAULT '1970-01-01',
+	`deleted_at` TIMESTAMP DEFAULT NULL,
+	`blocked_at` TIMESTAMP DEFAULT NULL,
+	`disabled_at` TIMESTAMP DEFAULT NULL,
 	
-	`deleted_on` TIMESTAMP DEFAULT NULL,
-	`blocked_on` TIMESTAMP DEFAULT NULL,
-	`disabled_on` TIMESTAMP DEFAULT NULL,
+	`address_changed_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	`confirmed_as_sender_at` TIMESTAMP DEFAULT NULL,
+	`confirmed_as_receiver_at` TIMESTAMP DEFAULT NULL,
 	
 	`home_location_id` INTEGER DEFAULT NULL REFERENCES `location_code`(`id`),
 	`travelling_location_id` INTEGER DEFAULT NULL REFERENCES `location_code`(`id`),
+	
+	`active_profile_id` INTEGER DEFAULT NULL UNIQUE
+);
+
+SELECT '-- user_profile';
+CREATE TABLE `user_profile`
+(
+	`id` INTEGER PRIMARY KEY,
+	`user_id` INTEGER NOT NULL,
 	
 	`birthday` DATE DEFAULT NULL,
 	
@@ -80,7 +90,9 @@ CREATE TABLE `user`
 	`desires` TEXT DEFAULT '',
 	`hobbies` TEXT DEFAULT '',
 	`phobias` TEXT DEFAULT '',
-	`languages` TEXT DEFAULT ''
+	`languages` TEXT DEFAULT '',
+	
+	`updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 SELECT '-- user_waiting_approval';

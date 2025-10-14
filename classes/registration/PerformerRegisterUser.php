@@ -61,8 +61,7 @@ class PerformerRegisterUser extends Performer_Abstract
 			return $this->abandon($response, 'user with that email already exists');
 		}
 		
-		$user = User::generateUser($config, $post['login'], $post['password'], $post['email']);
-		$user->updateHomeLocation(Location::getIdByCode($post['home_location']));
+		$user = User::generateUser($config, $post['login'], $post['password'], $post['email'], $post['home_location']);
 		
 		$page = (new PageRedirector())->withRedirectTo('/login');
 		$response = $response->withPage($page);

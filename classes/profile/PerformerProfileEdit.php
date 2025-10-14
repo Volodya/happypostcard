@@ -35,31 +35,36 @@ class PerformerProfileEdit extends Performer_Abstract
 		
 		$db = Database::getInstance();
 		
-		$homeLocation = Location::getIdByCode($post['home_location']);
-		$stmt = $db->prepare(
-			'UPDATE `user`
-			SET
-				`polite_name` = :polite_name,
-				`birthday` = :birthday,
-				`about` = :about,
-				`desires` = :desires,
-				`hobbies` = :hobbies,
-				`phobias` = :phobias,
-				`languages` = :languages,
-				`home_location_id` = :home_location_id
-			WHERE `id`=:user_id'
-			);
+		$stmt = $db->prepare('
+			INSERT INTO `user_profile`(`user_id`, `birthday`, `about`, `desires`, `hobbies`, `phobias`, `languages`)
+			VALUES (:user_id, :birthday, :about, :desires, :hobbies, :phobias, :languages)
+		');
 		$stmt->bindValue(':user_id', $user->getId());
 		$stmt->bindValue(':birthday', $post['birthday']);
-		$stmt->bindValue(':polite_name', $post['polite_name']);
 		$stmt->bindValue(':about', $post['about']);
 		$stmt->bindValue(':desires', $post['desires']);
 		$stmt->bindValue(':hobbies', $post['hobbies']);
 		$stmt->bindValue(':phobias', $post['phobias']);
 		$stmt->bindValue(':languages', $post['languages']);
-		$stmt->bindValue(':home_location_id', $homeLocation);
+		
 		$stmt->execute();
-		$user->setPreference('home_location', $post['home_location']); // TODO: REMOVE
+		
+		$activeProfileId=$db->lastInsertId();
+		
+		$homeLocation = Location::getIdByCode($post['home_location']);
+		$stmt = $db->prepare(
+			'UPDATE `user`
+			SET
+				`polite_name` = :polite_name,
+				`home_location_id` = :home_location_id,
+				`active_profile_id` = :active_profile_id
+			WHERE `id`=:user_id'
+			);
+		$stmt->bindValue(':user_id', $user->getId());
+		$stmt->bindValue(':polite_name', $post['polite_name']);
+		$stmt->bindValue(':home_location_id', $homeLocation);
+		$stmt->bindValue(':active_profile_id', $activeProfileId);
+		$stmt->execute();
 		
 		$addr = [];
 		for($i = 0; $i < min( count($post['addr_id']), count($post['addr_addr']), count($post['addr_lang_code'])); $i++)

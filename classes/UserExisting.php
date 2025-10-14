@@ -48,8 +48,8 @@ class UserExisting extends User
 		
 		$stmt = $db->prepare('
 			SELECT `id`, `pass_hash`, `login`, `polite_name`, `home_location_id`, `travelling_location_id`,
-				`address_changed_on`, `address_confirmed_on`,
-				`disabled_on`, `deleted_on`, `blocked_on`
+				`address_changed_at`, `confirmed_as_receiver_at`,
+				`disabled_at`, `deleted_at`, `blocked_at`
 			FROM `user` WHERE `id` = (
 				SELECT `user_id` FROM `user_persistent_login` WHERE `secret` = :secret
 			)');
@@ -69,8 +69,8 @@ class UserExisting extends User
 		
 		$stmt = $db->prepare('
 			SELECT `id`, `pass_hash`, `login`, `polite_name`, `home_location_id`, `travelling_location_id`,
-				`address_changed_on`, `address_confirmed_on`,
-				`disabled_on`, `deleted_on`, `blocked_on`
+				`address_changed_at`, `confirmed_as_receiver_at`,
+				`disabled_at`, `deleted_at`, `blocked_at`
 			FROM `user` WHERE `login`=:login
 		');
 		$stmt->bindParam(':login', $login);
@@ -88,8 +88,8 @@ class UserExisting extends User
 		$db = Database::getInstance();
 		$stmt = $db->prepare('
 			SELECT `id`, `pass_hash`, `login`, `polite_name`, `home_location_id`, `travelling_location_id`,
-				`address_changed_on`, `address_confirmed_on`,
-				`disabled_on`, `deleted_on`, `blocked_on`
+				`address_changed_at`, `confirmed_as_receiver_at`,
+				`disabled_at`, `deleted_at`, `blocked_at`
 			FROM `user` WHERE `id`=:id
 		');
 		$stmt->bindParam(':id', $id);
@@ -108,8 +108,8 @@ class UserExisting extends User
 		
 		$stmt = $db->prepare('
 			SELECT `id`, `pass_hash`, `login`, `polite_name`, `home_location_id`, `travelling_location_id`,
-				`address_changed_on`, `address_confirmed_on`,
-				`disabled_on`, `deleted_on`, `blocked_on`
+				`address_changed_at`, `confirmed_as_receiver_at`,
+				`disabled_at`, `deleted_at`, `blocked_at`
 			FROM `user` WHERE `id` = (
 				SELECT `user_id` FROM `user_password_recover_secret` WHERE `secret_code` = :secret
 			)');
@@ -136,8 +136,8 @@ class UserExisting extends User
 			$info['travelling_location_id'] = -1;
 		}
 		
-		$new->enabled = empty($info['disabled_on']);
-		$new->blocked = !empty($info['blocked_on']);
+		$new->enabled = empty($info['disabled_at']);
+		$new->blocked = !empty($info['blocked_at']);
 		
 		$new->homeLocationId = $info['home_location_id'];
 		$new->travellingLocationId = $info['travelling_location_id'];
@@ -386,7 +386,7 @@ class UserExisting extends User
 		
 		$stmt = $db->prepare('
 			UPDATE `user`
-			SET `disabled_on` = NULL
+			SET `disabled_at` = NULL
 			WHERE `id`=:user_id
 		');
 		$stmt->bindValue(':user_id', $this->id);
@@ -398,7 +398,7 @@ class UserExisting extends User
 		
 		$stmt = $db->prepare('
 			UPDATE `user`
-			SET `disabled_on` = DATETIME(\'now\')
+			SET `disabled_at` = DATETIME(\'now\')
 			WHERE `id`=:user_id
 		');
 		$stmt->bindValue(':user_id', $this->id);
@@ -457,8 +457,8 @@ class UserExisting extends User
 		$stmt = $db->prepare(
 			'SELECT
 				`about`, `desires`, `hobbies`, `phobias`, `languages`
-			FROM `user`
-			WHERE `id` = :id'
+			FROM `user_profile`
+			WHERE `id` = (SELECT `active_profile_id` FROM `user` WHERE id = :id)'
 			);
 		$stmt->bindValue(':id', $this->id);
 		$stmt->execute();
@@ -678,10 +678,11 @@ class UserExisting extends User
 				Cast(JulianDay("now") - JulianDay(`loggedin_at`) AS INTEGER) `days_since_last_login`,
 				`birthday`,
 				`location_code`.`code` AS `home_location_code`, `location_code`.`name` AS `home_location`,
-				`about`, `desires`, `hobbies`, `phobias`, `languages`
+				`about`, `desires`, `hobbies`, `phobias`, `languages`,
+				`user_profile`.`updated_at` AS `profile_updated_at`
 			FROM `user`
-				LEFT JOIN (SELECT * FROM `user_preference` WHERE `key`="home_location") AS `home` ON `home`.`user_id`=`user`.`id`
-				LEFT JOIN `location_code` ON `location_code`.`code`=`home`.`val`
+				LEFT JOIN `user_profile` ON `user`.`active_profile_id` = `user_profile`.`id`
+				LEFT JOIN `location_code` ON `location_code`.`id`=`user`.`home_location_id`
 			WHERE `login`=:login
 		');
 		$stmt->bindValue(':login', $this->getLogin());

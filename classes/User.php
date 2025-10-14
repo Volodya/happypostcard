@@ -42,7 +42,7 @@ class User
 		$result = $stmt->fetch(PDO::FETCH_ASSOC);
 		return ($result['cnt'] > 0);
 	}
-	public static function generateUser(Config $config, string $login, string $password, string $email = '') : UserExisting
+	public static function generateUser(Config $config, string $login, string $password, string $email = '', string $homeLocation = 'SOL3') : UserExisting
 	{
 		$passhash_options = $config->getProperty('passhash_options');
 		$pass_hash = password_hash($password, $passhash_options['algorythm'], $passhash_options['options']);
@@ -50,11 +50,12 @@ class User
 		$db = Database::getInstance();
 		$stmt = $db->prepare('
 			INSERT INTO `user` (`login`, `pass_hash`, `email`, `home_location_id`)
-			VALUES (:login, :pass_hash, :email, (SELECT `id` FROM `location_code` WHERE `code`="SOL3"))
+			VALUES (:login, :pass_hash, :email, (SELECT `id` FROM `location_code` WHERE `code`=:home_location))
 		');
 		$stmt->bindParam(':login', $login);
 		$stmt->bindParam(':pass_hash', $pass_hash);
 		$stmt->bindParam(':email', $email);
+		$stmt->bindParam(':email', $homeLocation);
 		$res = $stmt->execute();
 		if(!$res)
 		{
