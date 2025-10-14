@@ -762,7 +762,7 @@ class ComplexWidgets
 		
 		$stmt = $db->prepare('
 			SELECT * FROM (
-				SELECT `id`, `login`, `polite_name`,
+				SELECT `user`.`id`, `login`, `polite_name`,
 					CASE WHEN JULIANDAY(SUBSTR(DATE(\'now\'), 1, 5) || SUBSTR(`birthday`, 6, 5)) > JULIANDAY(\'now\')
 					THEN CAST(
 							JULIANDAY(SUBSTR(DATE(\'now\'), 1, 5) || SUBSTR(`birthday`, 6, 5)) - JULIANDAY(\'now\')
@@ -775,6 +775,7 @@ class ComplexWidgets
 					END AS `days_left`,
 					CAST(JULIANDAY(\'now\') - JULIANDAY(`last_sent_at`) AS INTEGER) AS `sent_days_ago`
 				FROM `user`
+				INNER JOIN `user_profile` ON `user`.`active_profile_id`=`user_profile`.`id`
 				LEFT JOIN (
 					SELECT `receiver_id`, MAX(`sent_at`) AS `last_sent_at`
 					FROM `postcard`
@@ -782,9 +783,9 @@ class ComplexWidgets
 					GROUP BY `receiver_id`
 				) AS `last_birthday_card` ON `user`.`id` = `last_birthday_card`.`receiver_id`
 				WHERE
-					`deleted_on` IS NULL
-					AND `blocked_on` IS NULL
-					AND `disabled_on` IS NULL
+					`deleted_at` IS NULL
+					AND `blocked_at` IS NULL
+					AND `disabled_at` IS NULL
 					AND JULIANDAY(\'now\') - JULIANDAY(`user`.`loggedin_at`) < 30
 			) AS `t`
 			WHERE `days_left` < 90
