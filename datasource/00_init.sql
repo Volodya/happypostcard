@@ -207,41 +207,7 @@ CREATE TABLE `user_image`
 );
 
 --
-SELECT 'registering v010dya';
-INSERT INTO `user`(`login`, `polite_name`, `pass_hash`, `email`, `about`, `desires`, `hobbies`, `phobias`, `languages`)
-	VALUES('v010dya', 'Volodya', '$2y$12$yYfVBrGcJLXS1emftJnYCO6.Cw6xtg4CWyALAfM0P5yP3.3mA.f52', 'EchoOfFreedom@riseup.net', 'I am a postcrosser from Anapa', 'I want weird cards', 'gardening, poetry, genealogy', '', 'English, Russian');
-SELECT '-- setting up addresses for v010dya';
-INSERT INTO `address`(`user_id`,`language_code`,`addr`)
-	VALUES((SELECT `id` FROM `user` WHERE `login`='v010dya'), 'en', "Volodya"||CHAR(10)||"ul Mayakovskogo d 146A"||CHAR(10)||"Anapa, Krasnoarskiy kray"||CHAR(10)||"353451"||CHAR(10)||"Russia");
-INSERT INTO `address`(`user_id`,`language_code`,`addr`)
-	VALUES((SELECT `id` FROM `user` WHERE `login`='v010dya'), 'ru', "Володя"||CHAR(10)||"ул Маяковского д 146А"||CHAR(10)||"Анапа, Краснодарский край"||CHAR(10)||"353451"||CHAR(10)||"Russia");
-UPDATE `user` SET `home_location_id` = (SELECT `id` FROM `location_code` WHERE `code`='RKDA') WHERE `login`='v010dya';
-
---
 SELECT 'load data';
-.read '/home/va/www/happypostcard/datasource/01_learnlanguages.sql'
+.read '01_learnlanguages.sql'
 -- .read '/home/va/www/happypostcard/datasource/02_all_geo_slow.sql'
-.read '/home/va/www/happypostcard/datasource/02_all_geo.sql'
-
---
-SELECT 'load test data';
-INSERT INTO `user_preference`(`user_id`,`key`,`val`)
-	VALUES((SELECT `id` FROM `user` WHERE `login`='v010dya'), 'home_location', (SELECT `code` FROM `location_code` WHERE `name`='Krasnodarskiy kray'));
-
---INSERT INTO `user`(`login`, `polite_name`, `pass_hash`, `email`, `about`, `desires`, `hobbies`, `phobias`, `languages`)
---	VALUES('bob', 'Bob', '$2y$12$yYfVBrGcJLXS1emftJnYCO6.Cw6xtg4CWyALAfM0P5yP3.3mA.f52', 'bob@bob.com', 'I am a fictional postcrosser.', 'I want any cards', 'running', '', 'English');
---INSERT INTO `address`(`user_id`,`language_code`,`addr`)
---	VALUES((SELECT `id` FROM `user` WHERE `login`='bob'), 'en', "Bob"||CHAR(10)||"Bob's streets"||CHAR(10)||"Afghanistan");
-
---INSERT INTO `postcard`(`num`, `year`, `code`, `sender_id`, `send_location_id`, `receiver_id`, `receive_location_id`, `received_at`)
---	VALUES (1, 1981, 'RKDA-USA-1981-1', 1, 3711, 2, 236, CURRENT_TIMESTAMP);
---INSERT INTO `postcard_image`(`postcard_id`, `uploader_profile_id`, `hash`, `extension`, `mime`)
---	VALUES(1, 1, '01', 'png', 'image/png');
---INSERT INTO `postcard_image`(`postcard_id`, `uploader_profile_id`, `hash`, `extension`, `mime`)
---	VALUES(1, 1, '9c0fcdd27fc5ef7687aa82e7d942cf506604fdc54d4a6db6a76f6c8417c27fe2', 'webp', 'image/webp');
---INSERT INTO `postcard`(`num`, `year`, `code`, `sender_id`, `send_location_id`, `receiver_id`, `receive_location_id`, `received_at`)
---	VALUES (2, 1981, 'SOL3-USA-1981-2', 1, 4822, 2, 236, CURRENT_TIMESTAMP);
---INSERT INTO `postcard_image`(`postcard_id`, `uploader_profile_id`, `hash`, `extension`, `mime`)
---	VALUES(2, 1, '02', 'png', 'image/png');
---INSERT INTO `postcard`(`num`, `year`, `code`, `sender_id`, `send_location_id`, `receiver_id`, `receive_location_id`, `received_at`)
---	VALUES (3, 1981, 'RKDA-USA-1981-3', 1, 3711, 2, 236, NULL);
+.read '02_all_geo.sql'
