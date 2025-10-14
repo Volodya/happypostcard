@@ -10,6 +10,8 @@ class UserExisting extends User
 	private int $homeLocationId;
 	private int $travellingLocationId;
 	
+	private DateTime $addressChangedAt;
+	
 	private bool $enabled;
 	private bool $blocked;
 	
@@ -139,6 +141,16 @@ class UserExisting extends User
 			$info['travelling_location_id'] = -1;
 		}
 		
+		if(empty($info['address_changed_at']))
+		{
+			// MAX date, to ensure that it is always larger than everything else
+			$new->addressChangedAt = new DateTime('99999-12-31 23:59:59');
+		}
+		else
+		{
+			$new->addressChangedAt = new DateTime($info['address_changed_at']);
+		}
+		
 		$new->enabled = empty($info['disabled_at']);
 		$new->blocked = !empty($info['blocked_at']);
 		
@@ -172,20 +184,25 @@ class UserExisting extends User
 	{
 		return $this->blocked;
 	}
-	public function confirmAsSender() : void
+	public function confirmAsSender(DateTime $knownDateTime) : void
 	{
-		$this->confirmedSender = true;
-		$db = Database::getInstance();
-		$stmt = $db->prepare('UPDATE `user` SET `confirmed_as_sender_at` = CURRENT_TIMESTAMP WHERE `id`=:id');
-		$stmt->bindParam('id', $this->id);
-		$stmt->execute();
+		if($this->addressChangedAt < $knownDateTime)
+		{
+			$this->confirmedSender = true;
+			$this->addressChangedAt = $knownDateTime;
+			$db = Database::getInstance();
+			$stmt = $db->prepare('UPDATE `user` SET `confirmed_as_sender_at` = :known WHERE `id`=:id');
+			$stmt->bindParam(':id', $this->id);
+			$stmt->bindParam(':known', $knownDateTime->format('Y-m-d H:i:s'));
+			$stmt->execute();
+		}
 	}
 	public function confirmAsReceiver() : void
 	{
 		$this->confirmedReceiver = true;
 		$db = Database::getInstance();
 		$stmt = $db->prepare('UPDATE `user` SET `confirmed_as_receiver_at` = CURRENT_TIMESTAMP WHERE `id`=:id');
-		$stmt->bindParam('id', $this->id);
+		$stmt->bindParam(':id', $this->id);
 		$stmt->execute();
 	}
 	public function isConfirmedSender() : bool
@@ -360,13 +377,11 @@ class UserExisting extends User
 		$stmt = $db->prepare('
 			UPDATE `address`
 			SET
-				`language_code` = :lang_code,
 				`addr` = :addr
 			WHERE id=:id AND `user_id`=:user_id AND `addr`<>:addr
 		');
 		$stmt->bindValue(':user_id', $this->id);
 		$stmt->bindValue(':id', $id);
-		$stmt->bindValue(':lang_code', $lang_code);
 		$stmt->bindValue(':addr', $addr);
 		$stmt->execute();
 		
@@ -396,6 +411,19 @@ class UserExisting extends User
 				$stmt->bindValue(':lang_code', $lang_code);
 				$stmt->execute();
 			}
+		}
+		else
+		{
+			$stmt = $db->prepare('
+				UPDATE `address`
+				SET
+					`language_code` = :lang_code
+				WHERE id=:id AND `user_id`=:user_id AND `language_code`<>:lang_code
+			');
+			$stmt->bindValue(':user_id', $this->id);
+			$stmt->bindValue(':id', $id);
+			$stmt->bindValue(':lang_code', $lang_code);
+			$stmt->execute();
 		}
 	}
 	public function removeAddress(int $id, bool $byAdmin=false) : void

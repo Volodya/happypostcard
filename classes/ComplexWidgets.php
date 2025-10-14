@@ -567,7 +567,7 @@ class ComplexWidgets
 				`user`.`polite_name`,
 				`user`.`registered_at`,
 				`user`.`loggedin_at`,
-				`user`.`birthday`,
+				`user_profile`.`birthday`,
 				`home_loc`.`home_location`,
 				COUNT(DISTINCT `sent_postcard`.`id`) AS `sent_postcards_1`,
 				COUNT(DISTINCT `sent_postcard`.`received_at`) AS `sent_postcards_2`,
@@ -575,6 +575,7 @@ class ComplexWidgets
 				COUNT(DISTINCT `received_postcard`.`received_at`) AS `received_postcard_2`
 			FROM
 				`user`
+				LEFT JOIN `user_profile` ON `user`.`active_profile_id` = `user_profile`.`id`
 				LEFT JOIN
 					(SELECT
 						`id`,
