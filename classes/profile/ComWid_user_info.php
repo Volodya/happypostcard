@@ -96,6 +96,7 @@ class ComWid_user_info implements ComWid
 			{
 				?><div>Phobias: None</div><?php
 			}
+			?><div>Profile updated: <?php HtmlSnippets::printTimestamp($userInfo['profile_updated_at']); ?></div><?php
 		}
 	}
 	public function haveDisplayed() : bool

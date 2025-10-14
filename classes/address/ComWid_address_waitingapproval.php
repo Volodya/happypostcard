@@ -31,6 +31,11 @@ class ComWid_address_waitingapproval implements ComWid
 			echo 'You are not admin!';
 			return;
 		}
+		if(!$user instanceof UserExisting)
+		{
+			echo 'This user does not exist';
+			return;
+		}
 		
 		$db = Database::getInstance();
 		$stmt = $db->prepare('

@@ -176,6 +176,7 @@ CREATE TABLE `postcard`
 	`receiver_id` INTEGER NOT NULL,
 	`receive_location_id` INTEGER NOT NULL,
 	`received_at` TIMESTAMP DEFAULT NULL,
+	`lost` INTEGER DEFAULT 0,
 	`type` INTEGER DEFAULT 0
 );
 

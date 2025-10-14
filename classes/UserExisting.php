@@ -70,6 +70,11 @@ class UserExisting extends User
 	}
 	public static function constructByLogin(string $login) : UserExisting
 	{
+		if(str_starts_with($login, 'deleted '))
+		{
+			throw new Exception('Deleted user');
+		}
+		
 		$db = Database::getInstance();
 		
 		$stmt = $db->prepare('
@@ -669,6 +674,21 @@ class UserExisting extends User
 		
 		return $stmt->fetchAll(PDO::FETCH_ASSOC);
 	}
+	public function getWaitingPostcards() : array // [ 'code', 'code' ]
+	{
+		$db = Database::getInstance();
+		
+		$stmt = $db->prepare('
+			SELECT `postcard`.`code`
+			FROM `postcard`
+			WHERE `received_at` IS NULL AND `receiver_id`=:receiver_id
+			ORDER BY `sent_at` DESC
+		');
+		$stmt->bindValue(':receiver_id', $this->getId());
+		$res = $stmt->execute();
+		
+		return $stmt->fetchAll(PDO::FETCH_COLUMN, 0);
+	}
 	public function getSentPostcards() : array
 	{
 		$db = Database::getInstance();
@@ -819,5 +839,77 @@ class UserExisting extends User
 		$stmt->bindValue(':user_id', $this->getId());
 		$stmt->execute();
 		return $stmt->fetchAll(PDO::FETCH_ASSOC);
+	}
+	
+	public function deleteUser() : string // returns the code for recovery purposes
+	{
+		$db = Database::getInstance();
+		
+		$stmt = $db->prepare('DELETE FROM `address` WHERE `user_id`=:id');
+		$stmt->bindParam(':id', $this->id);
+		$stmt->execute();
+		
+		$stmt = $db->prepare('DELETE FROM `address_waiting_approval` WHERE `user_id`=:id');
+		$stmt->bindParam(':id', $this->id);
+		$stmt->execute();
+		
+		$stmt = $db->prepare('DELETE FROM `user_blacklist` WHERE `user_id`=:id');
+		$stmt->bindParam(':id', $this->id);
+		$stmt->execute();
+		
+		$stmt = $db->prepare('DELETE FROM `user_preference` WHERE `user_id`=:id');
+		$stmt->bindParam(':id', $this->id);
+		$stmt->execute();
+		
+		$stmt = $db->prepare('DELETE FROM `user_password_recover_secret` WHERE `user_id`=:id');
+		$stmt->bindParam(':id', $this->id);
+		$stmt->execute();
+		
+		$stmt = $db->prepare('DELETE FROM `user_persistent_login` WHERE `user_id`=:id');
+		$stmt->bindParam(':id', $this->id);
+		$stmt->execute();
+		
+		$stmt = $db->prepare('DELETE FROM `user_waiting_approval` WHERE `user_id`=:id');
+		$stmt->bindParam(':id', $this->id);
+		$stmt->execute();
+		
+		$secret = '';
+		$alphabet = array_merge(
+			range(0, 9),
+			range('a', 'z'),
+			range('A', 'Z'),
+//			str_split('!@#$%^&*()_+-={}[]`~.,:;?')
+		);
+		
+		for ($i = 0; $i < 40; ++$i)
+		{
+			$secret .= $alphabet[array_rand($alphabet)];
+		}
+		
+		// login is changed to have space in it on purpose. it will be impossible to collide with a real login
+		$stmt = $db->prepare('
+			UPDATE `user` SET
+				`login` = CONCAT("deleted ", DATETIME()),
+				`polite_name` = "Deleted Account",
+				`pass_hash` = :secret,
+				`email` = "",
+				`loggedin_at` = CURRENT_TIMESTAMP,
+				`deleted_at` = CURRENT_TIMESTAMP,
+				`blocked_at` = CURRENT_TIMESTAMP,
+				`disabled_at` = CURRENT_TIMESTAMP,
+				`address_changed_at` = CURRENT_TIMESTAMP,
+				`confirmed_as_sender_at` = NULL,
+				`confirmed_as_receiver_at` = NULL,
+				`home_location_id` = NULL,
+				`travelling_location_id` = NULL,
+				`active_profile_id` = NULL
+			WHERE id=:id
+		');
+		$stmt->bindParam(':secret', $secret);
+		$stmt->bindParam(':id', $this->id);
+		
+		$stmt->execute();
+		
+		return $secret;
 	}
 }

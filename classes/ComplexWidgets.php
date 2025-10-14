@@ -260,6 +260,11 @@ class ComplexWidgets
 	public function user_status() : bool
 	{
 		$user = $this->options['user'];
+		if(!$user instanceof UserExisting)
+		{
+			echo 'This user does not exist';
+			return true;
+		}
 		if(!$user->isEnabled())
 		{
 			echo 'This user has disabled their profile';
@@ -851,6 +856,10 @@ class ComplexWidgets
 		try
 		{
 			$user = $this->template->getUser();
+			if(!$user instanceof UserExisting)
+			{
+				return false;
+			}
 			if(isset($this->options['card_code']))
 			{
 				$card = Card::constructByCode($this->options['card_code']);
@@ -861,7 +870,7 @@ class ComplexWidgets
 				unset($card);
 				unset($cardUserIds);
 			}
-			else if(isset($this->options['user']))
+			else if(isset($this->options['user']) and $this->options['user'] instanceof UserExisting)
 			{
 				$secondId = $this->options['user']->getId();
 				$thirdId = -1;
@@ -974,6 +983,7 @@ class ComplexWidgets
 				$user = $card->getSender();
 			}
 		}
+		if(!$user instanceof UserExisting) return;
 		?><div><a href='/userphotos/<?= $user->getLogin() ?>'>all photos</a></div><?php
 		$image = $user->getMainImage();
 		HtmlSnippets::printPhotoThumb200($image, $user->getLogin(), true, false);

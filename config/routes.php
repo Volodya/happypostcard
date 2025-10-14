@@ -41,6 +41,12 @@ return [
 		'page' => 'PageDirectSql',
 		'subpath_allowed' => false,
 	],
+	'/admin_deleteuser' => [
+		'permissions required' => ['v010dya'],
+		'performers' => [],
+		'page' => 'PageDeleteUser',
+		'subpath_allowed' => false,
+	],
 	'/mod' => [
 		'permissions required' => ['moderator'],
 		'page' => 'PageModeration',
@@ -269,6 +275,12 @@ return [
 		'permissions required' => ['v010dya'],
 		'page' => 'PageDirectSql',
 		'performer' => 'PerformerDirectSql',
+		'subpath_allowed' => false,
+	],
+	'/performdeleteuser' => [
+		'permissions required' => ['v010dya'],
+		'page' => 'PageRedirector',
+		'performer' => 'PerformerDeleteUser',
 		'subpath_allowed' => false,
 	],
 	'/travelling' => [

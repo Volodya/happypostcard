@@ -515,12 +515,19 @@ class Card
 		$new->receiveLocationId = intval($receiverLocation['id']);
 		return $new;
 	}
-	public function register() : void
+	public function register(bool $lost=false) : void
 	{
 		$db = Database::getInstance();
 		$stmt = $db->prepare('UPDATE `postcard` SET `received_at` = CURRENT_TIMESTAMP WHERE `id`=:id');
 		$stmt->bindValue(':id', $this->id);
 		$stmt->execute();
+		
+		if($lost)
+		{
+			$stmt = $db->prepare('UPDATE `postcard` SET `lost` = 1 WHERE `id`=:id');
+			$stmt->bindValue(':id', $this->id);
+			$stmt->execute();
+		}
 		
 		$this->receivedAt = 'CURRENT_TIMESTAMP';
 	}
