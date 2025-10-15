@@ -321,6 +321,11 @@ class HtmlSnippets
 	}
 	public static function printUserPoliteName(string $login, string $polite_name, bool $link=false) : void
 	{
+		if(str_starts_with($login, 'deleted '))
+		{
+			echo 'Deleted User';
+			return;
+		}
 		if(!isset($polite_name) || empty($polite_name))
 		{
 			$polite_name = $login;

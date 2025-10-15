@@ -60,8 +60,9 @@ class ComWid_user_news implements ComWid
 								?><td><?php
 									?>📮 <?php
 									?>You sent a <?php
-									?><a href='/card/<?= $row['card_code'] ?>' title='<?= $row['card_code'] ?>'>happy postcard</a> <?php
-									?>to <a href='/user/<?= $row['login'] ?>'><?= $row['polite_name'] ?></a>.<?php
+									?><a href='/card/<?= $row['card_code'] ?>' title='<?= $row['card_code'] ?>'>happy postcard</a> to <?php
+									HtmlSnippets::printUserPoliteName($row['login'], $row['polite_name'], true);
+									?>.<?php
 								?></td><?php
 								break;
 							case 'postcard_yousent_received':
@@ -70,7 +71,9 @@ class ComWid_user_news implements ComWid
 									?>📬 <?php
 									?>Your sent <?php
 									?><a href='/card/<?= $row['card_code'] ?>' title='<?= $row['card_code'] ?>'>happy postcard</a> <?php
-									?>was received by <a href='/user/<?= $row['login'] ?>'><?= $row['polite_name'] ?></a>.<?php
+									?>was received by <?php
+									HtmlSnippets::printUserPoliteName($row['login'], $row['polite_name'], true);
+									?>.<?php
 								?></td><?php
 								break;
 							case 'postcard_othersent':
@@ -87,7 +90,9 @@ class ComWid_user_news implements ComWid
 									?>📩 <?php
 									?>You received a <?php
 									?><a href='/card/<?= $row['card_code'] ?>' title='<?= $row['card_code'] ?>'>happy postcard</a> <?php
-									?>from <a href='/user/<?= $row['login'] ?>'><?= $row['polite_name'] ?></a>.<?php
+									?>from <?php
+									HtmlSnippets::printUserPoliteName($row['login'], $row['polite_name'], true);
+									?>.<?php
 								?></td><?php
 								break;
 						}
