@@ -149,7 +149,7 @@ class ComplexWidgets
 			if(substr($row['sent_at'], 5, 5)=='10-01') $wpd = " <a href='/wpd_cards'>Word Postcard Day</a>";
 			?>
 			<div>Sent: <?php HtmlSnippets::printTimestamp($row['sent_at']) ?><?= $wpd ?></div>
-			<div>Sender: <a href='/user/<?= $row['sender_login'] ?>'><?= $row['sender_name'] ?></a></div>
+			<div>Sender: <?php HtmlSnippets::printUserPoliteName($row['sender_login'], $row['sender_name']) ?></div>
 			<div>Sent from: <a href='/location/<?= $row['sent_location_code'] ?>'><?= $row['sent_location_name'] ?></a></div>
 		</div>
 		<div class='card_information card_information_receiver'>
@@ -173,7 +173,7 @@ class ComplexWidgets
 		if($cardWasReceived or $cardOfSender or $user->isAdmin())
 		{
 			?>
-			<div>Receiver: <a href='/user/<?= $row['receiver_login'] ?>'><?= $row['receiver_name'] ?></a></div>
+			<div>Receiver: <?php HtmlSnippets::printUserPoliteName($row['receiver_login'], $row['receiver_name']) ?></div>
 			<div>Destination: <a href='/location/<?= $row['received_location_code'] ?>'><?= $row['received_location_name'] ?></a></div>
 			<?php
 			if($allowToChangeReceiver)
