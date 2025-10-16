@@ -173,7 +173,7 @@ class ComplexWidgets
 		if($cardWasReceived or $cardOfSender or $user->isAdmin())
 		{
 			?>
-			<div>Receiver: <?php HtmlSnippets::printUserPoliteName($row['receiver_login'], $row['receiver_name']) ?></div>
+			<div>Receiver: <?php HtmlSnippets::printUserPoliteName($row['receiver_login'], $row['receiver_name'], true) ?></div>
 			<div>Destination: <a href='/location/<?= $row['received_location_code'] ?>'><?= $row['received_location_name'] ?></a></div>
 			<?php
 			if($allowToChangeReceiver)
