@@ -53,8 +53,8 @@ class ComWid_user_info implements ComWid
 		
 		if(!empty($userInfo))
 		{
-			$userAbout = self::smartCode( $userInfo['about'] );
-			$userDesires = self::smartCode( $userInfo['desires'] );
+			$userAbout = empty($userInfo['about']) ? '' : self::smartCode( $userInfo['about'] );
+			$userDesires = empty($userInfo['desires']) ? '' : self::smartCode( $userInfo['desires'] );
 			
 			?><div>Name: <?= $userInfo['polite_name'] ?></div><?php
 			?><div>Days on this site: <?= $userInfo['days_registered'] ?></div><?php
@@ -96,7 +96,10 @@ class ComWid_user_info implements ComWid
 			{
 				?><div>Phobias: None</div><?php
 			}
-			?><div>Profile updated: <?php HtmlSnippets::printTimestamp($userInfo['profile_updated_at']); ?></div><?php
+			if(!empty($userInfo['profile_updated_at']))
+			{
+				?><div>Profile updated: <?php HtmlSnippets::printTimestamp($userInfo['profile_updated_at']); ?></div><?php
+			}
 		}
 	}
 	public function haveDisplayed() : bool
