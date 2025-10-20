@@ -156,14 +156,14 @@ class UserExisting extends User
 			$new->addressChangedAt = new DateTime($info['address_changed_at']);
 		}
 		
-		$new->enabled = empty($info['disabled_at']);
+		$new->enabled = empty($info['disabled_at']) and empty($info['deleted_at']);
 		$new->blocked = !empty($info['blocked_at']);
 		
 		$new->confirmedReceiver = !empty($info['confirmed_as_receiver_at']);
 		$new->confirmedSender = !empty($info['confirmed_as_sender_at']);
 		
-		$new->homeLocationId = $info['home_location_id'];
-		$new->travellingLocationId = $info['travelling_location_id'];
+		$new->homeLocationId = $info['home_location_id'] == null ? -1 : $info['home_location_id'];
+		$new->travellingLocationId = $info['travelling_location_id'] == null ? -1 : $info['travelling_location_id'];
 		
 		return $new;
 	}

@@ -16,7 +16,11 @@ class PagePostcard extends Page_Abstract
 							'make_section' => true,
 							'logged_in' => true,
 						],
-						['user_main_image', 'make_section' => true],
+						[
+							'user_main_image',
+							'make_section' => true,
+							'clear_on_false' => true,
+						],
 					]
 				)
 				->withRight(

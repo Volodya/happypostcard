@@ -958,7 +958,7 @@ class ComplexWidgets
 		return true;
 	}
 	
-	public function user_main_image() : void
+	public function user_main_image() : bool
 	{
 		if(isset($this->options['user']))
 		{
@@ -983,10 +983,11 @@ class ComplexWidgets
 				$user = $card->getSender();
 			}
 		}
-		if(!$user instanceof UserExisting) return;
+		if(!$user instanceof UserExisting or !$user->isEnabled()) return false;
 		?><div><a href='/userphotos/<?= $user->getLogin() ?>'>all photos</a></div><?php
 		$image = $user->getMainImage();
 		HtmlSnippets::printPhotoThumb200($image, $user->getLogin(), true, false);
+		return true;
 	}
 	
 	public function user_disable() : void
