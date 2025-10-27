@@ -146,7 +146,7 @@ class ComplexWidgets
 		<h1><?= $cardCode ?><?= $birthdayMark ?></h1>
 		<div class='card_information card_information_sender'><?php
 			$wpd='';
-			if(substr($row['sent_at'], 5, 5)=='10-01') $wpd = " <a href='/wpd_cards'>Word Postcard Day</a>";
+			if(substr($row['sent_at'], 5, 5)=='10-01') $wpd = " <a href='/wpd_cards'>World Postcard Day</a>";
 			?>
 			<div>Sent: <?php HtmlSnippets::printTimestamp($row['sent_at']) ?><?= $wpd ?></div>
 			<div>Sender: <?php HtmlSnippets::printUserPoliteName($row['sender_login'], $row['sender_name']) ?></div>
@@ -157,7 +157,7 @@ class ComplexWidgets
 		if($cardWasReceived)
 		{
 			$wpd='';
-			if(substr($row['received_at'], 5, 5)=='10-01') $wpd = " <a href='/wpd_cards'>Word Postcard Day</a>";
+			if(substr($row['received_at'], 5, 5)=='10-01') $wpd = " <a href='/wpd_cards'>World Postcard Day</a>";
 			?>
 			<div>Received: <?php HtmlSnippets::printTimestamp($row['received_at']) ?><?= $wpd ?></div>
 			<div>Days travelled: <?=$row['days_travelled'] ?></div>
