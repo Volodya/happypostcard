@@ -169,6 +169,12 @@ class Card
 				case 'any':
 					$result = Card::generateRecepientId_any($db, $sender, $backoffDaysTravelling, $backoffDaysArrived);
 					break;
+				case 'confirmedreceiver':
+					$result = Card::generateRecepientId_confirmedreceiver($db, $sender, $backoffDaysTravelling, $backoffDaysArrived);
+					break;
+				default:
+					echo 'HUGE ERROR: incorrect recepient selection algorithm';
+					die();
 			}
 			if($result != -1) return $result;
 		}
@@ -295,6 +301,70 @@ class Card
 		
 		return intval($result['id']);
 	}
+	private static function generateRecepientId_confirmedreceiver(
+		$db,
+		UserExisting $sender,
+		int $backoffDaysTravelling,
+		int $backoffDaysArrived
+	) : int
+	{
+		$stmt = $db->prepare('
+			SELECT `user`.`id`
+			FROM `user`
+			CROSS JOIN (SELECT :id AS `id`) AS `cur_user`
+			WHERE `user`.`id` NOT IN
+				(
+					SELECT `id` AS `common_disabled`
+					FROM `postcard_blocked_users`
+					
+					UNION ALL
+					
+					SELECT `receiver_id` AS `backoff_travelling`
+					FROM `postcard`
+					WHERE `sender_id`=`cur_user`.`id`
+					AND `sent_at` > DATETIME("now", :backoff_travelling)
+					AND `received_at` IS NULL
+					
+					UNION ALL
+					
+					SELECT `receiver_id` AS `backoff_arrived`
+					FROM `postcard`
+					WHERE `sender_id`=`cur_user`.`id`
+					AND `sent_at` > DATETIME("now", :backoff_arrived)
+					AND `received_at` IS NOT NULL
+					
+					UNION ALL
+					
+					SELECT `id` AS `non_confirmed_receivers`
+					FROM `user`
+					WHERE `confirmed_as_receiver_at` IS NULL OR `address_changed_at` > `confirmed_as_receiver_at`
+				)
+			ORDER BY Random() LIMIT 1
+		');
+		if($stmt===false)
+		{
+			echo 'Huge error';
+			die();
+		}
+		$stmt->bindValue(':id', $sender->getId());
+		$stmt->bindValue(':backoff_travelling', "-{$backoffDaysTravelling} day");
+		$stmt->bindValue(':backoff_arrived', "-{$backoffDaysArrived} day");
+		$res = $stmt->execute();
+		
+		if($res === false)
+		{
+			echo 'SQL Error in generateRecepientId_confirmedreceiver';
+			die();
+		}
+		
+		$result = $stmt->fetch(PDO::FETCH_ASSOC);
+		if($result===false)
+		{
+			return -1;
+		}
+		
+		return intval($result['id']);
+	}
 	private static function generateRecepientId_any(
 		$db,
 		UserExisting $sender,
@@ -364,7 +434,7 @@ class Card
 			//return Card::sendCardToUser($sender, $sendLocationId, UserExisting::constructByLogin(''));
 		}
 		
-		$receiverId = Card::generateRecepientId($sender);
+		$receiverId = Card::generateRecepientId($sender, $algorithms);
 		
 		if($receiverId === -1)
 		{

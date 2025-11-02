@@ -139,7 +139,9 @@ class PerformerSelectAddress extends Performer_Abstract
 		{
 			if(!$request->allSetPOST(['type', 'receiver_login']))
 			{
-				$card = Card::sendCard($sender, $senderLocationId);
+				$card = $sender->isConfirmedSender()
+					? Card::sendCard($sender, $senderLocationId)
+					: Card::sendCard($sender, $senderLocationId, ['confirmedreceiver']);
 			}
 			else
 			{

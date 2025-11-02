@@ -189,25 +189,34 @@ class UserExisting extends User
 	{
 		return $this->blocked;
 	}
-	public function confirmAsSender(DateTime $knownDateTime) : void
+	public function confirmAsSender(DateTime $knownDateTime = new DateTime('now')) : void
 	{
 		if($this->addressChangedAt < $knownDateTime)
 		{
 			$this->confirmedSender = true;
 			$this->addressChangedAt = $knownDateTime;
 			$db = Database::getInstance();
-			$stmt = $db->prepare('UPDATE `user` SET `confirmed_as_sender_at` = :known WHERE `id`=:id');
+			$stmt = $db->prepare('
+				UPDATE `user`
+				SET `confirmed_as_sender_at` = MAX(`confirmed_as_sender_at`, :known)
+				WHERE `id`=:id
+			');
 			$stmt->bindParam(':id', $this->id);
 			$stmt->bindParam(':known', $knownDateTime->format('Y-m-d H:i:s'));
 			$stmt->execute();
 		}
 	}
-	public function confirmAsReceiver() : void
+	public function confirmAsReceiver(DateTime $knownDateTime) : void
 	{
 		$this->confirmedReceiver = true;
 		$db = Database::getInstance();
-		$stmt = $db->prepare('UPDATE `user` SET `confirmed_as_receiver_at` = CURRENT_TIMESTAMP WHERE `id`=:id');
+		$stmt = $db->prepare('
+			UPDATE `user`
+			SET `confirmed_as_receiver_at` = MAX(`confirmed_as_receiver_at`, :known
+			WHERE `id`=:id
+		');
 		$stmt->bindParam(':id', $this->id);
+		$stmt->bindParam(':known', $knownDateTime->format('Y-m-d H:i:s'));
 		$stmt->execute();
 	}
 	public function isConfirmedSender() : bool
