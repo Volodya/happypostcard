@@ -113,7 +113,7 @@ class PerformerReceivePostcard extends Performer_Abstract
 		}
 		
 		$card->register();
-		$card->getSender()->confirmAsSender();
+		$card->getSender()->confirmAsSender($card->getSentDateTime());
 		$card->getReceiver()->confirmAsReceiver($card->getSentDateTime());
 		
 		$this->sendEmail($card, $post['message']);
