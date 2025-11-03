@@ -216,7 +216,7 @@ class UserExisting extends User
 			WHERE `id`=:id
 		');
 		$stmt->bindParam(':id', $this->id);
-	1	$stmt->bindValue(':known', $knownDateTime->format('Y-m-d H:i:s'));
+		$stmt->bindValue(':known', $knownDateTime->format('Y-m-d H:i:s'));
 		$stmt->execute();
 	}
 	public function isConfirmedSender() : bool
