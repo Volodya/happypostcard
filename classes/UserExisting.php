@@ -198,7 +198,7 @@ class UserExisting extends User
 			$db = Database::getInstance();
 			$stmt = $db->prepare('
 				UPDATE `user`
-				SET `confirmed_as_sender_at` = MAX(`confirmed_as_sender_at`, :known)
+				SET `confirmed_as_sender_at` = MAX(IFNULL(`confirmed_as_sender_at`, :known), :known)
 				WHERE `id`=:id
 			');
 			$stmt->bindParam(':id', $this->id);
@@ -212,7 +212,7 @@ class UserExisting extends User
 		$db = Database::getInstance();
 		$stmt = $db->prepare('
 			UPDATE `user`
-			SET `confirmed_as_receiver_at` = MAX(`confirmed_as_receiver_at`, :known
+			SET `confirmed_as_receiver_at` = MAX(IFNULL(`confirmed_as_receiver_at`, :known), :known)
 			WHERE `id`=:id
 		');
 		$stmt->bindParam(':id', $this->id);
