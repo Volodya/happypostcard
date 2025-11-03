@@ -198,7 +198,7 @@ class UserExisting extends User
 			$db = Database::getInstance();
 			$stmt = $db->prepare('
 				UPDATE `user`
-				SET `confirmed_as_sender_at` = MAX(IFNULL(`confirmed_as_sender_at`, :known), :known)
+				SET `confirmed_as_sender_at` = MAX(IFNULL(`confirmed_as_sender_at`, DATETIME(0)), :known)
 				WHERE `id`=:id
 			');
 			$stmt->bindParam(':id', $this->id);
@@ -212,11 +212,11 @@ class UserExisting extends User
 		$db = Database::getInstance();
 		$stmt = $db->prepare('
 			UPDATE `user`
-			SET `confirmed_as_receiver_at` = MAX(IFNULL(`confirmed_as_receiver_at`, :known), :known)
+			SET `confirmed_as_receiver_at` = MAX(IFNULL(`confirmed_as_receiver_at`, DATETIME(0)), :known)
 			WHERE `id`=:id
 		');
 		$stmt->bindParam(':id', $this->id);
-		$stmt->bindValue(':known', $knownDateTime->format('Y-m-d H:i:s'));
+	1	$stmt->bindValue(':known', $knownDateTime->format('Y-m-d H:i:s'));
 		$stmt->execute();
 	}
 	public function isConfirmedSender() : bool
