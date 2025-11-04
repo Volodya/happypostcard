@@ -149,7 +149,7 @@ class ComplexWidgets
 			if(substr($row['sent_at'], 5, 5)=='10-01') $wpd = " <a href='/wpd_cards'>Word Postcard Day</a>";
 			?>
 			<div>Sent: <?php HtmlSnippets::printTimestamp($row['sent_at']) ?><?= $wpd ?></div>
-			<div>Sender: <?php HtmlSnippets::printUserPoliteName($row['sender_login'], $row['sender_name']) ?></div>
+			<div>Sender: <?php HtmlSnippets::printUserPoliteName($row['sender_login'], $row['sender_name'], true) ?></div>
 			<div>Sent from: <a href='/location/<?= $row['sent_location_code'] ?>'><?= $row['sent_location_name'] ?></a></div>
 		</div>
 		<div class='card_information card_information_receiver'>
