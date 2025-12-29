@@ -36,6 +36,30 @@ window.addEventListener('load', () => {
 		});
 		th_elem.classList.add('sortable-column');
 	});
+	
+	document.querySelectorAll('div.address').forEach(addr_elem => {
+		bInc = document.createElement('button');
+		bDec = document.createElement('button');
+		bInc.appendChild(document.createTextNode('+'));
+		bDec.appendChild(document.createTextNode('-'));
+		
+		div = document.createElement('div');
+		div.classList.add('resizer');
+		div.appendChild(bInc);
+		div.appendChild(bDec);
+		addr_elem.insertBefore(div, addr_elem.firstChild);
+		
+		curSize = 100;
+		
+		bInc.addEventListener('click', (e) => {
+			curSize += 10;
+			addr_elem.style.fontSize = curSize + '%';
+		});
+		bDec.addEventListener('click', (e) => {
+			curSize -= 10;
+			addr_elem.style.fontSize = curSize + '%';
+		});
+	});
 });
 
 

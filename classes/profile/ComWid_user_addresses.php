@@ -22,7 +22,7 @@ class ComWid_user_addresses implements ComWid
 	{
 		foreach($this->user->getUserAddresses() as $row)
 		{
-			?><div lang='<?= $row['language_code'] ?>' class='address'><?= $row['addr'] ?></div><?php
+			HtmlSnippets::printAddress($row['addr'], $row['language_code']);
 		}
 	}
 	public function haveDisplayed() : bool

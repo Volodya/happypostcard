@@ -54,7 +54,7 @@ class ComWid_address_waitingapproval implements ComWid
 				?><input type='hidden' name='id' value='<?= $row['id'] ?>' /><?php
 				?><input type='hidden' name='login' value='<?= $row['login'] ?>' /><?php
 				?><div class='addresses'><?php
-					?><div lang='<?= $row['language_code'] ?>' class='address'><?= $row['addr'] ?></div><?php
+					HtmlSnippets::printAddress($row['addr'], $row['language_code']);
 				?></div><?php
 				?><button type='submit'>approve</button><?php
 			?></form><?php

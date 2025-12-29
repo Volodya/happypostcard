@@ -340,4 +340,8 @@ class HtmlSnippets
 			echo $polite_name;
 		}
 	}
+	public static function printAddress(string $addrText, string $addrLangCode) : void
+	{
+		?><div lang='<?= $addrLangCode ?>' class='address'><?= $addrText ?></div><?php
+	}
 }

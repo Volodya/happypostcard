@@ -204,7 +204,7 @@ class ComplexWidgets
 				<div class="addresses"><?php
 				foreach($receiver->getUserAddresses() as $addr)
 				{
-					?><div lang='<?= $addr['language_code'] ?>' class='address'><?= $addr['addr'] ?></div><?php
+					HtmlSnippets::printAddress($addr['addr'], $addr['language_code']);
 				}
 				?></div>
 			</div>
