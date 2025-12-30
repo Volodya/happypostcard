@@ -395,11 +395,20 @@ div.address
 	margin: 1em;
 	background-color: white;
 	white-space: pre;
+	position: relative;
 }
 div .resizer
 {
-	text-align: right;
+	position: absolute;
+	top: 1px;
+	left: 1px;
+	display: none;
 }
+div.address:hover .resizer
+{
+	display: block;
+}
+
 .resizer button
 {
 	padding: 0;
