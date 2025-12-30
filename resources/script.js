@@ -41,7 +41,7 @@ window.addEventListener('load', () => {
 		bInc = document.createElement('button');
 		bDec = document.createElement('button');
 		bInc.appendChild(document.createTextNode('+'));
-		bDec.appendChild(document.createTextNode('-'));
+		bDec.appendChild(document.createTextNode('='));
 		
 		div = document.createElement('div');
 		div.classList.add('resizer');
@@ -49,15 +49,17 @@ window.addEventListener('load', () => {
 		div.appendChild(bDec);
 		addr_elem.insertBefore(div, addr_elem.firstChild);
 		
-		curSize = 100;
-		
 		bInc.addEventListener('click', (e) => {
+			let curSize = parseInt(addr_elem.style.fontSize);
+			if (isNaN(curSize))
+			{
+				curSize = 100;
+			}
 			curSize += 10;
 			addr_elem.style.fontSize = curSize + '%';
 		});
 		bDec.addEventListener('click', (e) => {
-			curSize -= 10;
-			addr_elem.style.fontSize = curSize + '%';
+			addr_elem.style.fontSize = '100%';
 		});
 	});
 });
