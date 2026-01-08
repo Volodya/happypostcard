@@ -133,7 +133,15 @@ CREATE TABLE `user_blacklist`
 	`id` INTEGER PRIMARY KEY,
 	`user_id` INTEGER NOT NULL,
 	`enemy_user_id` INTEGER NOT NULL,
-	`added_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+	`added_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	`blocked_until` DATETIME DEFAULT NULL,
+	`no_send` INT(1) DEFAULT 1,
+	`no_receive` INT(1) DEFAULT 1,
+	`no_show_them2me` INT(1) DEFAULT 1,
+	`no_show_me2them` INT(1) DEFAULT 1,
+	
+	FOREIGN KEY(`user_id`) REFERENCES `user`(`id`),
+	FOREIGN KEY(`enemy_user_id`) REFERENCES `user`(`id`)
 );
 
 SELECT '-- address';

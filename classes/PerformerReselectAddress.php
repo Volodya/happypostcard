@@ -113,6 +113,8 @@ class PerformerReselectAddress extends Performer_Abstract
 		{
 			return $this->abandon($response, 'You are not the sender of this card');
 		}
+		$oldReceiver = $card->getReceiver();
+		UserExisting::blacklist($user, $oldReceiver, 1, ['no_send'=>1]);
 		try
 		{
 			$card = $card->changeReceiver($senderLocationId);

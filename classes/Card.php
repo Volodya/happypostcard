@@ -104,13 +104,15 @@ class Card
 					
 					UNION ALL
 					
-					SELECT `enemy_user_id` AS `have_blacklisted_us`
-					FROM `user_blacklist` WHERE `user_id`=`cur_user`.`id`
+					SELECT `user_id` AS `we_have_blacklisted`
+					FROM `user_blacklist` WHERE `enemy_user_id`=`cur_user`.`id`
+					AND `no_send`=1 AND `blocked_until` < DATETIME("now")
 					
 					UNION ALL
 					
-					SELECT `user_id` AS `we_have_blacklisted`
-					FROM `user_blacklist` WHERE `enemy_user_id`=`cur_user`.`id`
+					SELECT `enemy_user_id` AS `have_blacklisted_us`
+					FROM `user_blacklist` WHERE `user_id`=`cur_user`.`id`
+					AND `no_receive`=1 AND `blocked_until` < DATETIME("now")
 					
 					UNION ALL
 					

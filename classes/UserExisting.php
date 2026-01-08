@@ -168,6 +168,24 @@ class UserExisting extends User
 		return $new;
 	}
 	
+	public static function blacklist(UserExisting $user, UserExisting $enemy, int $days, array $params): void
+	{
+		$db = Database::getInstance();
+		$stmt = $db->prepare('
+			INSERT INTO `user_blacklist`
+				(`user_id`, `enemy_user_id`, `blocked_until`, `no_send`, `no_receive`, `no_show_them2me`, `no_show_me2them`)
+			VALUES (:user_id, :enemy_user_id, :blocked_until, :no_send, :no_receive, :no_show_them2me, :no_show_me2them)
+		');
+		$stmt->bindValue(':user_id', $user->getId());
+		$stmt->bindValue(':enemy_user_id', $enemy->getId());
+		$stmt->bindValue(':blocked_until', (new DateTime("+{$days} days"))->format('Y-m-d H:i:s'));
+		$stmt->bindValue(':no_send', isset($params['no_send']) ? $params['no_send'] : 0);
+		$stmt->bindValue(':no_receive', isset($params['no_receive']) ? $params['no_receive'] : 0);
+		$stmt->bindValue(':no_show_them2me', isset($params['no_show_them2me']) ? $params['no_show_them2me'] : 0);
+		$stmt->bindValue(':no_show_me2them', isset($params['no_show_me2them']) ? $params['no_show_me2them'] : 0);
+		$stmt->execute();
+	}
+	
 	public function getId() : int
 	{
 		return $this->id;
