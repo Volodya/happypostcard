@@ -72,7 +72,17 @@ class Card
 		array $algorithms = ['karma', 'new', 'any'],
 		int $backoffDaysTravelling = 60,
 		int $backoffDaysArrived = 14
-	) : int
+	)
+	{
+		return self::generateRecepientIds($sender, $algorithms, $backoffDaysTravelling, $backoffDaysArrived, 1)[0];
+	}
+	private static function generateRecepientIds(
+		UserExisting $sender,
+		array $algorithms = ['karma', 'new', 'any'],
+		int $max = 1,
+		int $backoffDaysTravelling = 60,
+		int $backoffDaysArrived = 14
+	) : array // [int]
 	{
 		$db = Database::getInstance();
 		
@@ -157,36 +167,40 @@ class Card
 			die();
 		}
 		
-		$result = -1;
+		$result = array();
 		foreach($algorithms as $algo)
 		{
+			if($max <= 0) break;
+			$res = -1;
 			switch($algo)
 			{
 				case 'karma':
-					$result = Card::generateRecepientId_karma($db, $sender, $backoffDaysTravelling, $backoffDaysArrived);
+					$res = Card::generateRecepientIds_karma($db, $sender, $max, $backoffDaysTravelling, $backoffDaysArrived);
 					break;
 				case 'new':
-					$result = Card::generateRecepientId_new($db, $sender);
+					$res = Card::generateRecepientIds_new($db, $sender, $max);
 					break;
 				case 'any':
-					$result = Card::generateRecepientId_any($db, $sender, $backoffDaysTravelling, $backoffDaysArrived);
+					$res = Card::generateRecepientIds_any($db, $sender, $max, $backoffDaysTravelling, $backoffDaysArrived);
 					break;
 				case 'confirmedreceiver':
-					$result = Card::generateRecepientId_confirmedreceiver($db, $sender, $backoffDaysTravelling, $backoffDaysArrived);
+					$res = Card::generateRecepientIds_confirmedreceiver($db, $sender, $max, $backoffDaysTravelling, $backoffDaysArrived);
 					break;
 				default:
 					echo 'HUGE ERROR: incorrect recepient selection algorithm';
 					die();
 			}
-			if($result != -1) return $result;
+			$result = array_merge($result, $res);
+			$max -= count($res);
 		}
 		return $result;
 	}
-
-	private static function generateRecepientId_new(
+	
+	private static function generateRecepientIds_new(
 		$db,
-		UserExisting $sender
-	) : int
+		UserExisting $sender,
+		int $max
+	) : array
 	{
 		$stmt = $db->prepare('
 			SELECT `user`.`id`
@@ -203,7 +217,7 @@ class Card
 					FROM `postcard`
 					WHERE `sender_id`=`cur_user`.`id`
 				)
-			ORDER BY Random() LIMIT 1
+			ORDER BY Random() LIMIT '.$max.'
 		');
 		if($stmt===false)
 		{
@@ -219,20 +233,25 @@ class Card
 			die();
 		}
 		
-		$result = $stmt->fetch(PDO::FETCH_ASSOC);
-		if($result===false)
+		$result = $stmt->fetchAll(PDO::FETCH_COLUMN,0);
+		if($result !== false)
 		{
-			return -1;
+			$result = array_map('intval', $result);
+		}
+		else
+		{
+			$result = array();
 		}
 		
-		return intval($result['id']);
+		return $result;
 	}
-	private static function generateRecepientId_karma(
+	private static function generateRecepientIds_karma(
 		$db,
 		UserExisting $sender,
+		int $max,
 		int $backoffDaysTravelling,
 		int $backoffDaysArrived
-	) : int
+	) : array
 	{
 		$stmt = $db->prepare('
 			SELECT `user`.`id`
@@ -277,7 +296,7 @@ class Card
 					ON `sent`.`sender_id` = `waiting`.`receiver_id`
 					WHERE `waiting_count` < `sent_count`
 				)
-			ORDER BY Random() LIMIT 1
+			ORDER BY Random() LIMIT '.$max.'
 		');
 		if($stmt===false)
 		{
@@ -295,20 +314,26 @@ class Card
 			die();
 		}
 		
-		$result = $stmt->fetch(PDO::FETCH_ASSOC);
-		if($result===false)
+		$result = $stmt->fetchAll(PDO::FETCH_COLUMN,0);
+		if($result !== false)
 		{
-			return -1;
+			$result = array_map('intval', $result);
+		}
+		else
+		{
+			$result = array();
 		}
 		
-		return intval($result['id']);
+		return $result;
+
 	}
-	private static function generateRecepientId_confirmedreceiver(
+	private static function generateRecepientIds_confirmedreceiver(
 		$db,
 		UserExisting $sender,
+		int $max,
 		int $backoffDaysTravelling,
 		int $backoffDaysArrived
-	) : int
+	) : array
 	{
 		$stmt = $db->prepare('
 			SELECT `user`.`id`
@@ -341,7 +366,7 @@ class Card
 					FROM `user`
 					WHERE `confirmed_as_receiver_at` IS NULL OR `address_changed_at` > `confirmed_as_receiver_at`
 				)
-			ORDER BY Random() LIMIT 1
+			ORDER BY Random() LIMIT '.$max.'
 		');
 		if($stmt===false)
 		{
@@ -359,20 +384,25 @@ class Card
 			die();
 		}
 		
-		$result = $stmt->fetch(PDO::FETCH_ASSOC);
-		if($result===false)
+		$result = $stmt->fetchAll(PDO::FETCH_COLUMN,0);
+		if($result !== false)
 		{
-			return -1;
+			$result = array_map('intval', $result);
+		}
+		else
+		{
+			$result = array();
 		}
 		
-		return intval($result['id']);
+		return $result;
 	}
-	private static function generateRecepientId_any(
+	private static function generateRecepientIds_any(
 		$db,
 		UserExisting $sender,
+		int $max,
 		int $backoffDaysTravelling,
 		int $backoffDaysArrived
-	) : int
+	) : array
 	{
 		$stmt = $db->prepare('
 			SELECT `user`.`id`
@@ -399,7 +429,7 @@ class Card
 					AND `sent_at` > DATETIME("now", :backoff_arrived)
 					AND `received_at` IS NOT NULL
 				)
-			ORDER BY Random() LIMIT 1
+			ORDER BY Random() LIMIT '.$max.'
 		');
 		if($stmt===false)
 		{
@@ -417,13 +447,17 @@ class Card
 			die();
 		}
 		
-		$result = $stmt->fetch(PDO::FETCH_ASSOC);
-		if($result===false)
+		$result = $stmt->fetchAll(PDO::FETCH_COLUMN,0);
+		if($result !== false)
 		{
-			return -1;
+			$result = array_map('intval', $result);
+		}
+		else
+		{
+			$result = array();
 		}
 		
-		return intval($result['id']);
+		return $result;
 	}
 	public static function sendCard(
 		UserExisting $sender,
@@ -431,21 +465,34 @@ class Card
 		array $algorithms = ['karma', 'new', 'any']
 	) : Card
 	{
+		return self::sendCards($sender, $sendLocationId, $algorithms, 1)[0];
+	}
+	public static function sendCards(
+		UserExisting $sender,
+		int $sendLocationId,
+		array $algorithms = ['karma', 'new', 'any'],
+		int $num = 1
+	) : array // [Card]
+	{
 		if($sender->getId() == 1)
 		{
 			//return Card::sendCardToUser($sender, $sendLocationId, UserExisting::constructByLogin(''));
 		}
 		
-		$receiverId = Card::generateRecepientId($sender, $algorithms);
+		$receiverIds = Card::generateRecepientIds($sender, $algorithms, $num);
 		
-		if($receiverId === -1)
+		if($receiverIds === [])
 		{
 			throw new Exception('No address available');
 		}
 		
-		$receiver = UserExisting::constructById($receiverId);
-		
-		return Card::sendCardToUser($sender, $sendLocationId, $receiver);
+		$result = array();
+		foreach($receiverIds as $receiverId)
+		{
+			$receiver = UserExisting::constructById($receiverId);
+			$result[] = Card::sendCardToUser($sender, $sendLocationId, $receiver);
+		}
+		return $result;
 	}
 	public static function sendCardToUser(UserExisting $sender, int $sendLocationId, UserExisting $receiver, int $type = 0) : Card
 	{
@@ -545,8 +592,11 @@ class Card
 		}
 		
 		$sender = $this->getSender();
-		$receiver_id = Card::generateRecepientId($sender, ['any']);
-		if($receiver_id === -1)
+		try
+		{
+			$receiver_id = Card::generateRecepientId($sender, ['any']);
+		}
+		catch(Exception $e)
 		{
 			throw new Exception('No address available');
 		}
