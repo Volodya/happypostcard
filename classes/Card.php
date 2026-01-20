@@ -70,18 +70,21 @@ class Card
 	private static function generateRecepientId(
 		UserExisting $sender,
 		array $algorithms = ['karma', 'new', 'any'],
-		int $backoffDaysTravelling = 60,
-		int $backoffDaysArrived = 14
-	)
+		DateInterval $backoffTravelling = new \DateInterval("P60D"),
+		DateInterval $backoffArrived = new \DateInterval("P14D")
+	) : int
 	{
-		return self::generateRecepientIds($sender, $algorithms, $backoffDaysTravelling, $backoffDaysArrived, 1)[0];
+		$res = self::generateRecepientIds($sender, $algorithms, 1, $backoffTravelling, $backoffArrived);
+		if( empty($res) ) throw new Exception('No address available');;
+		
+		return $res[0];
 	}
 	private static function generateRecepientIds(
 		UserExisting $sender,
 		array $algorithms = ['karma', 'new', 'any'],
 		int $max = 1,
-		int $backoffDaysTravelling = 60,
-		int $backoffDaysArrived = 14
+		DateInterval $backoffTravelling = new \DateInterval("P60D"),
+		DateInterval $backoffArrived = new \DateInterval("P14D")
 	) : array // [int]
 	{
 		$db = Database::getInstance();
@@ -175,16 +178,16 @@ class Card
 			switch($algo)
 			{
 				case 'karma':
-					$res = Card::generateRecepientIds_karma($db, $sender, $max, $backoffDaysTravelling, $backoffDaysArrived);
+					$res = Card::generateRecepientIds_karma($db, $sender, $max, $backoffTravelling, $backoffArrived);
 					break;
 				case 'new':
 					$res = Card::generateRecepientIds_new($db, $sender, $max);
 					break;
 				case 'any':
-					$res = Card::generateRecepientIds_any($db, $sender, $max, $backoffDaysTravelling, $backoffDaysArrived);
+					$res = Card::generateRecepientIds_any($db, $sender, $max, $backoffTravelling, $backoffArrived);
 					break;
 				case 'confirmedreceiver':
-					$res = Card::generateRecepientIds_confirmedreceiver($db, $sender, $max, $backoffDaysTravelling, $backoffDaysArrived);
+					$res = Card::generateRecepientIds_confirmedreceiver($db, $sender, $max, $backoffTravelling, $backoffArrived);
 					break;
 				default:
 					echo 'HUGE ERROR: incorrect recepient selection algorithm';
@@ -192,8 +195,25 @@ class Card
 			}
 			$result = array_merge($result, $res);
 			$max -= count($res);
+			self::blockSpecificUsersOneTime($db, $res); // ensure that same user is not given out twice
 		}
 		return $result;
+	}
+	private static function blockSpecificUsersOneTime(
+		$db,
+		array $userIds
+	) : void
+	{
+		if(empty($userIds)) return;
+		
+		$sql = 'INSERT INTO `postcard_blocked_users`(`id`) VALUES ';
+		for($i=0; $i<count($userIds); ++$i)
+		{
+			if($i > 0) $sql .= ',';
+			$sql .= '(?)';
+		}
+		$stmt = $db->prepare($sql);
+		$stmt->execute($userIds);
 	}
 	
 	private static function generateRecepientIds_new(
@@ -203,7 +223,7 @@ class Card
 	) : array
 	{
 		$stmt = $db->prepare('
-			SELECT `user`.`id`
+			SELECT DISTINCT `user`.`id`
 			FROM `user`
 			CROSS JOIN (SELECT :id AS `id`) AS `cur_user`
 			WHERE `user`.`id` NOT IN
@@ -249,12 +269,12 @@ class Card
 		$db,
 		UserExisting $sender,
 		int $max,
-		int $backoffDaysTravelling,
-		int $backoffDaysArrived
+		DateInterval $backoffTravelling,
+		DateInterval $backoffArrived
 	) : array
 	{
 		$stmt = $db->prepare('
-			SELECT `user`.`id`
+			SELECT DISTINCT `user`.`id`
 			FROM `user`
 			CROSS JOIN (SELECT :id AS `id`) AS `cur_user`
 			WHERE `user`.`id` NOT IN
@@ -267,7 +287,7 @@ class Card
 					SELECT `receiver_id` AS `backoff_travelling`
 					FROM `postcard`
 					WHERE `sender_id`=`cur_user`.`id`
-					AND `sent_at` > DATETIME("now", :backoff_travelling)
+					AND `sent_at` > DATETIME(:backoff_travelling)
 					AND `received_at` IS NULL
 					
 					UNION ALL
@@ -275,7 +295,7 @@ class Card
 					SELECT `receiver_id` AS `backoff_arrived`
 					FROM `postcard`
 					WHERE `sender_id`=`cur_user`.`id`
-					AND `sent_at` > DATETIME("now", :backoff_arrived)
+					AND `sent_at` > DATETIME(:backoff_arrived)
 					AND `received_at` IS NOT NULL
 				)
 			AND
@@ -304,8 +324,9 @@ class Card
 			die();
 		}
 		$stmt->bindValue(':id', $sender->getId());
-		$stmt->bindValue(':backoff_travelling', "-{$backoffDaysTravelling} day");
-		$stmt->bindValue(':backoff_arrived', "-{$backoffDaysArrived} day");
+		$now = new DateTimeImmutable();
+		$stmt->bindValue(':backoff_travelling', $now->sub($backoffTravelling)->format('Y-m-d H:i:s'));
+		$stmt->bindValue(':backoff_arrived', $now->sub($backoffArrived)->format('Y-m-d H:i:s'));
 		$res = $stmt->execute();
 		
 		if($res === false)
@@ -325,18 +346,17 @@ class Card
 		}
 		
 		return $result;
-
 	}
 	private static function generateRecepientIds_confirmedreceiver(
 		$db,
 		UserExisting $sender,
 		int $max,
-		int $backoffDaysTravelling,
-		int $backoffDaysArrived
+		DateInterval $backoffTravelling,
+		DateInterval $backoffArrived
 	) : array
 	{
 		$stmt = $db->prepare('
-			SELECT `user`.`id`
+			SELECT DISTINCT `user`.`id`
 			FROM `user`
 			CROSS JOIN (SELECT :id AS `id`) AS `cur_user`
 			WHERE `user`.`id` NOT IN
@@ -349,7 +369,7 @@ class Card
 					SELECT `receiver_id` AS `backoff_travelling`
 					FROM `postcard`
 					WHERE `sender_id`=`cur_user`.`id`
-					AND `sent_at` > DATETIME("now", :backoff_travelling)
+					AND `sent_at` > DATETIME(:backoff_travelling)
 					AND `received_at` IS NULL
 					
 					UNION ALL
@@ -357,7 +377,7 @@ class Card
 					SELECT `receiver_id` AS `backoff_arrived`
 					FROM `postcard`
 					WHERE `sender_id`=`cur_user`.`id`
-					AND `sent_at` > DATETIME("now", :backoff_arrived)
+					AND `sent_at` > DATETIME(:backoff_arrived)
 					AND `received_at` IS NOT NULL
 					
 					UNION ALL
@@ -374,8 +394,9 @@ class Card
 			die();
 		}
 		$stmt->bindValue(':id', $sender->getId());
-		$stmt->bindValue(':backoff_travelling', "-{$backoffDaysTravelling} day");
-		$stmt->bindValue(':backoff_arrived', "-{$backoffDaysArrived} day");
+		$now = new DateTimeImmutable();
+		$stmt->bindValue(':backoff_travelling', $now->sub($backoffTravelling)->format('Y-m-d H:i:s'));
+		$stmt->bindValue(':backoff_arrived', $now->sub($backoffArrived)->format('Y-m-d H:i:s'));
 		$res = $stmt->execute();
 		
 		if($res === false)
@@ -400,12 +421,12 @@ class Card
 		$db,
 		UserExisting $sender,
 		int $max,
-		int $backoffDaysTravelling,
-		int $backoffDaysArrived
+		DateInterval $backoffTravelling,
+		DateInterval $backoffArrived
 	) : array
 	{
 		$stmt = $db->prepare('
-			SELECT `user`.`id`
+			SELECT DISTINCT `user`.`id`
 			FROM `user`
 			CROSS JOIN (SELECT :id AS `id`) AS `cur_user`
 			WHERE `user`.`id` NOT IN
@@ -418,7 +439,7 @@ class Card
 					SELECT `receiver_id` AS `backoff_travelling`
 					FROM `postcard`
 					WHERE `sender_id`=`cur_user`.`id`
-					AND `sent_at` > DATETIME("now", :backoff_travelling)
+					AND `sent_at` > DATETIME(:backoff_travelling)
 					AND `received_at` IS NULL
 					
 					UNION ALL
@@ -426,7 +447,7 @@ class Card
 					SELECT `receiver_id` AS `backoff_arrived`
 					FROM `postcard`
 					WHERE `sender_id`=`cur_user`.`id`
-					AND `sent_at` > DATETIME("now", :backoff_arrived)
+					AND `sent_at` > DATETIME(:backoff_arrived)
 					AND `received_at` IS NOT NULL
 				)
 			ORDER BY Random() LIMIT '.$max.'
@@ -437,8 +458,9 @@ class Card
 			die();
 		}
 		$stmt->bindValue(':id', $sender->getId());
-		$stmt->bindValue(':backoff_travelling', "-{$backoffDaysTravelling} day");
-		$stmt->bindValue(':backoff_arrived', "-{$backoffDaysArrived} day");
+		$now = new DateTimeImmutable();
+		$stmt->bindValue(':backoff_travelling', $now->sub($backoffTravelling)->format('Y-m-d H:i:s'));
+		$stmt->bindValue(':backoff_arrived', $now->sub($backoffArrived)->format('Y-m-d H:i:s'));
 		$res = $stmt->execute();
 		
 		if($res === false)
@@ -491,6 +513,7 @@ class Card
 		{
 			$receiver = UserExisting::constructById($receiverId);
 			$result[] = Card::sendCardToUser($sender, $sendLocationId, $receiver);
+			usleep(1000); // wait for 0,1 seconds
 		}
 		return $result;
 	}

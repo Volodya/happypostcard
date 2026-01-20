@@ -97,6 +97,11 @@ return [
 		'page' => 'PageSendPostcard',
 		'subpath_allowed' => false,
 	],
+	'/sendmany' => [
+		'permissions required' => ['user'],
+		'page' => 'PageSendManyPostcards',
+		'subpath_allowed' => false,
+	],
 	'/birthday' => [
 		'permissions required' => ['user'],
 		'page' => 'PageSendBirthdayCard',

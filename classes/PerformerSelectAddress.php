@@ -80,6 +80,10 @@ class PerformerSelectAddress extends Performer_Abstract
 			'location' => [
 				'filter' => FILTER_UNSAFE_RAW, // will check in database
 			],
+			'howmany' => [
+				'filter' => FILTER_VALIDATE_INT,
+				'default' => '1',
+			],
 			'confirm' => [
 				'filter' => FILTER_UNSAFE_RAW, // will disallow anything, but 'on' value
 				'default' => 'off',
@@ -139,9 +143,9 @@ class PerformerSelectAddress extends Performer_Abstract
 		{
 			if(!$request->allSetPOST(['type', 'receiver_login']))
 			{
-				$card = $sender->isConfirmedSender()
-					? Card::sendCard($sender, $senderLocationId)
-					: Card::sendCard($sender, $senderLocationId, ['confirmedreceiver']);
+				$cards = $sender->isConfirmedSender()
+					? Card::sendCards($sender, $senderLocationId, ['karma', 'new', 'any'], intval($post['howmany']))
+					: Card::sendCards($sender, $senderLocationId, ['confirmedreceiver'], 1);
 			}
 			else
 			{
@@ -158,7 +162,7 @@ class PerformerSelectAddress extends Performer_Abstract
 				{
 					return $this->abandon($response, 'Something went horribly wrong, wrong type!');
 				}
-				$card = Card::sendCardToUser($sender, $senderLocationId, $receiver, $post['type']);
+				$cards = [ Card::sendCardToUser($sender, $senderLocationId, $receiver, $post['type']) ];
 			}
 		}
 		catch(Exception $ex)
@@ -169,12 +173,30 @@ class PerformerSelectAddress extends Performer_Abstract
 			return $this->abandon($response, 'No user is currently available to send postcards to');
 		}
 		
-		$this->sendEmail($card);
+		foreach($cards as $card)
+		{
+			$this->sendEmail($card);
+		}
 		
-		$response = $response->withPage(
-			(new PageRedirector())->withRedirectTo('/card/'.$card->getCode())
-		);
-		
+		if(count($cards) == 1)
+		{
+			$response = $response->withPage(
+				(new PageRedirector())->withRedirectTo('/card/'.$cards[0]->getCode())
+			);
+		}
+		else
+		{
+			$cardCodes = array_map(function($c) {
+				$code = $c->getCode();
+				return "<a href='/card/{$code}'>{$code}</a>";
+			}, $cards);
+			$response = $response->withNoticeMessage(
+				'Generated cards: '.implode(', ', $cardCodes)
+			);
+			$response = $response->withPage(
+				(new PageRedirector())->withRedirectTo('/travelling')
+			);
+		}
 		
 		if(!$sender->hasAddress())
 		{

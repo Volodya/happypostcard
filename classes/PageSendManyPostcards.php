@@ -1,6 +1,6 @@
 <?php
 
-class PageSendPostcard extends Page_Abstract
+class PageSendManyPostcards extends Page_Abstract
 {
 	public function __construct()
 	{
@@ -31,7 +31,10 @@ class PageSendPostcard extends Page_Abstract
 						[
 							'sendpostcard',
 							'make_section' => true,
-							'section_header' => 'Ready to make somebody happy with a Happy Postcard'
+							'section_header' => 'Ready to make people happy with Happy Postcards',
+							'parameter' => [
+								'howmany' => 10
+							],
 						],
 					]
 				)
