@@ -498,7 +498,8 @@ class Card
 	{
 		if($sender->getId() == 1)
 		{
-			//return Card::sendCardToUser($sender, $sendLocationId, UserExisting::constructByLogin(''));
+			// for debugging
+			// return [ Card::sendCardToUser($sender, $sendLocationId, UserExisting::constructByLogin('')) ];
 		}
 		
 		$receiverIds = Card::generateRecepientIds($sender, $algorithms, $num);
