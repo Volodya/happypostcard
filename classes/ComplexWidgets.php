@@ -573,7 +573,7 @@ class ComplexWidgets
 				`user`.`registered_at`,
 				`user`.`loggedin_at`,
 				`user_profile`.`birthday`,
-				`home_loc`.`home_location`,
+				`home_loc`.`code` AS `location_code`,
 				COUNT(DISTINCT `sent_postcard`.`id`) AS `sent_postcards_1`,
 				COUNT(DISTINCT `sent_postcard`.`received_at`) AS `sent_postcards_2`,
 				COUNT(DISTINCT `received_postcard`.`id`) AS `received_postcard_1`,
@@ -598,13 +598,8 @@ class ComplexWidgets
 					) AS `sent_postcard`
 					ON `sent_postcard`.`sender_id`=`user`.`id`
 				LEFT JOIN
-					(SELECT
-						`val` AS `home_location`,
-						`user_id`
-					FROM `user_preference`
-					WHERE `key` = \'home_location\'
-					) AS `home_loc`
-					ON `user`.`id` = `home_loc`.`user_id`
+					`location_code` AS `home_loc`
+					ON `user`.`home_location_id` = `home_loc`.`id`
 			GROUP BY `user`.`id`
 			HAVING `sent_postcards_1` > 0 OR `sent_postcards_2` > 0 OR `received_postcard_1` > 0 OR `received_postcard_2` > 0
 				OR JULIANDAY(\'now\') - JULIANDAY(`user`.`loggedin_at`) < 30
@@ -636,7 +631,7 @@ class ComplexWidgets
 					<th scope='row'><?= $row['num'] ?></th>
 					<td><a href='/user/<?= $row['login'] ?>'><?= $row['login'] ?></a></td>
 					<td><?= $row['polite_name'] ?></td>
-					<td><a href='/location/<?= $row['home_location'] ?>'><?= $row['home_location'] ?></a></td>
+					<td><a href='/location/<?= $row['location_code'] ?>'><?= $row['location_code'] ?></a></td>
 					<td><?php HtmlSnippets::printTimestamp($row['registered_at']) ?></td>
 					<td><?= $row['loggedin_at'] ?></td>
 					<td><?= $row['birthday'] ?></td>
