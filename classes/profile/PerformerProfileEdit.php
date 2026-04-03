@@ -41,11 +41,11 @@ class PerformerProfileEdit extends Performer_Abstract
 		');
 		$stmt->bindValue(':user_id', $user->getId());
 		$stmt->bindValue(':birthday', $post['birthday']);
-		$stmt->bindValue(':about', $post['about']);
-		$stmt->bindValue(':desires', $post['desires']);
-		$stmt->bindValue(':hobbies', $post['hobbies']);
-		$stmt->bindValue(':phobias', $post['phobias']);
-		$stmt->bindValue(':languages', $post['languages']);
+		$stmt->bindValue(':about', trim($post['about']));
+		$stmt->bindValue(':desires', trim($post['desires']));
+		$stmt->bindValue(':hobbies', trim($post['hobbies']));
+		$stmt->bindValue(':phobias', trim($post['phobias']));
+		$stmt->bindValue(':languages', trim($post['languages']));
 		
 		$stmt->execute();
 		
@@ -61,7 +61,7 @@ class PerformerProfileEdit extends Performer_Abstract
 			WHERE `id`=:user_id'
 			);
 		$stmt->bindValue(':user_id', $user->getId());
-		$stmt->bindValue(':polite_name', $post['polite_name']);
+		$stmt->bindValue(':polite_name', trim($post['polite_name']));
 		$stmt->bindValue(':home_location_id', $homeLocation);
 		$stmt->bindValue(':active_profile_id', $activeProfileId);
 		$stmt->execute();
@@ -78,6 +78,7 @@ class PerformerProfileEdit extends Performer_Abstract
 		
 		foreach($addr as $ad)
 		{
+			$ad['addr'] = trim($ad['addr']);
 			if($ad['id']==0 and !empty($ad['addr']))
 			{
 				$user->addAddress($ad['addr'], $ad['lang_code'], $editor->isAdmin());
