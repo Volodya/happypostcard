@@ -13,6 +13,7 @@ class PictureScan extends Picture
 		$new = new PictureScan;
 		$new->hash = $array['hash'];
 		$new->ext = $array['ext'];
+		$new->rotate = intval($array['rotate']);
 		$new->cardIds = $array['card_ids'];
 		return $new;
 	}
@@ -21,7 +22,7 @@ class PictureScan extends Picture
 		$db = Database::getInstance();
 		
 		$stmt = $db->prepare('
-			SELECT DISTINCT `hash`, `extension` AS `ext`
+			SELECT DISTINCT `hash`, `extension` AS `ext`, `rotate`
 			FROM `postcard_image` WHERE `hash`=:hash
 		');
 		$stmt->bindParam(':hash', $hash);

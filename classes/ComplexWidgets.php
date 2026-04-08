@@ -15,7 +15,7 @@ class ComplexWidgets
 	{
 		$db = Database::getInstance();
 		$stmt = $db->prepare('
-			SELECT `postcard`.`code`, `hash`, `extension`, `mime`, `postcard`.`received_at`
+			SELECT `postcard`.`code`, `hash`, `extension`, `mime`, `postcard`.`received_at`, `postcard_image`.`rotate`
 			FROM `postcard_image`
 			INNER JOIN `postcard` ON `postcard`.`id`=`postcard_image`.`postcard_id`
 			WHERE
@@ -35,7 +35,8 @@ class ComplexWidgets
 		foreach($ar as $row)
 		{
 			$received = $row['received_at'] !== null;
-			HtmlSnippets::printPostcardThumb200($row['hash'], $row['extension'], $row['code'], $link, false, $received);
+			$rotate = intval($row['rotate']);
+			HtmlSnippets::printPostcardThumb200($row['hash'], $row['extension'], $row['code'], $link, false, $received, $rotate);
 		}
 	}
 	
@@ -237,7 +238,11 @@ class ComplexWidgets
 		
 		$stmt = $db->prepare('
 			SELECT
-				`hash`, `extension`, `uploader_profile_id`, JULIANDAY(\'now\') - JULIANDAY(`uploaded_at`) AS `days_since_upload`
+				`hash`,
+				`extension`,
+				`rotate`,
+				`uploader_profile_id`,
+				JULIANDAY(\'now\') - JULIANDAY(`uploaded_at`) AS `days_since_upload`
 			FROM
 				`postcard_image`
 			WHERE
@@ -253,7 +258,15 @@ class ComplexWidgets
 				intval($row['uploader_profile_id']) == $this->template->getUserId() and
 				intval($row['days_since_upload']) <= 3
 			);
-			HtmlSnippets::printPostcardThumb200($row['hash'], $row['extension'], $cardCode, false, $canEditThis, true);
+			HtmlSnippets::printPostcardThumb200(
+				$row['hash'],
+				$row['extension'],
+				$cardCode,
+				false,
+				$canEditThis,
+				true,
+				intval($row['rotate'])
+			);
 		}
 		echo '</div>';
 	}
@@ -666,7 +679,7 @@ class ComplexWidgets
 				return;
 			}
 		}
-		?><img src='<?= $image->getThumb800() ?>' /><?php
+		?><img src='<?= $image->getThumb800() ?>' style='transform: rotate(<?= $image->getRotate() ?>deg)' /><?php
 	}
 	public function image_information() : void
 	{

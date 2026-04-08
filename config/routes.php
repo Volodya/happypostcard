@@ -142,6 +142,12 @@ return [
 		'performer' => 'PerformerUnlinkImage',
 		'subpath_allowed' => false,
 	],
+	'/performrotateimage' => [
+		'permissions required' => ['user'],
+		'page' => 'PageRedirector',
+		'performer' => 'PerformerRotateImage',
+		'subpath_allowed' => false,
+	],
 	'/performgethelp' => [
 		'permissions required' => [],
 		'page' => 'PageRedirector',

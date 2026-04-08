@@ -28,13 +28,29 @@ class Request
 		
 		$this->loggedInUser = null;
 	}
+	public static function is_really_empty($var)
+	{
+		if(is_array($var))
+		{
+			foreach($var as $el)
+			{
+				if(!Request::is_really_empty($el))
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+		
+		return $var=='';
+	}
 	
 	public function allSetPOST(array $keys) : bool
 	{
 		$result = true;
 		foreach($keys as $key)
 		{
-			if(!isset($this->post[$key]) || empty($this->post[$key]))
+			if(!isset($this->post[$key]) || Request::is_really_empty($this->post[$key]))
 			{
 				$result = false;
 				break;
@@ -47,7 +63,7 @@ class Request
 		$result = true;
 		foreach($keys as $key)
 		{
-			if(!isset($this->get[$key]) || empty($this->get[$key]))
+			if(!isset($this->get[$key]) || Request::is_really_empty($this->get[$key]))
 			{
 				$result = false;
 				break;

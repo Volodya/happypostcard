@@ -199,7 +199,8 @@ CREATE TABLE `postcard_image`
 	`uploaded_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	`hash` VARCHAR(255) NOT NULL,
 	`extension` VARCHAR(10) NOT NULL,
-	`mime` VARCHAR(64) NOT NULL
+	`mime` VARCHAR(64) NOT NULL,
+	`rotate` INTEGER DEFAULT 0
 );
 
 SELECT '-- user_image';
@@ -212,7 +213,8 @@ CREATE TABLE `user_image`
 	`uploaded_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	`hash` VARCHAR(255) NOT NULL,
 	`extension` VARCHAR(10) NOT NULL,
-	`mime` VARCHAR(64) NOT NULL
+	`mime` VARCHAR(64) NOT NULL,
+	`rotate` INTEGER DEFAULT 0
 );
 
 --

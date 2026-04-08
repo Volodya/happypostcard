@@ -4,6 +4,7 @@ class Picture implements Image
 {
 	protected string $hash;
 	protected string $ext;
+	protected int $rotate;
 	
 	const dirThumbs  = 'uploads';
 	const dirUploads = 'uploads';
@@ -55,6 +56,10 @@ class Picture implements Image
 	public function getExt() : string
 	{
 		return $this->ext;
+	}
+	public function getRotate() : int
+	{
+		return $this->rotate;
 	}
 	public function getThumb200() : string
 	{

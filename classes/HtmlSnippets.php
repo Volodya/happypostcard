@@ -34,18 +34,23 @@ class HtmlSnippets
 			mt_rand( 0, 0x2Aff ), mt_rand( 0, 0xffD3 ), mt_rand( 0, 0xff4B )
 		);
 	}
-	public static function printPhotoThumb200(Image $photo, string $user, bool $link=false, bool $canEdit=false) : void
+	public static function printPhotoThumb200(Image $photo, string $user, bool $link=false, bool $canEdit=false, int $rotate=0) : void
 	{
 		$hash = $photo->getHash();
 		$imageUrl = $photo->getThumb200();
 		$imageTag = "<img src='{$imageUrl}' title='{$user}' />";
+		$rotateAttr = '';
+		if($rotate != 0)
+		{
+			$rotateAttr = "  style='transform: rotate({$rotate}deg);'";
+		}
 		if($link)
 		{
-			$imageTag = "<a href='/user/{$user}'><div class='thumbimage'>{$imageTag}</div><div class='thumbtext'>{$user}</div></a>";
+			$imageTag = "<a href='/user/{$user}'><div class='thumbimage'{$rotateAttr}>{$imageTag}</div><div class='thumbtext'>{$user}</div></a>";
 		}
 		else
 		{
-			$imageTag = "<a href='/image/{$hash}'><div class='thumbimage'>{$imageTag}</div></a>";
+			$imageTag = "<a href='/image/{$hash}'><div class='thumbimage'{$rotateAttr}>{$imageTag}</div></a>";
 		}
 		if($canEdit)
 		{
@@ -60,27 +65,42 @@ class HtmlSnippets
 		echo $imageTag;
 	}
 	public static function printPostcardThumb200(
-		string $hash, string $ext, string $code, bool $link=false, bool $canEdit=false, bool $received=true
+		string $hash, string $ext, string $code, bool $link=false, bool $canEdit=false, bool $received=true, int $rotate=0
 	) : void
 	{
 		$imageUrl = '/' . Picture::dirThumbs . "/200thumbs/{$hash}.{$ext}";
 		$imageTag = "<img src='{$imageUrl}' title='{$code}' />";
+		$rotateAttr = '';
+		if($rotate != 0)
+		{
+			$rotateAttr = "  style='transform: rotate({$rotate}deg);'";
+		}
 		if($link)
 		{
-			$imageTag = "<a href='/card/{$code}'><div class='thumbimage'>{$imageTag}</div><div class='thumbtext'>{$code}</div></a>";
+			$imageTag = "<a href='/card/{$code}'><div class='thumbimage'{$rotateAttr}>{$imageTag}</div><div class='thumbtext'>{$code}</div></a>";
 		}
 		else
 		{
-			$imageTag = "<a href='/image/{$hash}'><div class='thumbimage'>{$imageTag}</div></a>";
+			$imageTag = "<a href='/image/{$hash}'><div class='thumbimage'{$rotateAttr}>{$imageTag}</div></a>";
 		}
 		if($canEdit)
 		{
-			$imageTag .= "
-				<form action='/performunlinkimage' method='post'>
-					<input type='hidden' name='code' value='{$code}' />
-					<input type='hidden' name='hash' value='{$hash}' />
-					<button type='submit'>delete</button>
-				</form>";
+			$imageTag .= 
+				"<form action='/performunlinkimage' method='post'>".
+					"<input type='hidden' name='code' value='{$code}' />".
+					"<input type='hidden' name='hash' value='{$hash}' />".
+					"<button type='submit'>delete</button>".
+				"</form>";
+			
+			$rotL = ($rotate+270)%360;
+			$rotR = ($rotate+ 90)%360;
+			$imageTag .= 
+				"<form action='/performrotateimage' method='post'>".
+					"<input type='hidden' name='type' value='card' />".
+					"<input type='hidden' name='hash' value='{$hash}' />".
+					"<button type='submit' name='rotate' value='{$rotL}'>↺</button>".
+					"<button type='submit' name='rotate' value='{$rotR}'>↻</button>".
+				"</form>";
 		}
 		$classes = 'thumb cardthumb thumb200';
 		if(!$received)
