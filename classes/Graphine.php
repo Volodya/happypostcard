@@ -26,6 +26,10 @@ class Graphine implements Image
 	{
 		return self::ext;
 	}
+	public function getRotate() : int
+	{
+		return 0;
+	}
 	
 	public function getFileUrl() : string
 	{

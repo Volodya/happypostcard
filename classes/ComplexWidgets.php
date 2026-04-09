@@ -679,7 +679,7 @@ class ComplexWidgets
 				return;
 			}
 		}
-		?><img src='<?= $image->getThumb800() ?>' style='transform: rotate(<?= $image->getRotate() ?>deg)' /><?php
+		HtmlSnippets::printImageTag($image->getThumb800(), [], ['deg'=>$image->getRotate(), 'safe'=>false]);
 	}
 	public function image_information() : void
 	{
@@ -896,7 +896,7 @@ class ComplexWidgets
 		
 		$db = Database::getInstance();
 		$stmt = $db->prepare('
-			SELECT `postcard`.`code`, `hash`, `extension`, `mime`, `postcard`.`received_at`
+			SELECT `postcard`.`code`, `hash`, `extension`, `rotate`, `mime`, `postcard`.`received_at`
 			FROM `postcard_image`
 			INNER JOIN `postcard` ON `postcard`.`id`=`postcard_image`.`postcard_id`
 			WHERE

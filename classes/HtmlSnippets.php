@@ -34,6 +34,78 @@ class HtmlSnippets
 			mt_rand( 0, 0x2Aff ), mt_rand( 0, 0xffD3 ), mt_rand( 0, 0xff4B )
 		);
 	}
+	public static function printTagStyle(array $style) : void
+	{
+		$first = true;
+		foreach($style as $key => $val)
+		{
+			if(!$first) echo ' ';
+			$first = false;
+			echo "{$key}: {$val};";
+		}
+	}
+	public static function printImageTag(
+		string $src, // source, as it is in the <img> tag
+		array $attributes=array(), // all the attributes to apply to <img> tag
+		array $rotate=array() // [ deg=>int(0), safe=>bool(false) ] - rotation is safe, if it definitely fits
+	) : void
+	{
+		// the idea behind doing rotation this way came from https://stackoverflow.com/a/47860039/2893496
+		// however, pretty much no code was taken from there as is
+		$rotateDeg = isset($rotate['deg']) ? $rotate['deg'] : 0;
+		$rotateSafe = isset($rotate['safe']) ? $rotate['safe'] : false;
+		
+		if($rotateDeg % 180 == 0)
+		{
+			// it is always safe to rotate by 0 or 180 degrees around the centre
+			$rotateSafe = true;
+		}
+		
+		if($rotateDeg != 0)
+		{
+			$style = array();
+			$transform = "rotate({$rotateDeg}deg)";
+			if(!$rotateSafe)
+			{
+				$style['margin-top'] = '-50%';
+				$style['transform-origin'] = 'top left';
+				if($rotateDeg == 90)
+				{
+					$transform .= ' translate(0, -100%);';
+				}
+				elseif($rotateDeg == 270)
+				{
+					$transform .= ' translate(-100%)';
+				}
+			}
+			$style['transform'] = $transform;
+			$style = HtmlSnippets::getTagStyle($style);
+			if(isset($attributes['style']))
+			{
+				$attributes['style'] .= ' '.$style;
+			}
+			else
+			{
+				$attributes['style'] = $style;
+			}
+		}
+		$attr = '';
+		foreach($attributes as $key => $val)
+		{
+			$attr .= " {$key}='${val}'";
+		}
+		
+		$img = "<img src='{$src}'{$attr} />";
+		
+		if($rotateSafe)
+		{
+			echo $img;
+		}
+		else
+		{
+			?><div class='unsafe-rotate-outer-wrapper'><div class='unsafe-rotate-inner-wrapper'><?= $img ?></div></div><?
+		}
+	}
 	public static function printPhotoThumb200(Image $photo, string $user, bool $link=false, bool $canEdit=false, int $rotate=0) : void
 	{
 		$hash = $photo->getHash();
@@ -69,19 +141,14 @@ class HtmlSnippets
 	) : void
 	{
 		$imageUrl = '/' . Picture::dirThumbs . "/200thumbs/{$hash}.{$ext}";
-		$imageTag = "<img src='{$imageUrl}' title='{$code}' />";
-		$rotateAttr = '';
-		if($rotate != 0)
-		{
-			$rotateAttr = "  style='transform: rotate({$rotate}deg);'";
-		}
+		$imageTag = HtmlSnippets::getImageTag($imageUrl, [ 'title' => $code ], [ 'deg' => $rotate, 'safe' => true ]);
 		if($link)
 		{
-			$imageTag = "<a href='/card/{$code}'><div class='thumbimage'{$rotateAttr}>{$imageTag}</div><div class='thumbtext'>{$code}</div></a>";
+			$imageTag = "<a href='/card/{$code}'><div class='thumbimage'>{$imageTag}</div><div class='thumbtext'>{$code}</div></a>";
 		}
 		else
 		{
-			$imageTag = "<a href='/image/{$hash}'><div class='thumbimage'{$rotateAttr}>{$imageTag}</div></a>";
+			$imageTag = "<a href='/image/{$hash}'><div class='thumbimage'>{$imageTag}</div></a>";
 		}
 		if($canEdit)
 		{

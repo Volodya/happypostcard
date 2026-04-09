@@ -365,6 +365,15 @@ div.thumbimage
 	text-align: center;
 	font-size: smaller;
 }
+.unsafe-rotate-outer-wrapper
+{
+	display: table;
+}
+.unsafe-rotate-inner-wrapper
+{
+	padding: 50% 0;
+	height: 0
+}
 div.newsitem
 {
 	border-bottom: 1px;
