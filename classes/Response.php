@@ -138,4 +138,17 @@ class Response
 			die();
 		}
 	}
+	public function unsetCookie(string $key) : void
+	{
+		$res = setcookie($key, '', [
+			'expires' => 1,
+			'httponly' => true,
+			'samesite' => 'Strict',
+		]);
+		if($res === false)
+		{
+			echo 'Set cookie failed';
+		}
+		unset($_COOKIE[$key]);
+	}
 }

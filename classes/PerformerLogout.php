@@ -7,6 +7,7 @@ class PerformerLogout extends Performer_Abstract
 		$session = $request->getSESSION();
 		if(isset($session['login_id']))
 		{
+			echo 'here';
 			$db = Database::getInstance();
 			
 			$stmt = $db->prepare('DELETE FROM `user_persistent_login` WHERE `user_id`=:user_id');
@@ -14,8 +15,10 @@ class PerformerLogout extends Performer_Abstract
 			
 			$stmt->execute();
 			
+			$response->setCookie('test', 'test');
 			$response->unsetSession('login_id');
 		}
+		$response->unsetCookie('persistent');
 		
 		$page = (new PageRedirector())->withRedirectTo('/home');
 		$response = $response->withPage($page);
