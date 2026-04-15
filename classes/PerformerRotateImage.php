@@ -8,14 +8,27 @@ class PerformerRotateImage extends Performer_Abstract
 		
 		$db = Database::getInstance();
 		
-		$stmt = $db->prepare('
-			UPDATE `postcard_image`
-			SET `rotate`=:rotate
-			WHERE `hash`=:hash AND `uploader_profile_id`=:uploader_id
-		');
-		$stmt->bindValue(':hash', $hash);
-		$stmt->bindValue(':uploader_id', $user->getId());
-		$stmt->bindValue(':rotate', $rotate);
+		if($user->isAdmin())
+		{
+			$stmt = $db->prepare('
+				UPDATE `postcard_image`
+				SET `rotate`=:rotate
+				WHERE `hash`=:hash
+			');
+			$stmt->bindValue(':hash', $hash);
+			$stmt->bindValue(':rotate', $rotate);
+		}
+		else
+		{
+			$stmt = $db->prepare('
+				UPDATE `postcard_image`
+				SET `rotate`=:rotate
+				WHERE `hash`=:hash AND `uploader_profile_id`=:uploader_id
+			');
+			$stmt->bindValue(':hash', $hash);
+			$stmt->bindValue(':uploader_id', $user->getId());
+			$stmt->bindValue(':rotate', $rotate);
+		}
 		$stmt->execute();
 		
 		$page = (new PageRedirector())->withRedirectTo('/image/'.urlencode($hash));
@@ -78,6 +91,11 @@ class PerformerRotateImage extends Performer_Abstract
 		else if($post['type'] == 'user')
 		{
 			return $this->performRotateUserImage($request, $response, $post['hash'], $rotate);
+		}
+		else if($post['type'] == 'unknown')
+		{
+			// temporarily card image only
+			return $this->performRotateCardImage($request, $response, $post['hash'], $rotate);
 		}
 	}
 }
