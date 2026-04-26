@@ -937,7 +937,7 @@ class ComplexWidgets
 		
 		$db = Database::getInstance();
 		$stmt = $db->prepare('
-			SELECT `postcard`.`code`, `hash`, `extension`, `mime`, `postcard`.`received_at`
+			SELECT `postcard`.`code`, `hash`, `extension`, `mime`, `postcard`.`received_at`, `postcard_image`.`rotate`
 			FROM `postcard_image`
 			INNER JOIN `postcard` ON `postcard`.`id`=`postcard_image`.`postcard_id`
 			WHERE

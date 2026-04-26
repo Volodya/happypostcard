@@ -592,7 +592,7 @@ class Card
 		
 		// ORDER BY RANDOM is expensive, need to redo later!
 		$stmt = $db->prepare(
-			'SELECT `postcard`.`code`, `hash`, `extension`, `mime`
+			'SELECT `postcard`.`code`, `hash`, `extension`, `mime`, `postcard_image`.`rotate`
 				FROM `postcard_image`
 				INNER JOIN `postcard` ON `postcard`.`id`=`postcard_image`.`postcard_id`
 				WHERE
